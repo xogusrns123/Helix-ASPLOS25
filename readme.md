@@ -14,8 +14,11 @@ distributed environments.
 ### Installing Dependencies
 We recommend using Python 3.11. To install the required dependencies, run the following command:
 ```bash
+conda create -n helix python=3.11 -y && conda activate helix
 pip install -r requirements.txt
 ```
+We use Gurobi as the MILP solver in the simulator, which requires a valid license. Please follow
+the instructions on the [Gurobi website](https://www.gurobi.com/) to obtain a license.
 
 ### Running the Simulator
 TODO
