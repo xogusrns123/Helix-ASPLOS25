@@ -5,7 +5,7 @@ import time
 
 import gurobipy as gp
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Set
 from configparser import ConfigParser
 from gurobipy import GRB
 
@@ -1223,6 +1223,18 @@ class ILPLayout:
                                                                    allow_partial_inference=allow_partial_inference)
                     if backward_link_valid:
                         valid_links[(link_name_tuple[1], link_name_tuple[0])] = ilp_link
+
+            # remove links associated with nodes with no outbound link
+            # if a node other than sink does not have any outbound link, then remove all inbound links
+            # associated with node, as this node can not be used in inference
+            nodes_with_outbound: Set[int or str] = set()
+            for link_name_tuple in valid_links.keys():
+                nodes_with_outbound.add(link_name_tuple[0])
+            valid_links_with_outbound: Dict[Tuple[int or str, int or str], ILPLink] = {}
+            for link_name_tuple, ilp_link in valid_links.items():
+                if link_name_tuple[1] == "sink" or link_name_tuple[1] in nodes_with_outbound:
+                    valid_links_with_outbound[link_name_tuple] = ilp_link
+            valid_links = valid_links_with_outbound
 
             # write the valid link names
             file.write("[Links]\n")
