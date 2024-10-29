@@ -21,5 +21,12 @@ We use Gurobi as the MILP solver in the simulator, which requires a valid licens
 the instructions on the [Gurobi website](https://www.gurobi.com/) to obtain a license.
 
 ### Running the Simulator
-TODO
+#### Generate Configuration Files
+First, we need to generate a cluster configuration file, which represents the GPU cluster to
+simulate. Two examples of cluster configuration files can be found in `./examples/simulation/config/single24.ini`
+and `./examples/simulation/config/3cluster24.ini`. We provide some helper functions to generate
+cluster configuration files, with example usage shown in `./examples/simulation/step1_gen_cluster.py`.
+The simulator also needs a machine profile file. We provide an example in `./examples/simulation/config/machine.ini`
+
+#### TODO
 
