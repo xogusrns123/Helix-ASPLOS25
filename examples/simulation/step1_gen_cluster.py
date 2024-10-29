@@ -49,6 +49,9 @@ def main():
     We provide two automatic ways to generate the cluster configuration file. Refer to FakeClusterGenerator
     and PartitionedClusterGenerator for more details. If you have a specific cluster configuration, you can
     also write your own script to generate the cluster configuration file.
+
+    Note: currently, the simulator only supports machines with {"A100", "V100", "L4", "L4x2", "T4", "T4x2",
+    "T4x4"} GPUs. You can add more machines by profiling them and add the data to simulator/model_manager.
     """
     generate_single(file_name="./config/single24.ini")
     print("Single cluster configuration file is generated to ./config/single24.ini")

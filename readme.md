@@ -21,8 +21,8 @@ We use Gurobi as the MILP solver in the simulator, which requires a valid licens
 the instructions on the [Gurobi website](https://www.gurobi.com/) to obtain a license.
 
 ### Running the Simulator
-In this tutorial, we use an example to demonstrate how to use Helix's simulator. 
-The example is is located in `./examples/simulation`:
+In this tutorial, we use an example of serving LLaMA-2 70B in a cluster with 24 machines to demonstrate
+how to use Helix's simulator. The example is is located in `./examples/simulation`:
 ```bash
 cd examples/simulation
 ```
