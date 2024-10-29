@@ -351,7 +351,7 @@ class PartitionedClusterGenerator:
         self.cross_partition_avg_latency = cross_partition_avg_latency
         self.cross_partition_var_latency = cross_partition_var_latency
 
-    def generator_fake_cluster(self, file_name: str, seed: int = 0) -> None:
+    def generator_fake_cluster(self, file_name: str, seed: int = 0, create_separate: bool = False) -> None:
         """
         Generate a fake cluster and write into the given file.
         File format convention:
@@ -360,6 +360,7 @@ class PartitionedClusterGenerator:
 
         :param file_name: name of the file
         :param seed: random seed
+        :param create_separate: whether to create separate cluster files for each type
         :return: None
         """
         # set random seed
@@ -516,40 +517,42 @@ class PartitionedClusterGenerator:
                     in_type_edges[node_types[node_id_1]].append((in_type_id_1, in_type_id_2, cur_bandwidth, cur_latency))
 
         # use in_type_edges to write separate files
-        for type_name, all_edges in in_type_edges.items():
-            with open(f"./{type_name}_cluster.ini", "w") as sub_file:
-                # node names
-                sub_file.write(f"[NodeNames]\n")
-                sub_file.write(f"total_compute_nodes={node_type_count[type_name]}\n")
-                sub_file.write(f"\n")
-
-                # source and sink
-                sub_file.write(f"[SourceNode]\n")
-                sub_file.write(f"connected_nodes={list(range(node_type_count[type_name]))}\n")
-                sub_file.write(f"\n")
-                sub_file.write(f"[SinkNode]\n")
-                sub_file.write(f"connected_nodes={list(range(node_type_count[type_name]))}\n")
-                sub_file.write(f"\n")
-
-                # compute nodes
-                for i in range(node_type_count[type_name]):
-                    # connected to all other nodes
-                    connected_nodes: List[int or str] = ["source"] + list(range(node_type_count[type_name])) + ["sink"]
-                    connected_nodes.remove(i)
-
-                    # write the properties of the compute node
-                    sub_file.write(f"[ComputeNode-{i}]\n")
-                    sub_file.write(f"type={type_name}\n")
-                    sub_file.write(f"connected_nodes={connected_nodes}\n")
+        if create_separate:
+            for type_name, all_edges in in_type_edges.items():
+                with open(f"./{type_name}_cluster.ini", "w") as sub_file:
+                    # node names
+                    sub_file.write(f"[NodeNames]\n")
+                    sub_file.write(f"total_compute_nodes={node_type_count[type_name]}\n")
                     sub_file.write(f"\n")
 
-                # edges
-                for edge_info in all_edges:
-                    src_id, dst_id, bandwidth, latency = edge_info
-                    sub_file.write(f"[Link-{src_id}-{dst_id}]\n")
-                    sub_file.write(f"bandwidth={bandwidth} * mbps\n")
-                    sub_file.write(f"latency={latency} * MilliSec\n")
+                    # source and sink
+                    sub_file.write(f"[SourceNode]\n")
+                    sub_file.write(f"connected_nodes={list(range(node_type_count[type_name]))}\n")
                     sub_file.write(f"\n")
+                    sub_file.write(f"[SinkNode]\n")
+                    sub_file.write(f"connected_nodes={list(range(node_type_count[type_name]))}\n")
+                    sub_file.write(f"\n")
+
+                    # compute nodes
+                    for i in range(node_type_count[type_name]):
+                        # connected to all other nodes
+                        connected_nodes: List[int or str] = ["source"] + list(range(node_type_count[type_name])) + [
+                            "sink"]
+                        connected_nodes.remove(i)
+
+                        # write the properties of the compute node
+                        sub_file.write(f"[ComputeNode-{i}]\n")
+                        sub_file.write(f"type={type_name}\n")
+                        sub_file.write(f"connected_nodes={connected_nodes}\n")
+                        sub_file.write(f"\n")
+
+                    # edges
+                    for edge_info in all_edges:
+                        src_id, dst_id, bandwidth, latency = edge_info
+                        sub_file.write(f"[Link-{src_id}-{dst_id}]\n")
+                        sub_file.write(f"bandwidth={bandwidth} * mbps\n")
+                        sub_file.write(f"latency={latency} * MilliSec\n")
+                        sub_file.write(f"\n")
 
 
 def prune_cluster(complete_cluster_file_name: str, pruned_cluster_file_name: str,
