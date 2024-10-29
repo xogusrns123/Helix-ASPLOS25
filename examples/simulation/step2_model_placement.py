@@ -116,7 +116,7 @@ def main():
         # ILP layout synthesis
         # Note: We set the max running time to 10 hours. However, you can stop the process at any time (ctrl + c ONCE)
         # and the best solution found so far will be saved. In this example, we early stop at around 10 minutes.
-        # Depending on the random seed, the running time may vary.
+        # Depending on the random seed, the running time and model placement found may vary.
         ilp_layout()
         print(f"ILP layout synthesis is done! (Results in ./layouts/ilp)")
 
