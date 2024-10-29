@@ -162,7 +162,7 @@ class HomogeneousLayout:
 
         # determine the performance ordering of each type of machine
         machine_type_perf: List[Tuple[float, str]] = []
-        for machine_type in self.machine_profiles:
+        for machine_type in self.model_manager.machine_num_dict.keys():
             if machine_type == "SourceNode" or machine_type == "SinkNode":
                 continue
             max_layers_on_node = self.model_manager.get_max_num_layers(machine_type=machine_type)
