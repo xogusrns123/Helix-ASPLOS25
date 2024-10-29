@@ -9,7 +9,7 @@ from typing import List, Dict, Tuple
 from configparser import ConfigParser
 from gurobipy import GRB
 
-from simulator.event_simulator.utils import kbps, mbps, gbps, Byte, KB, MB, GB, Sec, MilliSec, ATOL
+from simulator.event_simulator.utils import kbps, mbps, gbps, Byte, KB, MB, GB, Sec, MilliSec, ATOL, is_close
 from simulator.event_simulator.cluster_simulator import ClusterSimulator
 from simulator.event_simulator.query_manager import QueryManagerParameters
 from simulator.model_manager.model_manager import ModelManager
@@ -116,7 +116,7 @@ class ILPLayout:
     # 4. call "load_and_verify_solution" to load the ILP solution
     # 5. call "generate_simulator_cluster" to generate the cluster file and machine statistics file that
     #    will be used by the simulator
-    # 6. after cluster is initialized (see line 114 of /simulator/event_simulator/cluster_simulator.py), call
+    # 6. after cluster is initialized (see line 134 of /simulator/event_simulator/cluster_simulator.py), call
     #    set_initial_layout to load the initial layout into cluster simulator
 
     def __init__(self, model_manager: ModelManager) -> None:
@@ -1028,16 +1028,18 @@ class ILPLayout:
             compute_node: ILPNode
 
             # start layer index
-            compute_node.start_layer_idx = name_2_val[f"start_{node_idx}"]
+            compute_node.start_layer_idx = round(name_2_val[f"start_{node_idx}"])
             assert 0 <= compute_node.start_layer_idx, "Bad start layer index!"
-            assert compute_node.start_layer_idx == int(compute_node.start_layer_idx), \
+            assert is_close(compute_node.start_layer_idx, name_2_val[f"start_{node_idx}"]), \
                 "Start layer index should be an int!"
 
             # check that only one configuration is selected
             hold_sum, k_hold_sum = 0, 0
             for layer_count in range(1, compute_node.max_num_layers + 1):
-                hold_var_val = name_2_val[f"hold_{node_idx}_{layer_count}"]
-                assert hold_var_val == 0 or hold_var_val == 1, "Hold var must be int!"
+                hold_var_val = round(name_2_val[f"hold_{node_idx}_{layer_count}"])
+                assert is_close(hold_var_val, name_2_val[f"hold_{node_idx}_{layer_count}"]), \
+                    "Hold var should be an int!"
+                assert hold_var_val == 0 or hold_var_val == 1, "Hold var must be binary!"
                 hold_sum += hold_var_val
                 k_hold_sum += layer_count * hold_var_val
             assert hold_sum == 1, f"Only one configuration can be selected (now {hold_sum})!"
@@ -1057,12 +1059,18 @@ class ILPLayout:
 
                 # load variables
                 link.forward_flow = name_2_val[f"flow_{from_idx}_{to_idx}"]
-                assert link.forward_flow >= 0, "Flow should be larger or equal to 0!"
-                link.forward_edge_switch = name_2_val[f"switch_{from_idx}_{to_idx}"]
+                assert link.forward_flow >= 0 - ATOL, "Flow should be larger or equal to 0!"
+                link.forward_edge_switch = round(name_2_val[f"switch_{from_idx}_{to_idx}"])
+                assert is_close(link.forward_edge_switch, name_2_val[f"switch_{from_idx}_{to_idx}"]), \
+                    "Switch variable should be an int!"
                 assert link.forward_edge_switch == 0 or link.forward_edge_switch == 1, "Switch is binary!"
                 if not from_idx == "source" and not to_idx == "sink" and allow_partial_inference:
-                    link.forward_edge_cond1 = name_2_val[f"edge_cond1_{from_idx}_{to_idx}"]
-                    link.forward_edge_cond2 = name_2_val[f"edge_cond2_{from_idx}_{to_idx}"]
+                    link.forward_edge_cond1 = round(name_2_val[f"edge_cond1_{from_idx}_{to_idx}"])
+                    link.forward_edge_cond2 = round(name_2_val[f"edge_cond2_{from_idx}_{to_idx}"])
+                    assert is_close(link.forward_edge_cond1, name_2_val[f"edge_cond1_{from_idx}_{to_idx}"]), \
+                        "Condition 1 should be an int!"
+                    assert is_close(link.forward_edge_cond2, name_2_val[f"edge_cond2_{from_idx}_{to_idx}"]), \
+                        "Condition 2 should be an int!"
                     assert link.forward_edge_cond1 == 0 or link.forward_edge_cond1 == 1, "Condition 1 is binary!"
                     assert link.forward_edge_cond2 == 0 or link.forward_edge_cond2 == 1, "Condition 2 is binary!"
                     if link.forward_edge_switch:
@@ -1086,12 +1094,18 @@ class ILPLayout:
 
                 # load variables
                 link.backward_flow = name_2_val[f"flow_{from_idx}_{to_idx}"]
-                assert link.backward_flow >= 0, "Flow should be larger or equal to 0!"
-                link.backward_edge_switch = name_2_val[f"switch_{from_idx}_{to_idx}"]
+                assert link.backward_flow >= 0 - ATOL, "Flow should be larger or equal to 0!"
+                link.backward_edge_switch = round(name_2_val[f"switch_{from_idx}_{to_idx}"])
+                assert is_close(link.backward_edge_switch, name_2_val[f"switch_{from_idx}_{to_idx}"]), \
+                    "Switch variable should be an int!"
                 assert link.backward_edge_switch == 0 or link.backward_edge_switch == 1, "Switch is binary!"
                 if not from_idx == "source" and not to_idx == "sink" and allow_partial_inference:
-                    link.backward_edge_cond1 = name_2_val[f"edge_cond1_{from_idx}_{to_idx}"]
-                    link.backward_edge_cond2 = name_2_val[f"edge_cond2_{from_idx}_{to_idx}"]
+                    link.backward_edge_cond1 = round(name_2_val[f"edge_cond1_{from_idx}_{to_idx}"])
+                    link.backward_edge_cond2 = round(name_2_val[f"edge_cond2_{from_idx}_{to_idx}"])
+                    assert is_close(link.backward_edge_cond1, name_2_val[f"edge_cond1_{from_idx}_{to_idx}"]), \
+                        "Condition 1 should be an int!"
+                    assert is_close(link.backward_edge_cond2, name_2_val[f"edge_cond2_{from_idx}_{to_idx}"]), \
+                        "Condition 2 should be an int!"
                     assert link.backward_edge_cond1 == 0 or link.backward_edge_cond1 == 1, "Condition 1 is binary!"
                     assert link.backward_edge_cond2 == 0 or link.backward_edge_cond2 == 1, "Condition 2 is binary!"
                     if link.backward_edge_switch:

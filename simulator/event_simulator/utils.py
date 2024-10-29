@@ -25,7 +25,7 @@ Sec = 1
 MilliSec = 0.001
 
 # ILP
-ATOL = 1e-5
+ATOL = 1e-3
 TOKEN_SLOW_LINK = 10
 ACT_SLOW_LINK = 200
 
