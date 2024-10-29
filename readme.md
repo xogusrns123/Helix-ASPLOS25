@@ -27,7 +27,7 @@ The example is is located in `./examples/simulation`:
 cd examples/simulation
 ```
 
-#### Step 1: Generate Configuration Files
+### Step 1: Generate Configuration Files
 First, we need to generate a cluster configuration file, which specifies the nodes and network connections
 in the cluster. Run the following command to generate example cluster configuration files
 ```bash
@@ -40,5 +40,5 @@ please refer to these two helper classes to implement your own generator. The si
 profile file, which specifies the nic speed and vram size of machines. We provide such an example in
 `config/machine_profile.ini`.
 
-#### Step 2: Finding Model Placement Plans
+### Step 2: Finding Model Placement Plans
 
