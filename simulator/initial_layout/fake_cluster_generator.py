@@ -351,7 +351,7 @@ class PartitionedClusterGenerator:
         self.cross_partition_avg_latency = cross_partition_avg_latency
         self.cross_partition_var_latency = cross_partition_var_latency
 
-    def generator_fake_cluster(self, file_name: str, seed: int = 0, create_separate: bool = False) -> None:
+    def generator_fake_cluster(self, file_name: str, seed: int = 0, create_separate: bool = True) -> None:
         """
         Generate a fake cluster and write into the given file.
         File format convention:
@@ -514,7 +514,8 @@ class PartitionedClusterGenerator:
                 if node_types[node_id_1] == node_types[node_id_2]:
                     in_type_id_1 = in_type_node_id[node_id_1]
                     in_type_id_2 = in_type_node_id[node_id_2]
-                    in_type_edges[node_types[node_id_1]].append((in_type_id_1, in_type_id_2, cur_bandwidth, cur_latency))
+                    in_type_edges[node_types[node_id_1]].append(
+                        (in_type_id_1, in_type_id_2, cur_bandwidth, cur_latency))
 
         # use in_type_edges to write separate files
         if create_separate:

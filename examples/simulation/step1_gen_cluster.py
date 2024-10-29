@@ -41,7 +41,7 @@ def generate_partitioned(file_name: str):
     )
 
     # generate the cluster
-    generator.generator_fake_cluster(file_name=file_name, seed=0)
+    generator.generator_fake_cluster(file_name=file_name, seed=0, create_separate=False)
 
 
 def main():
