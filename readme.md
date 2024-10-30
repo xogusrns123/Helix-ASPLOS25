@@ -179,7 +179,7 @@ python step3_run_simulation.py online maxflow
 python step3_run_simulation.py <offline/online> <swarm/random/shortest_queue>
 ```
 In online mode, the request arrives based on the distribution in Azure Conversation Dataset. 
-`swarm`/`random`/`shortest_queue` are three heuristic-based request scheduling methods we support in
+`swarm` / `random` / `shortest_queue` are three heuristic-based request scheduling methods we support in
 the simulator.
 
 > **Tips:** Our simulator also supports other traces. For arrival rate, we support Azure Conversation
