@@ -97,6 +97,61 @@ Max compute throughput = 2803.860988272896
 Max flow = 1289.5557702751464
 ```
 
+At this point, the simulator has finished initialization and starts to run simulation. It will
+periodically print out the status of all compute nodes in the cluster:
+
+```
+# -------------- Watch -------------- #
+Last event time = 29.999846466400065
+Next event time = 30.00046720600006
+[Item] active queries: 61, finished queries 0.
+[Item] KV-Cache:
+Node Name: Real Used / Real Total | Expected Used / Expected Total | Expected > Real
+	Compute-2: 145194/3004416 (5%) | 224264 / 3004416 (7%) | True
+	Compute-3: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
+	Compute-4: 66434/2031488 (3%) | 112132 / 2031488 (6%) | True
+	Compute-5: 91731/1751008 (5%) | 163989 / 1751008 (9%) | True
+	Compute-6: 77388/1577856 (5%) | 168198 / 1577856 (11%) | True
+	Compute-7: 86831/1751008 (5%) | 167181 / 1751008 (10%) | True
+	Compute-8: 261104/4630752 (6%) | 504594 / 4630752 (11%) | True
+	Compute-9: 76990/1124224 (7%) | 126028 / 1124224 (11%) | True
+	Compute-10: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
+	Compute-11: 161100/3377472 (5%) | 294708 / 3377472 (9%) | True
+	Compute-12: 234131/5048576 (5%) | 448528 / 5048576 (9%) | True
+	Compute-13: 39431/1751008 (2%) | 63399 / 1751008 (4%) | True
+	Compute-14: 53700/1124224 (5%) | 98236 / 1124224 (9%) | True
+	Compute-15: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
+	Compute-16: 149121/3004416 (5%) | 224264 / 3004416 (7%) | True
+	Compute-17: 114433/1577856 (7%) | 168198 / 1577856 (11%) | True
+	Compute-18: 104856/1577856 (7%) | 168198 / 1577856 (11%) | True
+	Compute-19: 311635/4630752 (7%) | 504594 / 4630752 (11%) | True
+	Compute-20: 91490/1751008 (5%) | 157150 / 1751008 (9%) | True
+	Compute-21: 52280/1124224 (5%) | 89800 / 1124224 (8%) | True
+	Compute-22: 33217/2485120 (1%) | 56066 / 2485120 (2%) | True
+	Compute-23: 36396/1751008 (2%) | 61292 / 1751008 (4%) | True
+	Compute-24: 76232/1124224 (7%) | 134464 / 1124224 (12%) | True
+	Compute-25: 93975/1751008 (5%) | 171913 / 1751008 (10%) | True
+Realtime bottleneck usage: 0.07252436217246694
+Expected bottleneck usage: 0.1089658871820387
+# ------------ End Watch ------------ #
+```
+
+The watch items include number of active queries and KV-cache usage on each node. Don't worry if
+`Expected > Real` is `False` for some nodes. This only indicates that the KV-cache estimator
+underestimated the usage. Since we have a `expected_kv_hwm`, in most cases the compute nodes will
+not run out of memory. And sometimes you might see a log like this:
+```
+[SchedulerNode-11] Reject scheduler - out_nodes=[24], reasons=['Fail-KV']
+A query is rejected due to low kv-cache in specific routes!
+```
+This indicates that the best route is not available because of insufficient memory. The scheduler
+will temporarily reject the query (which is ok as we are in offline mode) and try to schedule it
+later, when there is more memory available.
+
+If the actual KV-cache usage is much larger than the estimation and causes the simulation to fail,
+you can increase `expected_output_length_ratio` and decrease the `expected_kv_hwm` in `KVParameters`.
+This will help the scheduler better estimate the real KV-cache usage.
+
 > **Tips:** Our simulator also supports other traces. For arrival rate, we support Azure Conversation
 > and Azure Code datasets. For length distribution, we support Azure Conversation, Azure Code, Alpaca,
 > and SharedGPT datasets. Please refer to `simulator/trace_generator`. If you want to use these length
