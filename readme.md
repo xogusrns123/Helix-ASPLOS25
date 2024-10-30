@@ -152,6 +152,26 @@ If the actual KV-cache usage is much larger than the estimation and causes the s
 you can increase `expected_output_length_ratio` and decrease the `expected_kv_hwm` in `KVParameters`.
 This will help the scheduler better estimate the real KV-cache usage.
 
+Eventually, when the simulation finishes, the simulator will print out the statistics like this:
+```
+# ------------------------------------------------------------- #
+Simulation Results (time range: 80s - 680s)
+Avg decode speed: 252.1 tokens/s
+Avg prompt latency: 2.955s
+Avg decode latency: 1.450s
+# ------------------------------------------------------------- #
+```
+This log shows the average decode throughput, average prompt latency and average decode latency in
+this setup. You will also see another log like this:
+```
+# -------------------- MaxFlow Scheduler -------------------- #
+Total time usage: 679.69s (1173.64 tokens/s)
+Theoretical optimal: 618.59s (1289.56 tokens/s)
+# ----------------------------------------------------------- #
+```
+This log shows the throughput when counting both prompt and decode phase tokens. The value is slightly
+lower than the theoretical optimal (i.e. max flow) because of dynamic runtime overheads.
+
 > **Tips:** Our simulator also supports other traces. For arrival rate, we support Azure Conversation
 > and Azure Code datasets. For length distribution, we support Azure Conversation, Azure Code, Alpaca,
 > and SharedGPT datasets. Please refer to `simulator/trace_generator`. If you want to use these length
