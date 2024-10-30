@@ -1,5 +1,4 @@
 # 2024.10.29 Yixuan Mei
-import os
 import sys
 from simulator.initial_layout.layout_synthesizer import LayoutMethod, LayoutSynthesizer, ModelName
 from simulator.event_simulator.utils import kbps, mbps, gbps, KB, MB, GB, Sec, MilliSec
