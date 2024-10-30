@@ -172,6 +172,16 @@ Theoretical optimal: 618.59s (1289.56 tokens/s)
 This log shows the throughput when counting both prompt and decode phase tokens. The value is slightly
 lower than the theoretical optimal (i.e. max flow) because of dynamic runtime overheads.
 
+Finally, we also provide examples for other serving modes and request scheduling methods. Please refer
+to:
+```bash
+python step3_run_simulation.py online maxflow
+python step3_run_simulation.py <offline/online> <swarm/random/shortest_queue>
+```
+In online mode, the request arrives based on the distribution in Azure Conversation Dataset. 
+`swarm`/`random`/`shortest_queue` are three heuristic-based request scheduling methods we support in
+the simulator.
+
 > **Tips:** Our simulator also supports other traces. For arrival rate, we support Azure Conversation
 > and Azure Code datasets. For length distribution, we support Azure Conversation, Azure Code, Alpaca,
 > and SharedGPT datasets. Please refer to `simulator/trace_generator`. If you want to use these length
