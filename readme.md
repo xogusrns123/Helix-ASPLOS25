@@ -84,7 +84,7 @@ We refer to this setup as offline setup.
 When running the above code, you will first see the model placement of the cluster (plotted by
 `simulator.visualize_cluster()`):
 
-![model_placement](examples/simulation/sim_files/model_placement.jpg "model_placement")
+![model_placement](examples/simulation/sim_files/maxflow_offline/model_placement.jpg "model_placement")
 
 Then, the simulator will print out the max compute throughput and max flow of the cluster, both in
 token/s. Max compute throughput is the max number of tokens the cluster can process in one second
