@@ -195,13 +195,76 @@ execution engine. In the following example, we will install all dependencies on 
 LTS system and run Helix's prototype system.
 
 ### Installing Dependencies
-#### Build Essentials
-xxx
+#### Basic C++ Building Tools
+```bash
+sudo apt update
+sudo apt install build-essential
+sudo apt install cmake
+```
+After this step, run the following commands to verify installation:
+```bash
+gcc --version   # gcc (Ubuntu 13.2.0-23ubuntu4) 13.2.0
+cmake --version # cmake version 3.28.3
+```
 
-#### Other
+#### CUDA and GPU Driver
+We install `CUDA 12.6` following [NVIDIA's official documentation](https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Ubuntu&target_version=24.04&target_type=deb_network).
+```bash
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt-get update
+sudo apt-get -y install cuda-12-6
+```
+Then, we set the environment variables and reboot the system to complete installation:
+```bash
+echo 'export PATH=/usr/local/cuda-12.6/bin${PATH:+:${PATH}}' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.6/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.bashrc
+sudo reboot
+```
+To verify installation, run:
+```bash
+nvcc --version        # Cuda compilation tools, release 12.6, V12.6.77
+nvidia-smi --version  # DRIVER version      : 560.35.03
+```
+
+#### ZeroMQ
+We use ZeroMQ as the communication framework. To install `libzmq` and its C++ binding `cppzmq`,
+run the following command:
+```bash
+sudo apt install libzmq3-dev
+```
+
+#### Pybind11
 We implement the inter-node communication logic in C++. In order to call the C++ functions from Python
-side, we use pybind11:
+side, we use `pybind11`:
 ```bash
 sudo apt-get install pybind11-dev
 ```
-We use torch tensors to store the intermediate results (activations). Therefore, we need to 
+
+#### Python Dependencies
+First, we set python as python3 and install `pip`:
+```bash
+sudo apt install python-is-python3
+sudo apt install python3-pip
+```
+Then, we install `conda` to isolate the Python environment we are using:
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+chmod +x Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+Remember to initialize conda in the shell environment before using it. We create a new conda environment
+with:
+```bash
+conda create -n runtime python=3.10 -y && conda activate runtime
+```
+In this new environment, we install `Pytorch 2.5.1` with the following command. We use torch tensor
+in Helix to store the intermediate results (activations).
+```bash
+pip install torch
+```
+We use `vllm` as our execution engine. For the prototype system, we require using `vllm 0.4.0.post1`.
+We can install this version of `vllm` using:
+```bash
+pip install vllm==0.4.0.post1
+```
