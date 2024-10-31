@@ -190,3 +190,18 @@ the simulator.
 > `simulator/event_simulator/utils.py`.
 
 ## Distributed LLM Serving Real System Tutorial
+We build a prototype system for Helix using ZeroMQ as the communication framework and vLLM as the
+execution engine. In the following example, we will install all dependencies on a fresh Ubuntu 24.04
+LTS system and run Helix's prototype system.
+
+### Installing Dependencies
+#### Build Essentials
+xxx
+
+#### Other
+We implement the inter-node communication logic in C++. In order to call the C++ functions from Python
+side, we use pybind11:
+```bash
+sudo apt-get install pybind11-dev
+```
+We use torch tensors to store the intermediate results (activations). Therefore, we need to 
