@@ -229,10 +229,7 @@ nvidia-smi --version  # DRIVER version      : 560.35.03
 
 #### ZeroMQ
 We use ZeroMQ as the communication framework. To install `libzmq` and its C++ binding `cppzmq`,
-run the following command:
-```bash
-sudo apt install libzmq3-dev
-```
+follow the steps in [this GitHub repo](https://github.com/zeromq/cppzmq).
 
 #### Pybind11
 We implement the inter-node communication logic in C++. In order to call the C++ functions from Python
@@ -258,13 +255,41 @@ with:
 ```bash
 conda create -n runtime python=3.10 -y && conda activate runtime
 ```
-In this new environment, we install `Pytorch 2.5.1` with the following command. We use torch tensor
-in Helix to store the intermediate results (activations).
-```bash
-pip install torch
-```
 We use `vllm` as our execution engine. For the prototype system, we require using `vllm 0.4.0.post1`.
 We can install this version of `vllm` using:
 ```bash
 pip install vllm==0.4.0.post1
 ```
+
+#### Runtime within Conda Environment
+Run the following command to install gcc/g++ in the conda environment, this can avoid errors like
+`'GLIBCXX_3.4.32' not found`:
+```bash
+conda install -c conda-forge gcc gxx
+```
+
+### Installing Helix's Communication Framework
+At the root directory of this repository, execute the following commands:
+```bash
+cd llm_sys/comm
+bash build.sh
+```
+The build script will automatically build and install Helix's communication framework.
+
+> **Tips:** You may need to change `CMAKE_PREFIX_PATH` if your conda environment has a different path
+> from the default one. Also, you may need to change the file path in `setup.py` if the `.so` files
+> you built have a different name from the one list there.
+
+> **Tips:** By default, Helix's communication framework use ports starting from 6000 for inter-node
+> communication. If you want to use other ports, you can change the `BASE_PORT` in `src/const.h`
+
+To verify that the basic functionalities are working correctly, you can run the following commands:
+```bash
+cd build
+./test_msg  # a unit test for message encoding & decoding
+```
+You should be able to see `Test Passed!` after some other logs.
+
+To verify network conditions, you can run
+
+TODO
