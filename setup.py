@@ -5,6 +5,7 @@ setup(
     version="1.0.0",
     packages=find_packages(),
     install_requires=[
+        "numpy~=1.26",
         "networkx~=3.2.1",
         "matplotlib~=3.8.2",
         "gurobipy~=11.0.0",
