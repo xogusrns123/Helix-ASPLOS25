@@ -296,10 +296,26 @@ You should be able to see `Test Passed!` after some other logs.
 #### Cross-Node Communication
 On two machines, run the following command (replace the IP and port):
 ```bash
-./packed_server 10.128.0.13 5555
+./packed_server 10.128.0.13 5555 1  # on machine 1
+./packed_server 10.128.0.14 5555 1  # on machine 2
 ```
 On one client machine, run the following command (replace the IP and port):
 ```bash
 ./packed_client tcp://10.128.0.13:5555 tcp://10.128.0.14:5555
 ```
-You will see messages 
+If running correctly, the client will print out messages like this from both servers:
+```
+Received:
+Creation time: 1730430003755545
+Latency: 562 us
+From server: 1
+```
+
+#### Python Binding Test
+Run the following command in Python: 
+```
+import llm_host, llm_worker
+```
+If everything is correct, you should not receive any error messages.
+
+### Running Helix's Prototype System

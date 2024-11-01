@@ -31,9 +31,10 @@ int main(int argc, char *argv[]) {
         // check and print
         if (header.msg_type != MsgType::Invalid) {
             std::cout << "Received: " << std::endl;
-            std::cout << "ser - send - recv - des: " << receive_time - header.creation_time << " us\n";
-            std::cout << header.creation_time << std::endl;
-            std::cout << header.request_id << std::endl;
+            std::cout << "Creation time: " << header.creation_time << std::endl;
+            std::cout << "Latency: " << receive_time - header.creation_time << " us\n";
+            std::cout << "From server: " << header.request_id << std::endl;
+            std::cout << std::endl;
         }
     }
 }
