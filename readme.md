@@ -264,7 +264,7 @@ pip install vllm==0.4.0.post1
 
 #### Runtime within Conda Environment
 Run the following command to install `libstdcxx` in the conda environment, this can avoid errors like
-`'GLIBCXX_3.4.32' not found`:
+`'GLIBCXX_3.4.32' not found` in later steps:
 ```bash
 conda install -c conda-forge libstdcxx-ng
 ```
@@ -284,13 +284,22 @@ The build script will automatically build and install Helix's communication fram
 > **Tips:** By default, Helix's communication framework use ports starting from 6000 for inter-node
 > communication. If you want to use other ports, you can change the `BASE_PORT` in `src/const.h`
 
-To verify that the basic functionalities are working correctly, you can run the following commands:
+To verify Helix's communication framework is correctly installed, we provide several unit tests.
+
+#### Message Encoding & Decoding
 ```bash
 cd build
 ./test_msg  # a unit test for message encoding & decoding
 ```
 You should be able to see `Test Passed!` after some other logs.
 
-To verify network conditions, you can run
-
-TODO
+#### Cross-Node Communication
+On two machines, run the following command (replace the IP and port):
+```bash
+./packed_server 10.128.0.13 5555
+```
+On one client machine, run the following command (replace the IP and port):
+```bash
+./packed_client tcp://10.128.0.13:5555 tcp://10.128.0.14:5555
+```
+You will see messages 
