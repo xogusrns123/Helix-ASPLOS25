@@ -249,6 +249,7 @@ Then, we install `conda` to isolate the Python environment we are using:
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 chmod +x Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
+source ~/.bashrc
 ```
 Remember to initialize conda in the shell environment before using it. We create a new conda environment
 with:
@@ -262,10 +263,10 @@ pip install vllm==0.4.0.post1
 ```
 
 #### Runtime within Conda Environment
-Run the following command to install gcc/g++ in the conda environment, this can avoid errors like
+Run the following command to install `libstdcxx` in the conda environment, this can avoid errors like
 `'GLIBCXX_3.4.32' not found`:
 ```bash
-conda install -c conda-forge gcc gxx
+conda install -c conda-forge libstdcxx-ng
 ```
 
 ### Installing Helix's Communication Framework
