@@ -319,3 +319,19 @@ import llm_host, llm_worker
 If everything is correct, you should not receive any error messages.
 
 ### Running Helix's Prototype System
+With all dependencies and the communication framework installed, we can now start running Helix's
+prototype system. Starting from the root directory of this repository, run:
+```bash
+cd examples/real_sys
+```
+Here, we assume that you have already followed the simulation steps to generate the cluster
+configuration files (`config/single24.ini` and `config/machine_profile.ini`) and the model
+placement files (`layout/ilp_sol.ini` and `simulator_cluster.ini`). If you have not yet done so,
+you can refer to Step 1 and Step 2 in the simulator tutorial. Based on the four files above
+we can generate the system configuration file for Helix's runtime system:
+```bash
+python step1_generate_system_config.py
+```
+Running this script generates `config/real_sys_config.txt`, which specifies the layers each
+machine should hold and the connection to setup between machines. Notice that for your own
+cluster, you will need to change the IP addresses in `step1_generate_system_config.py`.
