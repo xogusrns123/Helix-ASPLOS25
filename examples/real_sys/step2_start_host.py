@@ -91,7 +91,7 @@ def main():
     if len(sys.argv) != 3:
         print("Usage: python3 run_host.py <mode> <scheduling_method>")
         print("  mode: online | offline")
-        print("  scheduling_method: maxflow | heuristic")
+        print("  scheduling_method: maxflow | swarm | random")
         return
     mode = sys.argv[1]
     method = sys.argv[2]

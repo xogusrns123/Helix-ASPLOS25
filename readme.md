@@ -347,3 +347,40 @@ machine should hold and the connection to setup between machines.
 
 After this step, we can deploy Helix to serve the model using the cluster. Before starting
 the deployment, make sure you have a copy of Helix on every machine you are going to use.
+
+In this example, we will deploy Helix using its MaxFlow-based scheduling method and run in
+online mode, where the request arrival rate follows the distribution generated from Azure
+Conversation Dataset. (Please refer to our paper for more details about online and offline
+setup). 
+
+On the host machine, run the following command:
+```bash
+python step2_start_host.py online maxflow
+```
+Then, on the worker machines, run the following command:
+```bash
+python step3_start_worker.py maxflow
+```
+
+> **Tips:** We design the prototype system to make it agnostic to the order of starting the
+> host and worker machines. You can start the workers first and then the host, or vice versa.
+> However, you need to make sure the scheduling method of the host matches that of the worker.
+
+We also provide examples for other scheduling methods and setups:
+```bash
+# maxflow + offline
+python step2_start_host.py offline maxflow  # on host
+python step3_start_worker.py maxflow        # on workers
+# swarm + online
+python step2_start_host.py online swarm     # on host
+python step3_start_worker.py swarm          # on workers
+# swarm + offline
+python step2_start_host.py offline swarm    # on host
+python step3_start_worker.py swarm          # on workers
+# random + online
+python step2_start_host.py online random    # on host
+python step3_start_worker.py random         # on workers
+# random + offline
+python step2_start_host.py offline random   # on host
+python step3_start_worker.py random         # on workers
+```
