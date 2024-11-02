@@ -257,9 +257,10 @@ with:
 conda create -n runtime python=3.10 -y && conda activate runtime
 ```
 We use `vllm` as our execution engine. For the prototype system, we require using `vllm 0.4.0.post1`.
-We can install this version of `vllm` using:
+We can install this version of `vllm` and `numpy` using:
 ```bash
 pip install vllm==0.4.0.post1
+pip install numpy~=1.26
 ```
 
 #### Runtime within Conda Environment
