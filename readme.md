@@ -1,17 +1,17 @@
 # ASPLOS'25 Helix
-## Introduction 
+## 1. Introduction 
 Helix is a distributed system designed for high-throughput, low-latency large language model
 serving across heterogeneous and potentially geo-distributed GPU clusters. This repository
 contains the official implementation of both Helix's simulator and prototype system. Our paper
 can be found here [https://arxiv.org/abs/2406.01566](https://arxiv.org/abs/2406.01566).
 
-## Distributed LLM Serving Simulator Tutorial
+## 2. Distributed LLM Serving Simulator Tutorial
 The Helix simulator is a high-fidelity discrete-event simulator implemented in Python,
 specifically designed for distributed LLM serving across heterogeneous and geo-distributed
 GPU clusters. It provides detailed modeling and analysis of system behavior in complex
 distributed environments.
 
-### Installing Dependencies
+### 2.1 Installing Dependencies
 We recommend using Python 3.11. To install the required dependencies, run the following command:
 ```bash
 conda create -n helix python=3.11 -y && conda activate helix
@@ -20,14 +20,14 @@ pip install -e .
 We use Gurobi as the MILP solver in the simulator, which requires a valid license. Please follow
 the instructions on the [Gurobi website](https://www.gurobi.com/) to obtain a license.
 
-### Running the Simulator
+### 2.2 Running the Simulator
 In this tutorial, we use an example of serving LLaMA-2 70B in a cluster with 24 machines to demonstrate
 how to use Helix's simulator. The example is is located in `./examples/simulation`:
 ```bash
 cd examples/simulation
 ```
 
-### Step 1: Generate Configuration Files
+#### Step 1: Generate Configuration Files
 First, we need to generate a cluster configuration file, which specifies the nodes and network connections
 in the cluster. Run the following command to generate example cluster configuration files
 ```bash
@@ -40,7 +40,7 @@ please refer to these two helper classes to implement your own generator. The si
 profile file, which specifies the nic speed and vram size of machines. We provide such an example in
 `config/machine_profile.ini`.
 
-### Step 2: Finding Model Placement Plans
+#### Step 2: Finding Model Placement Plans
 The second step is to find a model placement, which specifies the layers each compute node holds.
 In our simulator, we implement our MILP-based model placement method (`ILPLayout`) and three
 heuristic-based model placement methods as baselines. Let's first use the heuristic methods to
@@ -71,7 +71,7 @@ problem and the raw solution.
 > is generated, you still have the chance to recover the results. As long as you have `ilp_solution.sol`,
 > you can generate `simulator_cluster.ini` and `ilp_sol.ini` using the method in `verify_ilp.py`.
 
-### Step 3: Run Simulation
+#### Step 3: Run Simulation
 Finally, we can run the simulate to see how the model placement plan and request scheduling performs:
 ```bash
 python step3_run_simulation.py offline maxflow
@@ -189,12 +189,12 @@ the simulator.
 > the profiling results are accurate. You also need to change the dataset-related constants in
 > `simulator/event_simulator/utils.py`.
 
-## Distributed LLM Serving Real System Tutorial
+## 3. Distributed LLM Serving Real System Tutorial
 We build a prototype system for Helix using ZeroMQ as the communication framework and vLLM as the
 execution engine. In the following example, we will install all dependencies on a fresh Ubuntu 24.04
 LTS system and run Helix's prototype system to serve LLaMa 70B in a cluster with 24 machines.
 
-### Installing Dependencies
+### 3.1 Installing Dependencies
 #### Basic C++ Building Tools
 ```bash
 sudo apt update
@@ -269,7 +269,7 @@ Run the following command to install `libstdcxx` in the conda environment, this 
 conda install -c conda-forge libstdcxx-ng
 ```
 
-### Installing Helix's Communication Framework
+### 3.2 Installing Helix's Communication Framework
 At the root directory of this repository, execute the following commands:
 ```bash
 cd llm_sys/comm
@@ -318,7 +318,7 @@ import llm_host, llm_worker
 ```
 If everything is correct, you should not receive any error messages.
 
-### Running Helix's Prototype System
+### 3.3 Running Helix's Prototype System
 With all dependencies and the communication framework installed, we can now start running Helix's
 prototype system. Starting from the root directory of this repository, enter the example directory:
 ```bash
