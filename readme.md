@@ -343,7 +343,9 @@ Running this script generates `config/real_sys_config.txt`, which specifies the 
 machine should hold and the connection to setup between machines. 
 
 > **Tips:** To run on your own cluster, you need to change the IP addresses in 
-> `step1_generate_system_config.py`.
+> `step1_generate_system_config.py`. You also need to change the `CONFIG_BROADCAST_ADDR`
+> in `llm_sys/utils.py` to the broadcast address of your cluster. (i.e. the IP address
+> of the host machine).
 
 After this step, we can deploy Helix to serve the model using the cluster. Before starting
 the deployment, make sure you have a copy of Helix on every machine you are going to use.
