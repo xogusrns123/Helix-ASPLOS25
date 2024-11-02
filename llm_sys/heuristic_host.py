@@ -8,7 +8,7 @@ from simulator.trace_generator.trace_generator import TraceGenerator, ArrivalRat
 from llm_sys.utils import get_local_ip, CONFIG_BROADCAST_ADDR, FlyingQuery
 
 
-def run_other_host_online(
+def run_heuristic_host_online(
         # scheduler
         scheduler_name: str,
         # cluster
@@ -157,7 +157,7 @@ def run_other_host_online(
             f.write(f"{item}\n")
 
 
-def run_other_host_offline(
+def run_heuristic_host_offline(
         # scheduler
         scheduler_name: str,
         # cluster
