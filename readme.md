@@ -192,7 +192,7 @@ the simulator.
 ## Distributed LLM Serving Real System Tutorial
 We build a prototype system for Helix using ZeroMQ as the communication framework and vLLM as the
 execution engine. In the following example, we will install all dependencies on a fresh Ubuntu 24.04
-LTS system and run Helix's prototype system.
+LTS system and run Helix's prototype system to serve LLaMa 70B in a cluster with 24 machines.
 
 ### Installing Dependencies
 #### Basic C++ Building Tools
@@ -320,18 +320,30 @@ If everything is correct, you should not receive any error messages.
 
 ### Running Helix's Prototype System
 With all dependencies and the communication framework installed, we can now start running Helix's
-prototype system. Starting from the root directory of this repository, run:
+prototype system. Starting from the root directory of this repository, enter the example directory:
 ```bash
 cd examples/real_sys
 ```
 Here, we assume that you have already followed the simulation steps to generate the cluster
 configuration files (`config/single24.ini` and `config/machine_profile.ini`) and the model
 placement files (`layout/ilp_sol.ini` and `simulator_cluster.ini`). If you have not yet done so,
-you can refer to Step 1 and Step 2 in the simulator tutorial. Based on the four files above
-we can generate the system configuration file for Helix's runtime system:
+you can refer to Step 1 and Step 2 in the simulator tutorial. 
+
+We also assume that the model to serve is stored in `model`. For the prototype system, we use
+dummy weights. Therefore, you only need to provide the model config (`model/config.json`) and
+tokenizer (`tokenizer.json` and `tokenizer_config.json`). We follow the standard format used
+on [HuggingFace](https://huggingface.co/).
+
+Based on the files above, we can generate the system configuration file for Helix's runtime
+system:
 ```bash
 python step1_generate_system_config.py
 ```
 Running this script generates `config/real_sys_config.txt`, which specifies the layers each
-machine should hold and the connection to setup between machines. Notice that for your own
-cluster, you will need to change the IP addresses in `step1_generate_system_config.py`.
+machine should hold and the connection to setup between machines. 
+
+> **Tips:** To run on your own cluster, you need to change the IP addresses in 
+> `step1_generate_system_config.py`.
+
+After this step, we can deploy Helix to serve the model using the cluster. Before starting
+the deployment, make sure you have a copy of Helix on every machine you are going to use.
