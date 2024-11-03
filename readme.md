@@ -387,3 +387,16 @@ python step3_start_worker.py random         # on workers
 python step2_start_host.py offline random   # on host
 python step3_start_worker.py random         # on workers
 ```
+
+After running the above commands, you should see the host machine store two log files in the
+`result` directory. The `events.txt` stores the launch and finish time of each iteration for
+each query. To analyze this file, run:
+```bash
+python step4_parse_results.py
+```
+The `query_route.txt` stores the route each request takes. The format is like the following:
+```bash
+(0, 194, 96, [16, 15, 1, 17, 18, 3, 21, 8, 9, 2, 14, 20, 19, 6, 11, 7, 5, 0], [0, 3, 7, 11, 14, 23, 25, 26, 30, 34, 38, 42, 46, 53, 60, 68, 77, -1], [3, 7, 11, 14, 23, 25, 26, 30, 34, 38, 42, 46, 53, 60, 68, 77, 80, -1])
+```
+Here, the first three numbers are the query id, the input length and the output length. The
+three arrays are the compute nodes used, start layer ids, and end layer ids.
