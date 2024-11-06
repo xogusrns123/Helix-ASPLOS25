@@ -53,6 +53,13 @@ python step2_model_placement.py homogeneous
 These heuristic-based methods run very fast. However, the quality of the model placement can not
 be guaranteed. Then, we use Helix's MILP-based model placement planner to generate high-quality
 model placements:
+
+> **Tips:** You need to remove the contents of `./layouts/ilp` directory before running the following
+> command. The folder currently contains our results. If you want to compare your results with ours,
+> you can move the contents to a backup place. Also, before running the MILP-based model placement
+> planner, you need to run `petals` to generate a model placement for LLaMA-2 70B. We bootstrap the
+> solver with `petals`' solution.
+
 ```bash
 python step2_model_placement.py ilp
 ```
