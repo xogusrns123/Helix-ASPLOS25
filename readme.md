@@ -12,9 +12,9 @@ GPU clusters. It provides detailed modeling and analysis of system behavior in c
 distributed environments.
 
 ### 2.1 Installing Dependencies
-We recommend using Python 3.11. To install the required dependencies, run the following command:
+We recommend using Python 3.10. To install the required dependencies, run the following command:
 ```bash
-conda create -n helix python=3.11 -y && conda activate helix
+conda create -n runtime python=3.10 -y && conda activate runtime
 pip install -e .
 ```
 We use Gurobi as the MILP solver in the simulator, which requires a valid license. Please follow
