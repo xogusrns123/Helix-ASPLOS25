@@ -32,3 +32,17 @@ also generate the three sub-cluster config files with each type of machine: `con
 
 ### Model Placement
 
+The next step is to generate the model placement for the cluster. Run the following commands
+to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
+methods:
+
+```bash
+# Generate model placement using heuristic method Petals
+python step2_gen_layout.py petals llama30b
+python step2_gen_layout.py petals llama70b
+# Generate model placement using heuristic method Swarm
+python step2_gen_layout.py swarm llama30b
+python step2_gen_layout.py swarm llama70b
+```
+
+
