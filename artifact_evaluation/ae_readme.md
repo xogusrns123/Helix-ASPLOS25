@@ -43,6 +43,12 @@ python step2_gen_layout.py petals llama70b
 # Generate model placement using heuristic method Swarm
 python step2_gen_layout.py swarm llama30b
 python step2_gen_layout.py swarm llama70b
+# Generate model placement using heuristic method separate pipelines
+python step2_gen_layout.py separate llama30b
+python step2_gen_layout.py separate llama70b
+# Generate model placement using Helix's MILP-based method
+python step2_gen_layout.py ilp llama30b
+python step2_gen_layout.py ilp llama70b
 ```
 
 

@@ -40,14 +40,78 @@ def swarm_layout(model_name: ModelName, save_path: str, num_stages: int):
     layout_synthesizer.synthesize(args=swarm_args)
 
 
+def ilp_layout30b(cluster_file_path: str, save_path: str, machine_num_dict: dict, heuristic_path: str):
+    # initialize the layout synthesizer
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name=cluster_file_path,
+        machine_profile_name="./config/machine_profiles.ini",
+        model_name=ModelName.LLaMa30B,
+        workspace_path=save_path,
+        layout_method=LayoutMethod.ILP,
+        machine_num_dict=machine_num_dict
+    )
+
+    ilp_args = {
+        "seed": 1,
+        # pruning
+        "enable_pruning": False,
+        "min_keep": 12,
+        "max_keep": 12,
+        "keep_bandwidth_threshold": 1 * mbps,
+        # ILP
+        "use_existing_sol": False,
+        "allow_partial_inference": False,
+        "remove_redundant": False,
+        "max_run_time": 1,
+        "early_stop_time": 100,
+        "early_stop_threshold": 0.9,
+        "existing_sol_path": "path/to/existing/ilp_solution.sol",
+        # heuristic
+        "start_from_heuristic": True,
+        "heuristic_sol_path": heuristic_path,
+    }
+
+    # run the ILP layout synthesis
+    layout_synthesizer.synthesize(args=ilp_args)
+
+
 def main():
-    assert len(sys.argv) == 3, f"Usage: python {sys.argv[0]} <ilp/swarm/petals/homogeneous> <llama30b/llama70b>"
+    assert len(sys.argv) == 3, f"Usage: python {sys.argv[0]} <ilp/swarm/petals/separate> <llama30b/llama70b>"
     layout_method = sys.argv[1]
     model_name = sys.argv[2]
 
     if layout_method == "ilp":
-        # TODO
-        raise NotImplementedError
+        # Helix's MILP-based model placement method
+        if model_name == "llama30b":
+            os.makedirs("./layout_llama30b/ilp/a100", exist_ok=True)
+            os.makedirs("./layout_llama30b/ilp/l4", exist_ok=True)
+            os.makedirs("./layout_llama30b/ilp/t4", exist_ok=True)
+            ilp_layout30b(
+                cluster_file_path="./config/a100.ini",
+                save_path="./layout_llama30b/ilp/a100",
+                machine_num_dict={"A100": 4},
+                heuristic_path="./layout_llama30b/separate/a100_solution_file.ini"
+            )
+            ilp_layout30b(
+                cluster_file_path="./config/l4.ini",
+                save_path="./layout_llama30b/ilp/l4",
+                machine_num_dict={"L4": 8},
+                heuristic_path="./layout_llama30b/separate/l4_solution_file.ini"
+            )
+            ilp_layout30b(
+                cluster_file_path="./config/t4.ini",
+                save_path="./layout_llama30b/ilp/t4",
+                machine_num_dict={"T4": 12},
+                heuristic_path="./layout_llama30b/separate/t4_solution_file.ini"
+            )
+            print("Layout for LLaMa30B model is generated using ILP method.")
+        elif model_name == "llama70b":
+            # TODO
+            raise NotImplementedError
+
+        else:
+            raise ValueError(f"Invalid model name: {model_name}")
+
     elif layout_method == "swarm":
         # Heuristic method: swarm
         if model_name == "llama30b":
@@ -78,9 +142,17 @@ def main():
         else:
             raise ValueError(f"Invalid model name: {model_name}")
 
-    elif layout_method == "homogeneous":
-        # TODO
-        raise NotImplementedError
+    elif layout_method == "separate":
+        print("We manually create model placement for the separate pipelines baseline.")
+        if model_name == "llama30b":
+            print("The files are located in ./layout_llama30b/separate")
+
+        elif model_name == "llama70b":
+            print("The files are located in ./layout_llama70b/separate")
+
+        else:
+            raise ValueError(f"Invalid model name: {model_name}")
+
     else:
         raise ValueError(f"Invalid layout method: {layout_method}")
 
