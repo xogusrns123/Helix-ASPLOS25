@@ -1239,6 +1239,18 @@ class ILPLayout:
                     valid_links_with_outbound[link_name_tuple] = ilp_link
             valid_links = valid_links_with_outbound
 
+            # remove links associated with nodes with no inbound link
+            # if a node other than source does not have any inbound link, then remove all outbound links
+            # associated with node, as this node can not be used in inference
+            nodes_with_inbound: Set[int or str] = set()
+            for link_name_tuple in valid_links.keys():
+                nodes_with_inbound.add(link_name_tuple[1])
+            valid_links_with_inbound: Dict[Tuple[int or str, int or str], ILPLink] = {}
+            for link_name_tuple, ilp_link in valid_links.items():
+                if link_name_tuple[0] == "source" or link_name_tuple[0] in nodes_with_inbound:
+                    valid_links_with_inbound[link_name_tuple] = ilp_link
+            valid_links = valid_links_with_inbound
+
             # write the valid link names
             file.write("[Links]\n")
             valid_link_names = []
