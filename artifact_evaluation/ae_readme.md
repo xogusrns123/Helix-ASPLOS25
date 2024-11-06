@@ -47,8 +47,11 @@ python step2_gen_layout.py swarm llama70b
 python step2_gen_layout.py separate llama30b
 python step2_gen_layout.py separate llama70b
 # Generate model placement using Helix's MILP-based method
-python step2_gen_layout.py ilp llama30b
-python step2_gen_layout.py ilp llama70b
+python step2_gen_layout.py ilp llama30b  # remove ./layout_llama30b/ilp before running
+python step2_gen_layout.py ilp llama70b  # remove ./layout_llama70b/ilp before running
 ```
+
+> **Note:** Before running Helix's MILP-based method, remove the `./layout_llama30b/ilp` and
+> `./layout_llama70b/ilp` directories (example outputs).
 
 
