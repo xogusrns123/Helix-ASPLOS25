@@ -1,5 +1,5 @@
-# Solution for model 2024-10-29_18-50-53
-# Objective value = 1.2895557702751735e+03
+# Solution for model 2024-11-05_18-20-39
+# Objective value = 1.2895557717392778e+03
 start_0 7
 start_1 34
 start_2 23
@@ -20,7 +20,7 @@ start_16 11
 start_17 14
 start_18 46
 start_19 42
-start_20 25
+start_20 76
 start_21 53
 start_22 49
 start_23 26
@@ -36,8 +36,8 @@ hold_1_2 0
 hold_1_3 0
 hold_1_4 1
 hold_2_1 0
-hold_2_2 1
-hold_2_3 0
+hold_2_2 0
+hold_2_3 1
 hold_2_4 0
 hold_3_1 0
 hold_3_2 0
@@ -179,7 +179,7 @@ hold_23_7 1
 flow_source_0 0
 flow_source_1 0
 flow_source_2 0
-flow_source_3 0
+flow_source_3 7.5399816523713525e-07
 flow_source_4 0
 flow_source_5 0
 flow_source_6 0
@@ -191,7 +191,7 @@ flow_source_11 0
 flow_source_12 0
 flow_source_13 0
 flow_source_14 0
-flow_source_15 1.2895557702751735e+03
+flow_source_15 1.2895557709852797e+03
 flow_source_16 0
 flow_source_17 0
 flow_source_18 0
@@ -204,7 +204,7 @@ flow_0_sink 0
 flow_1_sink 0
 flow_2_sink 0
 flow_3_sink 0
-flow_4_sink 1.2895557702751735e+03
+flow_4_sink 1.2895557710291782e+03
 flow_5_sink 0
 flow_6_sink 0
 flow_7_sink 0
@@ -251,10 +251,10 @@ flow_12_0 0
 flow_0_13 0
 flow_13_0 0
 flow_0_14 0
-flow_14_0 1.2895557702751735e+03
+flow_14_0 1.2895557709902796e+03
 flow_0_15 0
 flow_15_0 0
-flow_0_16 1.2895557702751735e+03
+flow_0_16 1.2895557709902796e+03
 flow_16_0 0
 flow_0_17 0
 flow_17_0 0
@@ -283,7 +283,7 @@ flow_6_1 0
 flow_1_7 0
 flow_7_1 0
 flow_1_8 0
-flow_8_1 7.5785318572279232e+02
+flow_8_1 7.5785318643455707e+02
 flow_1_9 0
 flow_9_1 0
 flow_1_10 0
@@ -292,7 +292,7 @@ flow_1_11 0
 flow_11_1 0
 flow_1_12 0
 flow_12_1 0
-flow_1_13 7.5785318572279232e+02
+flow_1_13 7.5785318643789037e+02
 flow_13_1 0
 flow_1_14 0
 flow_14_1 0
@@ -322,7 +322,7 @@ flow_2_5 0
 flow_5_2 0
 flow_2_6 0
 flow_6_2 0
-flow_2_7 0
+flow_2_7 7.5785318643789037e+02
 flow_7_2 0
 flow_2_8 0
 flow_8_2 0
@@ -343,18 +343,18 @@ flow_15_2 0
 flow_2_16 0
 flow_16_2 0
 flow_2_17 0
-flow_17_2 1.2895557702751735e+03
+flow_17_2 1.2895557709852797e+03
 flow_2_18 0
 flow_18_2 0
 flow_2_19 0
 flow_19_2 0
-flow_2_20 1.2895557702751735e+03
+flow_2_20 0
 flow_20_2 0
 flow_2_21 0
 flow_21_2 0
 flow_2_22 0
 flow_22_2 0
-flow_2_23 0
+flow_2_23 5.3170258455238923e+02
 flow_23_2 0
 flow_3_4 0
 flow_4_3 0
@@ -368,7 +368,7 @@ flow_3_8 0
 flow_8_3 0
 flow_3_9 0
 flow_9_3 0
-flow_3_10 2.2615060117042185e+02
+flow_3_10 2.2615060192445287e+02
 flow_10_3 0
 flow_3_11 0
 flow_11_3 0
@@ -385,7 +385,7 @@ flow_16_3 0
 flow_3_17 0
 flow_17_3 0
 flow_3_18 0
-flow_18_3 0
+flow_18_3 2.2615060117045471e+02
 flow_3_19 0
 flow_19_3 0
 flow_3_20 0
@@ -393,13 +393,13 @@ flow_20_3 0
 flow_3_21 0
 flow_21_3 0
 flow_3_22 0
-flow_22_3 2.2615060117042185e+02
+flow_22_3 0
 flow_3_23 0
 flow_23_3 0
 flow_4_5 0
 flow_5_4 0
 flow_4_6 0
-flow_6_4 1.2895557702751735e+03
+flow_6_4 1.2895557710291878e+03
 flow_4_7 0
 flow_7_4 0
 flow_4_8 0
@@ -442,7 +442,7 @@ flow_5_8 0
 flow_8_5 0
 flow_5_9 0
 flow_9_5 0
-flow_5_10 5.3170258455238923e+02
+flow_5_10 5.3170258455236217e+02
 flow_10_5 0
 flow_5_11 0
 flow_11_5 0
@@ -467,7 +467,7 @@ flow_20_5 0
 flow_5_21 0
 flow_21_5 0
 flow_5_22 0
-flow_22_5 5.3170258455238923e+02
+flow_22_5 5.3170258455237229e+02
 flow_5_23 0
 flow_23_5 0
 flow_6_7 0
@@ -477,7 +477,7 @@ flow_8_6 0
 flow_6_9 0
 flow_9_6 0
 flow_6_10 0
-flow_10_6 1.2895557702751735e+03
+flow_10_6 1.2895557710291896e+03
 flow_6_11 0
 flow_11_6 0
 flow_6_12 0
@@ -504,7 +504,7 @@ flow_6_22 0
 flow_22_6 0
 flow_6_23 0
 flow_23_6 0
-flow_7_8 757.853185722811
+flow_7_8 7.5785318643289031e+02
 flow_8_7 0
 flow_7_9 0
 flow_9_7 0
@@ -529,7 +529,7 @@ flow_18_7 0
 flow_7_19 0
 flow_19_7 0
 flow_7_20 0
-flow_20_7 7.5785318572279232e+02
+flow_20_7 0
 flow_7_21 0
 flow_21_7 0
 flow_7_22 0
@@ -571,7 +571,7 @@ flow_10_9 0
 flow_9_11 0
 flow_11_9 0
 flow_9_12 0
-flow_12_9 5.3170258455236240e+02
+flow_12_9 5.3170258383227360e+02
 flow_9_13 0
 flow_13_9 0
 flow_9_14 0
@@ -590,7 +590,7 @@ flow_9_20 0
 flow_20_9 0
 flow_9_21 0
 flow_21_9 0
-flow_9_22 5.3170258455236240e+02
+flow_9_22 5.3170258383226985e+02
 flow_22_9 0
 flow_9_23 0
 flow_23_9 0
@@ -615,7 +615,7 @@ flow_19_10 0
 flow_10_20 0
 flow_20_10 0
 flow_10_21 0
-flow_21_10 5.3170258455236228e+02
+flow_21_10 5.3170258455237456e+02
 flow_10_22 0
 flow_22_10 0
 flow_10_23 0
@@ -623,7 +623,7 @@ flow_23_10 0
 flow_11_12 0
 flow_12_11 0
 flow_11_13 0
-flow_13_11 2.2615060117042174e+02
+flow_13_11 2.2615060189050109e+02
 flow_11_14 0
 flow_14_11 0
 flow_11_15 0
@@ -640,7 +640,7 @@ flow_11_20 0
 flow_20_11 0
 flow_11_21 0
 flow_21_11 0
-flow_11_22 2.2615060117042174e+02
+flow_11_22 2.2615060189051846e+02
 flow_22_11 0
 flow_11_23 0
 flow_23_11 0
@@ -665,7 +665,7 @@ flow_21_12 0
 flow_12_22 0
 flow_22_12 0
 flow_12_23 0
-flow_23_12 5.3170258455236228e+02
+flow_23_12 5.3170258455238923e+02
 flow_13_14 0
 flow_14_13 0
 flow_13_15 0
@@ -687,7 +687,7 @@ flow_22_13 0
 flow_13_23 0
 flow_23_13 0
 flow_14_15 0
-flow_15_14 1.2895557702751735e+03
+flow_15_14 1.2895557709852797e+03
 flow_14_16 0
 flow_16_14 0
 flow_14_17 0
@@ -720,7 +720,7 @@ flow_15_22 0
 flow_22_15 0
 flow_15_23 0
 flow_23_15 0
-flow_16_17 1.2895557702751735e+03
+flow_16_17 1.2895557709902796e+03
 flow_17_16 0
 flow_16_18 0
 flow_18_16 0
@@ -750,7 +750,7 @@ flow_18_19 0
 flow_19_18 5.3170258455238923e+02
 flow_18_20 0
 flow_20_18 0
-flow_18_21 5.3170258455238923e+02
+flow_18_21 3.0555198338192810e+02
 flow_21_18 0
 flow_18_22 0
 flow_22_18 0
@@ -768,10 +768,10 @@ flow_20_21 0
 flow_21_20 0
 flow_20_22 0
 flow_22_20 0
-flow_20_23 5.3170258455236228e+02
+flow_20_23 0
 flow_23_20 0
 flow_21_22 0
-flow_22_21 0
+flow_22_21 2.2615060117043998e+02
 flow_21_23 0
 flow_23_21 0
 flow_22_23 0
@@ -922,7 +922,7 @@ switch_2_5 0
 switch_5_2 0
 switch_2_6 0
 switch_6_2 0
-switch_2_7 0
+switch_2_7 1
 switch_7_2 0
 switch_2_8 0
 switch_8_2 0
@@ -948,13 +948,13 @@ switch_2_18 0
 switch_18_2 0
 switch_2_19 0
 switch_19_2 0
-switch_2_20 1
+switch_2_20 0
 switch_20_2 0
 switch_2_21 0
 switch_21_2 0
 switch_2_22 0
 switch_22_2 0
-switch_2_23 0
+switch_2_23 1
 switch_23_2 0
 switch_3_4 0
 switch_4_3 0
@@ -993,7 +993,7 @@ switch_20_3 0
 switch_3_21 0
 switch_21_3 0
 switch_3_22 0
-switch_22_3 1
+switch_22_3 0
 switch_3_23 0
 switch_23_3 0
 switch_4_5 0
@@ -1129,7 +1129,7 @@ switch_18_7 0
 switch_7_19 0
 switch_19_7 0
 switch_7_20 0
-switch_20_7 1
+switch_20_7 0
 switch_7_21 0
 switch_21_7 0
 switch_7_22 0
@@ -1368,7 +1368,7 @@ switch_20_21 0
 switch_21_20 0
 switch_20_22 0
 switch_22_20 0
-switch_20_23 1
+switch_20_23 0
 switch_23_20 0
 switch_21_22 0
 switch_22_21 1

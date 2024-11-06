@@ -58,8 +58,8 @@ python step2_model_placement.py ilp
 ```
 Notice that we set the max running time to 10 hours. However, you can interrupt with `ctrl + c` at
 any time, and the best model placement will be saved (press `ctrl + c` only once, otherwise the
-process will be killed by the os). On a laptop with 14 cores, we run the solver for 10 minutes to
-find the solution in `layouts/ilp`.
+process will be killed by the os). On a laptop with 14 cores, we run the solver for around 20
+minutes to find the solution in `layouts/ilp`.
 
 After running model placement, we will get a `{method_name}_sol.ini`, which specifies the layers
 each compute node holds, and a `simulator_cluster.ini`, which is the cluster description file that
@@ -70,6 +70,10 @@ problem and the raw solution.
 > **Tips:** If you accidentally press `ctrl + c` twice and kill the process before `simulator_cluster.ini`
 > is generated, you still have the chance to recover the results. As long as you have `ilp_solution.sol`,
 > you can generate `simulator_cluster.ini` and `ilp_sol.ini` using the method in `verify_ilp.py`.
+
+> **Tips:** It is possible that some compute nodes are not used in the model placement. Also, your
+> solution might be different from what we get, as there are many possible model placements with
+> the same objective value.
 
 #### Step 3: Run Simulation
 Finally, we can run the simulate to see how the model placement plan and request scheduling performs:
@@ -82,7 +86,7 @@ cluster is able to serve more, and the length distribution follows the Azure Con
 We refer to this setup as offline setup.
 
 When running the above code, you will first see the model placement of the cluster (plotted by
-`simulator.visualize_cluster()`):
+`simulator.visualize_cluster()`, here we have a T4 node not used in the model placement):
 
 ![model_placement](examples/simulation/sim_files/maxflow_offline/model_placement.jpg "model_placement")
 
@@ -102,36 +106,36 @@ periodically print out the status of all compute nodes in the cluster:
 
 ```
 # -------------- Watch -------------- #
-Last event time = 29.999846466400065
-Next event time = 30.00046720600006
+Last event time = 29.999638276400034
+Next event time = 30.000469309600057
 [Item] active queries: 61, finished queries 0.
 [Item] KV-Cache:
 Node Name: Real Used / Real Total | Expected Used / Expected Total | Expected > Real
-	Compute-2: 145194/3004416 (5%) | 224264 / 3004416 (7%) | True
+	Compute-2: 146416/3004416 (5%) | 224264 / 3004416 (7%) | True
 	Compute-3: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
-	Compute-4: 66434/2031488 (3%) | 112132 / 2031488 (6%) | True
+	Compute-4: 99651/1577856 (6%) | 168198 / 1577856 (11%) | True
 	Compute-5: 91731/1751008 (5%) | 163989 / 1751008 (9%) | True
-	Compute-6: 77388/1577856 (5%) | 168198 / 1577856 (11%) | True
-	Compute-7: 86831/1751008 (5%) | 167181 / 1751008 (10%) | True
-	Compute-8: 261104/4630752 (6%) | 504594 / 4630752 (11%) | True
-	Compute-9: 76990/1124224 (7%) | 126028 / 1124224 (11%) | True
+	Compute-6: 77178/1577856 (5%) | 168198 / 1577856 (11%) | True
+	Compute-7: 85811/1751008 (5%) | 167181 / 1751008 (10%) | True
+	Compute-8: 251739/4630752 (5%) | 504594 / 4630752 (11%) | True
+	Compute-9: 78079/1124224 (7%) | 126028 / 1124224 (11%) | True
 	Compute-10: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
 	Compute-11: 161100/3377472 (5%) | 294708 / 3377472 (9%) | True
-	Compute-12: 234131/5048576 (5%) | 448528 / 5048576 (9%) | True
+	Compute-12: 231055/5048576 (5%) | 448528 / 5048576 (9%) | True
 	Compute-13: 39431/1751008 (2%) | 63399 / 1751008 (4%) | True
 	Compute-14: 53700/1124224 (5%) | 98236 / 1124224 (9%) | True
 	Compute-15: 74812/1124224 (7%) | 126028 / 1124224 (11%) | True
-	Compute-16: 149121/3004416 (5%) | 224264 / 3004416 (7%) | True
-	Compute-17: 114433/1577856 (7%) | 168198 / 1577856 (11%) | True
-	Compute-18: 104856/1577856 (7%) | 168198 / 1577856 (11%) | True
-	Compute-19: 311635/4630752 (7%) | 504594 / 4630752 (11%) | True
+	Compute-16: 149520/3004416 (5%) | 224264 / 3004416 (7%) | True
+	Compute-17: 115587/1577856 (7%) | 168198 / 1577856 (11%) | True
+	Compute-18: 104853/1577856 (7%) | 168198 / 1577856 (11%) | True
+	Compute-19: 314559/4630752 (7%) | 504594 / 4630752 (11%) | True
 	Compute-20: 91490/1751008 (5%) | 157150 / 1751008 (9%) | True
 	Compute-21: 52280/1124224 (5%) | 89800 / 1124224 (8%) | True
-	Compute-22: 33217/2485120 (1%) | 56066 / 2485120 (2%) | True
-	Compute-23: 36396/1751008 (2%) | 61292 / 1751008 (4%) | True
+	Compute-22: 0/2485120 (0%) | 0 / 2485120 (0%) | True
+	Compute-23: 34342/1751008 (2%) | 61292 / 1751008 (4%) | True
 	Compute-24: 76232/1124224 (7%) | 134464 / 1124224 (12%) | True
 	Compute-25: 93975/1751008 (5%) | 171913 / 1751008 (10%) | True
-Realtime bottleneck usage: 0.07252436217246694
+Realtime bottleneck usage: 0.07325573436359212
 Expected bottleneck usage: 0.1089658871820387
 # ------------ End Watch ------------ #
 ```
@@ -156,17 +160,17 @@ Eventually, when the simulation finishes, the simulator will print out the stati
 ```
 # ------------------------------------------------------------- #
 Simulation Results (time range: 80s - 680s)
-Avg decode speed: 252.1 tokens/s
-Avg prompt latency: 2.955s
-Avg decode latency: 1.450s
+Avg decode speed: 248.3 tokens/s
+Avg prompt latency: 3.094s
+Avg decode latency: 1.457s
 # ------------------------------------------------------------- #
 ```
 This log shows the average decode throughput, average prompt latency and average decode latency in
 this setup. You will also see another log like this:
 ```
 # -------------------- MaxFlow Scheduler -------------------- #
-Total time usage: 679.69s (1173.64 tokens/s)
-Theoretical optimal: 618.59s (1289.56 tokens/s)
+Total time usage: 679.60s (1176.70 tokens/s)
+Theoretical optimal: 620.13s (1289.56 tokens/s)
 # ----------------------------------------------------------- #
 ```
 This log shows the throughput when counting both prompt and decode phase tokens. The value is slightly
