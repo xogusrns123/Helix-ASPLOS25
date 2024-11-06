@@ -291,14 +291,16 @@ class ILPLayout:
             k_hold_var.append(layer_count * hold_var)
         return start_var + gp.quicksum(k_hold_var)
 
-    def step1_initialize_ilp(self, model_name: str) -> None:
+    def step1_initialize_ilp(self, seed: int, model_name: str) -> None:
         """
         Initialize the ILP program.
 
-        :param model_name:
-        :return:
+        :param seed: random seed
+        :param model_name: name of the model
+        :return: None
         """
         self.ilp_model = gp.Model(model_name)
+        self.ilp_model.Params.Seed = seed
 
         # variables
         self.var_node_start.clear()
@@ -840,7 +842,7 @@ class ILPLayout:
 
         return num_constraints
 
-    def build_model(self, model_name: str, enable_partial_inference: bool, remove_redundant: bool,
+    def build_model(self, seed: int, model_name: str, enable_partial_inference: bool, remove_redundant: bool,
                     start_from_heuristic: bool, heuristic_sol_path: str) -> Tuple[int, int, int, int]:
         """
         Build the ILP model.
@@ -848,6 +850,7 @@ class ILPLayout:
                  like prune edge / layer fusion / limit on the lower bound of layers on node can be done by
                  changing the cluster description file.
 
+        :param seed: random seed
         :param model_name: name of the ILP model
         :param enable_partial_inference: whether partial inference is enabled or not
         :param remove_redundant: remove redundant constraints in the model
@@ -860,7 +863,7 @@ class ILPLayout:
         num_int, num_real, num_binary, num_constraint = 0, 0, 0, 0
 
         # Step 1: initial the ILP program
-        self.step1_initialize_ilp(model_name=model_name)
+        self.step1_initialize_ilp(seed=seed, model_name=model_name)
 
         # Step 2: add variables
         cur_num_int, cur_num_real, cur_num_binary = self.step2_add_variables(

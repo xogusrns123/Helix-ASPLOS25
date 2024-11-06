@@ -72,6 +72,8 @@ class LayoutSynthesizer:
         """
         Synthesize the initial layout. Below is contents of args for each layout method.
         When layout_method == LayoutMethod.ILP:
+            seed: [Optional] int, seed for the ILP solver (0 if not provided)
+
             # pruning related
             "enable_pruning": bool, whether we should prune the cluster
             "min_keep": int, keep at least first min_keep links for each node during pruning
@@ -126,6 +128,9 @@ class LayoutSynthesizer:
                 for k, v in args.items():
                     f.write(f"{k} = {v}\n")
 
+            # get random seed
+            seed: int = args["seed"] if "seed" in args else 0
+
             # prune the cluster
             enable_pruning: bool = args["enable_pruning"]
             if enable_pruning:
@@ -164,6 +169,7 @@ class LayoutSynthesizer:
                 early_stop_time: float = args["early_stop_time"]
                 early_stop_threshold: float = args["early_stop_threshold"]
                 self.layout_synthesizer.build_model(
+                    seed=seed,
                     model_name=trail_name,
                     enable_partial_inference=allow_partial_inference,
                     remove_redundant=remove_redundant,
