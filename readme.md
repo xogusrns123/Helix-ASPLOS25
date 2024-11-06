@@ -275,7 +275,12 @@ conda install -c conda-forge libstdcxx-ng
 ```
 
 ### 3.2 Installing Helix's Communication Framework
-At the root directory of this repository, execute the following commands:
+First, at the root directory of this repository, run the following command to install the directory:
+```bash
+pip install -e .
+```
+
+Then, at the root directory of this repository, execute the following commands:
 ```bash
 cd llm_sys/comm
 bash build.sh
@@ -338,6 +343,9 @@ We also assume that the model to serve is stored in `model`. For the prototype s
 dummy weights. Therefore, you only need to provide the model config (`model/config.json`) and
 tokenizer (`tokenizer.json` and `tokenizer_config.json`). We follow the standard format used
 on [HuggingFace](https://huggingface.co/).
+
+> **Tips:** Before running the following commands, make sure you are using the conda
+> environment we just created. You can activate the environment using `conda activate runtime`.
 
 Based on the files above, we can generate the system configuration file for Helix's runtime
 system:
