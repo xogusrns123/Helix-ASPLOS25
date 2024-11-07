@@ -566,8 +566,24 @@ def main():
     elif model_name == "llama70b":
         if serving_mode == "online":
             if method == "helix":
-                # TODO: implement this
-                raise NotImplementedError
+                os.makedirs("./simulation_llama70b/ilp_online", exist_ok=True)
+                decode_throughput = simulate_maxflow_online(
+                    model_name=ModelName.LLaMa70B,
+                    workspace_path="./simulation_llama70b/ilp_online",
+                    solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
+                    avg_throughput=700,
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+                )
+                print("*" * 60)
+                print(f"LLaMa70B online simulation results: Helix")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama70b/ilp_online/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama70b/ilp_online/decode_latency.pkl"])
+                print("*" * 60)
 
             elif method == "swarm":
                 # TODO: implement this

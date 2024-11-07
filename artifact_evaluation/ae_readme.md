@@ -252,3 +252,30 @@ LLaMa70B offline simulation results: Separate
 Total decode throughput: 124.3 tokens/s
 ************************************************************
 ```
+
+(10) Run LLaMA 70B in online setup using Helix and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 5(d)'s Simulation - Helix; the
+prompt latency corresponds to Figure 5(g)'s Simulation - Helix; the decode latency corresponds
+to Figure 5(h)'s Simulation - Helix.
+```bash
+python step3_simulation.py helix llama70b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Helix
+Total decode throughput: 141.6 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.80 s
+Latency 25th percentile: 1.38 s
+Latency 50th percentile: 2.64 s
+Latency 75th percentile: 3.52 s
+Latency 95th percentile: 4.41 s
+Decode latency:
+Latency 5th percentile: 0.56 s
+Latency 25th percentile: 0.76 s
+Latency 50th percentile: 0.98 s
+Latency 75th percentile: 1.67 s
+Latency 95th percentile: 3.19 s
+************************************************************
+```
