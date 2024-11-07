@@ -65,7 +65,7 @@ python step2_model_placement.py ilp
 ```
 Notice that we set the max running time to 10 hours. However, you can interrupt with `ctrl + c` at
 any time, and the best model placement will be saved (press `ctrl + c` only once, otherwise the
-process will be killed by the os). On a laptop with 14 cores, we run the solver for around 20
+process will be killed by the os). On a laptop with 14 cores, we run the solver for around 10
 minutes to find the solution in `layouts/ilp`.
 
 After running model placement, we will get a `{method_name}_sol.ini`, which specifies the layers
@@ -78,9 +78,9 @@ problem and the raw solution.
 > is generated, you still have the chance to recover the results. As long as you have `ilp_solution.sol`,
 > you can generate `simulator_cluster.ini` and `ilp_sol.ini` using the method in `verify_ilp.py`.
 
-> **Tips:** It is possible that some compute nodes are not used in the model placement. Also, your
-> solution might be different from what we get, as there are many possible model placements with
-> the same objective value.
+> **Tips:** It is possible that some compute nodes are not used in the model placement. Also, due
+> to different licenses and hardware, you may find different solutions. We empirically find that
+> Gurobi optimizes much slower with its default limited license.
 
 #### Step 3: Run Simulation
 Finally, we can run the simulate to see how the model placement plan and request scheduling performs:
