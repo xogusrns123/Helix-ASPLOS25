@@ -111,5 +111,18 @@ Total decode throughput: 151.6 tokens/s
 ************************************************************
 ```
 
+(3) Run LLaMA 30B in offline setup using Separate Pipelines and observe its decode 
+throughput. This corresponds to Figure 5(a)'s Simulation - Separate Pipelines in the paper.
+```bash
+python step3_simulation.py separate llama30b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Separate
+Total decode throughput: 309.0 tokens/s
+************************************************************
+```
+
 TODO: describe the steps and result & files
 

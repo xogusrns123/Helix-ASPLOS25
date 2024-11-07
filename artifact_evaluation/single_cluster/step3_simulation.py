@@ -376,8 +376,38 @@ def main():
                 print("*" * 60)
 
             elif method == "separate":
-                # TODO: implement this
-                raise NotImplementedError
+                a100_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/separate/a100_solution_file.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/a100_simulator_cluster.ini",
+                    initial_feed_num=30,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"A100": 4}
+                )
+                l4_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/separate/l4_solution_file.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/l4_simulator_cluster.ini",
+                    initial_feed_num=25,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"L4": 8}
+                )
+                t4_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/separate/t4_solution_file.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/t4_simulator_cluster.ini",
+                    initial_feed_num=25,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"T4": 12}
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 60)
+                print(f"LLaMa30B offline simulation results: Separate")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             else:
                 raise ValueError(f"Invalid method: {method}")
