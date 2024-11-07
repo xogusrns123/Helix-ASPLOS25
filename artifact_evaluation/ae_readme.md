@@ -124,5 +124,32 @@ Total decode throughput: 309.0 tokens/s
 ************************************************************
 ```
 
+(4) Run LLaMA 30B in online setup using Helix and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 5(b)'s Simulation - Helix; the
+prompt latency corresponds to Figure 5(e)'s Simulation - Helix; the decode latency corresponds
+to Figure 5(f)'s Simulation - Helix.
+```bash
+python step3_simulation.py helix llama30b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B online simulation results: Helix
+Total decode throughput: 216.7 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.10 s
+Latency 25th percentile: 0.17 s
+Latency 50th percentile: 0.43 s
+Latency 75th percentile: 0.99 s
+Latency 95th percentile: 2.95 s
+Decode latency:
+Latency 5th percentile: 0.06 s
+Latency 25th percentile: 0.08 s
+Latency 50th percentile: 0.13 s
+Latency 75th percentile: 0.37 s
+Latency 95th percentile: 0.70 s
+************************************************************
+```
+
 TODO: describe the steps and result & files
 
