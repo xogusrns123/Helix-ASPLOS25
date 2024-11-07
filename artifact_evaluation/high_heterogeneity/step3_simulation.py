@@ -368,10 +368,10 @@ def main():
                 model_name=ModelName.LLaMa70B,
                 workspace_path="./simulation_llama70b/ilp_online",
                 solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
-                complete_cluster_file_name="./config/3cluster24.ini",
+                complete_cluster_file_name="./config/cluster42.ini",
                 simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
-                avg_throughput=320,
-                machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+                avg_throughput=2150,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4}
             )
             print("*" * 60)
             print(f"LLaMa70B online simulation results: Helix")
@@ -388,11 +388,11 @@ def main():
                 model_name=ModelName.LLaMa70B,
                 workspace_path="./simulation_llama70b/swarm_online",
                 solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
-                complete_cluster_file_name="./config/3cluster24.ini",
+                complete_cluster_file_name="./config/cluster42.ini",
                 simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
                 scheduling_method=SchedulingMethod.Swarm,
-                avg_throughput=160,
-                machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
+                avg_throughput=1450,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4}
             )
             print("*" * 60)
             print(f"LLaMa70B online simulation results: Swarm")
@@ -406,52 +406,147 @@ def main():
         elif method == "separate":
             os.makedirs("./simulation_llama70b/separate_online/a100", exist_ok=True)
             os.makedirs("./simulation_llama70b/separate_online/l4", exist_ok=True)
-            os.makedirs("./simulation_llama70b/separate_online/t4", exist_ok=True)
+            os.makedirs("./simulation_llama70b/separate_online/l4x2", exist_ok=True)
+            os.makedirs("./simulation_llama70b/separate_online/t4x4", exist_ok=True)
             a100_decode_throughput = simulate_heuristic_online(
                 model_name=ModelName.LLaMa70B,
                 workspace_path="./simulation_llama70b/separate_online/a100",
-                solution_file_name="./layout_llama70b/separate/a100_solution_file.ini",
-                complete_cluster_file_name="./config/a100.ini",
-                simulator_cluster_file_name="./layout_llama70b/separate/a100_simulator_cluster.ini",
+                solution_file_name="./layout_llama70b/separate/a100/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/a100/simulator_cluster.ini",
                 scheduling_method=SchedulingMethod.Naive,
-                avg_throughput=1,  # it always exceeds KV limit with larger throughput, therefore, set to 1
-                machine_num_dict={"A100": 4},
+                avg_throughput=1,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
             l4_decode_throughput = simulate_heuristic_online(
                 model_name=ModelName.LLaMa70B,
                 workspace_path="./simulation_llama70b/separate_online/l4",
-                solution_file_name="./layout_llama70b/separate/l4_solution_file.ini",
-                complete_cluster_file_name="./config/l4.ini",
-                simulator_cluster_file_name="./layout_llama70b/separate/l4_simulator_cluster.ini",
+                solution_file_name="./layout_llama70b/separate/l4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4/simulator_cluster.ini",
                 scheduling_method=SchedulingMethod.Naive,
-                avg_throughput=120,
-                machine_num_dict={"L4": 8},
+                avg_throughput=140,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
-            t4_decode_throughput = simulate_heuristic_online(
+            l4x2_decode_throughput = simulate_heuristic_online(
                 model_name=ModelName.LLaMa70B,
-                workspace_path="./simulation_llama70b/separate_online/t4",
-                solution_file_name="./layout_llama70b/separate/t4_solution_file.ini",
-                complete_cluster_file_name="./config/t4.ini",
-                simulator_cluster_file_name="./layout_llama70b/separate/t4_simulator_cluster.ini",
+                workspace_path="./simulation_llama70b/separate_online/l4x2",
+                solution_file_name="./layout_llama70b/separate/l4x2/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4x2/simulator_cluster.ini",
                 scheduling_method=SchedulingMethod.Naive,
-                avg_throughput=60,
-                machine_num_dict={"T4": 12},
+                avg_throughput=160,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
-            sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+            t4x4_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/separate_online/t4x4",
+                solution_file_name="./layout_llama70b/separate/t4x4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/t4x4/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=350,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            sum_decode_throughput = (a100_decode_throughput + l4_decode_throughput + l4x2_decode_throughput +
+                                     t4x4_decode_throughput)
             print("*" * 60)
             print(f"LLaMa70B online simulation results: Separate")
             print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
             print("Prompt latency:")
             analyze_latency(["./simulation_llama70b/separate_online/a100/prompt_latency.pkl",
                              "./simulation_llama70b/separate_online/l4/prompt_latency.pkl",
-                             "./simulation_llama70b/separate_online/t4/prompt_latency.pkl"])
+                             "./simulation_llama70b/separate_online/l4x2/prompt_latency.pkl",
+                             "./simulation_llama70b/separate_online/t4x4/prompt_latency.pkl"])
             print("Decode latency:")
             analyze_latency(["./simulation_llama70b/separate_online/a100/decode_latency.pkl",
                              "./simulation_llama70b/separate_online/l4/decode_latency.pkl",
-                             "./simulation_llama70b/separate_online/t4/decode_latency.pkl"])
+                             "./simulation_llama70b/separate_online/l4x2/decode_latency.pkl",
+                             "./simulation_llama70b/separate_online/t4x4/decode_latency.pkl"])
+            print("*" * 60)
+
+        elif method == "sp_plus":
+            os.makedirs("./simulation_llama70b/sp_plus_online/a100", exist_ok=True)
+            os.makedirs("./simulation_llama70b/sp_plus_online/l4", exist_ok=True)
+            os.makedirs("./simulation_llama70b/sp_plus_online/l4x2", exist_ok=True)
+            os.makedirs("./simulation_llama70b/sp_plus_online/t4x4", exist_ok=True)
+            os.makedirs("./simulation_llama70b/sp_plus_online/v100_t4", exist_ok=True)
+            a100_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/sp_plus_online/a100",
+                solution_file_name="./layout_llama70b/separate/a100/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/a100/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=1,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            l4_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/sp_plus_online/l4",
+                solution_file_name="./layout_llama70b/separate/l4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=140,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            l4x2_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/sp_plus_online/l4x2",
+                solution_file_name="./layout_llama70b/separate/l4x2/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4x2/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=160,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            t4x4_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/sp_plus_online/t4x4",
+                solution_file_name="./layout_llama70b/separate/t4x4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/t4x4/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=350,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            v100_t4_decode_throughput = simulate_heuristic_online(
+                model_name=ModelName.LLaMa70B,
+                workspace_path="./simulation_llama70b/sp_plus_online/v100_t4",
+                solution_file_name="./layout_llama70b/separate/v100_t4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/v100_t4/simulator_cluster.ini",
+                scheduling_method=SchedulingMethod.Naive,
+                avg_throughput=200,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            sum_decode_throughput = (a100_decode_throughput + l4_decode_throughput + l4x2_decode_throughput +
+                                     t4x4_decode_throughput + v100_t4_decode_throughput)
+            print("*" * 60)
+            print(f"LLaMa70B online simulation results: Separate")
+            print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+            print("Prompt latency:")
+            analyze_latency(["./simulation_llama70b/sp_plus_online/a100/prompt_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/l4/prompt_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/l4x2/prompt_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/t4x4/prompt_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/v100_t4/prompt_latency.pkl"])
+            print("Decode latency:")
+            analyze_latency(["./simulation_llama70b/sp_plus_online/a100/decode_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/l4/decode_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/l4x2/decode_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/t4x4/decode_latency.pkl",
+                             "./simulation_llama70b/sp_plus_online/v100_t4/decode_latency.pkl"])
             print("*" * 60)
 
         else:

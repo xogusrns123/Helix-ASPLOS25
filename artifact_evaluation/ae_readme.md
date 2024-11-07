@@ -803,3 +803,108 @@ LLaMa70B offline simulation results: Separate
 Total decode throughput: 285.1 tokens/s
 ************************************************************
 ```
+
+(5) Run LLaMA 70B in online setup using Helix and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 8(a)'s online - Helix; the
+prompt latency corresponds to Figure 8(b)'s Helix (H); the decode latency corresponds to Figure
+8(c)'s Helix (H).
+```bash
+python step3_simulation.py helix online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Helix
+Total decode throughput: 459.8 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.71 s
+Latency 25th percentile: 1.20 s
+Latency 50th percentile: 2.09 s
+Latency 75th percentile: 2.76 s
+Latency 95th percentile: 3.51 s
+Decode latency:
+Latency 5th percentile: 0.36 s
+Latency 25th percentile: 0.51 s
+Latency 50th percentile: 0.73 s
+Latency 75th percentile: 1.22 s
+Latency 95th percentile: 2.18 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/ilp_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(6) Run LLaMA 70B in online setup using Swarm and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 8(a)'s online - Swarm; the
+prompt latency corresponds to Figure 8(b)'s Swarm (S); the decode latency corresponds to Figure
+8(c)'s Swarm (S).
+```bash
+python step3_simulation.py swarm online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(7) Run LLaMA 70B in online setup using Separate Pipelines and observe its decode throughput,
+prompt latency and decode latency. The decode throughput corresponds to Figure 8(a)'s online -
+Separate Pipelines (SP); the prompt latency corresponds to Figure 8(b)'s Separate Pipelines (SP);
+the decode latency corresponds to Figure 8(c)'s Separate Pipelines (SP).
+```bash
+python step3_simulation.py separate online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Separate
+Total decode throughput: 140.2 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.55 s
+Latency 25th percentile: 0.99 s
+Latency 50th percentile: 2.21 s
+Latency 75th percentile: 2.73 s
+Latency 95th percentile: 3.78 s
+Decode latency:
+Latency 5th percentile: 0.27 s
+Latency 25th percentile: 0.44 s
+Latency 50th percentile: 0.47 s
+Latency 75th percentile: 0.76 s
+Latency 95th percentile: 2.49 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(8) Run LLaMA 70B in online setup using Separate Pipelines Plus and observe its decode throughput,
+prompt latency and decode latency. The decode throughput corresponds to Figure 8(a)'s online -
+Separate Pipelines Plus (SP+); the prompt latency corresponds to Figure 8(b)'s Separate Pipelines Plus (SP+);
+the decode latency corresponds to Figure 8(c)'s Separate Pipelines Plus (SP+).
+```bash
+python step3_simulation.py sp_plus online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Separate
+Total decode throughput: 181.3 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.56 s
+Latency 25th percentile: 1.04 s
+Latency 50th percentile: 2.22 s
+Latency 75th percentile: 3.13 s
+Latency 95th percentile: 4.20 s
+Decode latency:
+Latency 5th percentile: 0.29 s
+Latency 25th percentile: 0.44 s
+Latency 50th percentile: 0.57 s
+Latency 75th percentile: 0.83 s
+Latency 95th percentile: 2.62 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/sp_plus_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
