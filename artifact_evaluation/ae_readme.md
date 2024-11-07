@@ -745,3 +745,55 @@ After running the commands above, you will get model placement files located in:
 + **swarm**: `./layout_llama70b/swarm` (`swarm_sol.ini` and `simulator_cluster.ini`)
 + **separate**: `./layout_llama70b/separate` (12 manually created files in 6 directories)
 + **ilp**: `./layout_llama70b/ilp` (`ilp_sol.ini` and `simulator_cluster.ini`, and 4 other files that records information about the MILP problem)
+
+### Step 3: Run Simulation
+With the model placement files generated, we can run the simulation and reproduce the results in the
+paper.
+
+(1) Run LLaMA 70B in offline setup using Helix and observe its decode throughput. This
+corresponds to Figure 8(a)'s offline - Helix in the paper.
+```bash
+python step3_simulation.py helix offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Helix
+Total decode throughput: 645.6 tokens/s
+************************************************************
+```
+The result here is slightly higher than the result in the paper, because of the slight
+difference in the model placement.
+    
+(2) Run LLaMA 70B in offline setup using Swarm and observe its decode throughput. This
+corresponds to Figure 8(a)'s offline - Swarm in the paper.
+```bash
+python step3_simulation.py swarm offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Swarm
+Total decode throughput: 473.2 tokens/s
+************************************************************
+```
+
+(3) Run LLaMA 70B in offline setup using Separate Pipelines and observe its decode throughput.
+This corresponds to Figure 8(a)'s offline - Separate Pipelines (SP) in the paper.
+```bash
+python step3_simulation.py separate offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+
+```
+
+(4) Run LLaMA 70B in offline setup using Separate Pipelines Plus and observe its decode throughput.
+This corresponds to Figure 8(a)'s offline - Separate Pipelines Plus (SP+) in the paper.
+```bash
+python step3_simulation.py sp_plus offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+
+```
