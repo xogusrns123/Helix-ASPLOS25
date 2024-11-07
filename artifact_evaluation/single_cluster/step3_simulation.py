@@ -200,6 +200,7 @@ def simulate_heuristic_online(
         scheduling_method: SchedulingMethod,
         avg_throughput: float,
         machine_num_dict: Dict[str, int],
+        force_set: bool = False,
 ) -> float:
     # load cluster
     layout_synthesizer = LayoutSynthesizer(
@@ -218,6 +219,7 @@ def simulate_heuristic_online(
 
     # initialize the simulator
     simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.model_manager.allow_force_set = force_set  # for baseline: separate pipelines
     simulator.from_ini_file(config_file_name=cluster_file_path)
     simulator.init_scheduler(scheduling_method=scheduling_method, args=None)
     simulator.init_query_manager()
@@ -607,8 +609,55 @@ def main():
                 print("*" * 60)
 
             elif method == "separate":
-                # TODO: implement this
-                raise NotImplementedError
+                os.makedirs("./simulation_llama70b/separate_online/a100", exist_ok=True)
+                os.makedirs("./simulation_llama70b/separate_online/l4", exist_ok=True)
+                os.makedirs("./simulation_llama70b/separate_online/t4", exist_ok=True)
+                a100_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa70B,
+                    workspace_path="./simulation_llama70b/separate_online/a100",
+                    solution_file_name="./layout_llama70b/separate/a100_solution_file.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/a100_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=240,
+                    machine_num_dict={"A100": 4},
+                    force_set=True
+                )
+                l4_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa70B,
+                    workspace_path="./simulation_llama70b/separate_online/l4",
+                    solution_file_name="./layout_llama70b/separate/l4_solution_file.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/l4_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=120,
+                    machine_num_dict={"L4": 8},
+                    force_set=True
+                )
+                t4_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa70B,
+                    workspace_path="./simulation_llama70b/separate_online/t4",
+                    solution_file_name="./layout_llama70b/separate/t4_solution_file.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/t4_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=10,
+                    machine_num_dict={"T4": 12},
+                    force_set=True
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 60)
+                print(f"LLaMa70B online simulation results: Separate")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama70b/separate_online/a100/prompt_latency.pkl",
+                                 "./simulation_llama70b/separate_online/l4/prompt_latency.pkl",
+                                 "./simulation_llama70b/separate_online/t4/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama70b/separate_online/a100/decode_latency.pkl",
+                                 "./simulation_llama70b/separate_online/l4/decode_latency.pkl",
+                                 "./simulation_llama70b/separate_online/t4/decode_latency.pkl"])
+                print("*" * 60)
 
             else:
                 raise ValueError(f"Invalid method: {method}")

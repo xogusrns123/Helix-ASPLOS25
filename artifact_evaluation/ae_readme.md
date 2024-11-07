@@ -312,3 +312,41 @@ Latency 95th percentile: 2.51 s
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama70b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
+
+(12) Run LLaMA 70B in online setup using Separate Pipelines and observe its decode throughput,
+prompt latency and decode latency. The decode throughput corresponds to Figure 5(d)'s Simulation -
+Separate Pipelines (SP); the prompt latency corresponds to Figure 5(g)'s Simulation - Separate
+Pipelines (SP); the decode latency corresponds to Figure 5(h)'s Simulation - Separate Pipelines (SP).
+```bash
+python step3_simulation.py separate llama70b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Separate
+Total decode throughput: 84.0 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.19 s
+Latency 25th percentile: 0.36 s
+Latency 50th percentile: 0.80 s
+Latency 75th percentile: 1.48 s
+Latency 95th percentile: 4.19 s
+Decode latency:
+Latency 5th percentile: 0.14 s
+Latency 25th percentile: 0.14 s
+Latency 50th percentile: 0.22 s
+Latency 75th percentile: 0.69 s
+Latency 95th percentile: 1.20 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+### Step 4: Generate Real System Config Files
+
+TODO!!
+
+### Step 5: Run Prototype System Experiments
+
+TODO!!
