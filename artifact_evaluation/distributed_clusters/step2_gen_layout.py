@@ -131,19 +131,19 @@ def main():
                 cluster_file_path="./config/a100.ini",
                 save_path="./layout_llama30b/ilp/a100",
                 machine_num_dict={"A100": 4},
-                heuristic_path="./layout_llama30b/separate/a100_solution_file.ini"
+                heuristic_path="./layout_llama30b/heuristic/a100_solution_file.ini"
             )
             ilp_layout30b(
                 cluster_file_path="./config/l4.ini",
                 save_path="./layout_llama30b/ilp/l4",
                 machine_num_dict={"L4": 8},
-                heuristic_path="./layout_llama30b/separate/l4_solution_file.ini"
+                heuristic_path="./layout_llama30b/heuristic/l4_solution_file.ini"
             )
             ilp_layout30b(
                 cluster_file_path="./config/t4.ini",
                 save_path="./layout_llama30b/ilp/t4",
                 machine_num_dict={"T4": 12},
-                heuristic_path="./layout_llama30b/separate/t4_solution_file.ini"
+                heuristic_path="./layout_llama30b/heuristic/t4_solution_file.ini"
             )
             print("Layout for LLaMa30B model is generated using ILP method.")
         elif model_name == "llama70b":
