@@ -437,6 +437,8 @@ LLaMa30B offline simulation results: Helix
 Total decode throughput: 232.7 tokens/s
 ************************************************************
 ```
+The result here is slightly different from the one in the paper, as the model placement
+found is slightly different.
 
 (2) Run LLaMA 30B in offline setup using Swarm and observe its decode throughput. This
 corresponds to Figure 7(a)'s offline - Swarm in the paper.
@@ -490,6 +492,9 @@ Latency 75th percentile: 0.47 s
 Latency 95th percentile: 0.83 s
 ************************************************************
 ```
+The result here is slightly different from the one in the paper, as the model placement
+found is slightly different.
+
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama30b/ilp_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
