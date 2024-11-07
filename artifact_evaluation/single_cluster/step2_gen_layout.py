@@ -75,6 +75,47 @@ def ilp_layout30b(cluster_file_path: str, save_path: str, machine_num_dict: dict
     layout_synthesizer.synthesize(args=ilp_args)
 
 
+def ilp_layout70b(save_path: str):
+    # initialize the layout synthesizer
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name="./config/cluster24.ini",
+        machine_profile_name="./config/machine_profiles.ini",
+        model_name=ModelName.LLaMa70B,
+        workspace_path=save_path,
+        layout_method=LayoutMethod.ILP,
+        machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+    )
+
+    # check if ./layout_llama70b/petals/petals_sol.ini exists
+    if not os.path.exists("./layout_llama70b/petals/petals_sol.ini"):
+        print("Please generate Petals solution first, for this example Helix starts from the heuristic"
+              "solution found by Petals!")
+        raise FileNotFoundError("File ./layout_llama70b/petals/petals_sol.ini not found!")
+
+    # setting arguments for ILP layout synthesis
+    ilp_args = {
+        # pruning
+        "enable_pruning": False,
+        "min_keep": 12,
+        "max_keep": 12,
+        "keep_bandwidth_threshold": 1 * mbps,
+        # ILP
+        "use_existing_sol": False,
+        "allow_partial_inference": False,
+        "remove_redundant": True,
+        "max_run_time": 36000,
+        "early_stop_time": 100,
+        "early_stop_threshold": 0.95,
+        "existing_sol_path": "path/to/existing/ilp_solution.sol",
+        # heuristic
+        "start_from_heuristic": True,
+        "heuristic_sol_path": "./layout_llama70b/petals/petals_sol.ini",
+    }
+
+    # run the ILP layout synthesis
+    layout_synthesizer.synthesize(args=ilp_args)
+
+
 def main():
     assert len(sys.argv) == 3, f"Usage: python {sys.argv[0]} <ilp/swarm/petals/separate> <llama30b/llama70b>"
     layout_method = sys.argv[1]
@@ -106,8 +147,9 @@ def main():
             )
             print("Layout for LLaMa30B model is generated using ILP method.")
         elif model_name == "llama70b":
-            # TODO
-            raise NotImplementedError
+            os.makedirs("./layout_llama70b/ilp", exist_ok=True)
+            ilp_layout70b("./layout_llama70b/ilp")
+            print("Layout for LLaMa70B model is generated using ILP method.")
 
         else:
             raise ValueError(f"Invalid model name: {model_name}")
