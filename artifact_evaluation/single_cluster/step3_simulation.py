@@ -20,11 +20,11 @@ def analyze_latency(file_paths: List[str]) -> None:
     for file_path in file_paths:
         latency_list.extend(get_latency(file_path))
     latency_list.sort()
-    print(f"Latency 5th percentile: {latency_list[int(len(latency_list) * 0.05)]:.2f} ms")
-    print(f"Latency 25th percentile: {latency_list[int(len(latency_list) * 0.25)]:.2f} ms")
-    print(f"Latency 50th percentile: {latency_list[int(len(latency_list) * 0.5)]:.2f} ms")
-    print(f"Latency 75th percentile: {latency_list[int(len(latency_list) * 0.75)]:.2f} ms")
-    print(f"Latency 95th percentile: {latency_list[int(len(latency_list) * 0.95)]:.2f} ms")
+    print(f"Latency 5th percentile: {latency_list[int(len(latency_list) * 0.05)]:.2f} s")
+    print(f"Latency 25th percentile: {latency_list[int(len(latency_list) * 0.25)]:.2f} s")
+    print(f"Latency 50th percentile: {latency_list[int(len(latency_list) * 0.5)]:.2f} s")
+    print(f"Latency 75th percentile: {latency_list[int(len(latency_list) * 0.75)]:.2f} s")
+    print(f"Latency 95th percentile: {latency_list[int(len(latency_list) * 0.95)]:.2f} s")
 
 
 def simulate_maxflow_online(
@@ -191,6 +191,91 @@ def simulate_maxflow_offline(
     return decode_throughput
 
 
+def simulate_heuristic_online(
+        model_name: ModelName,
+        workspace_path: str,
+        solution_file_name: str,
+        complete_cluster_file_name: str,
+        simulator_cluster_file_name: str,
+        scheduling_method: SchedulingMethod,
+        avg_throughput: float,
+        machine_num_dict: Dict[str, int],
+) -> float:
+    # load cluster
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name=complete_cluster_file_name,
+        machine_profile_name="config/machine_profiles.ini",
+        model_name=model_name,
+        workspace_path=workspace_path,
+        layout_method=LayoutMethod.LoadExisting,
+        machine_num_dict=machine_num_dict
+    )
+    layout_args = {
+        "solution_file_name": solution_file_name,
+        "simulator_cluster_file_name": simulator_cluster_file_name,
+    }
+    cluster_file_path = layout_synthesizer.synthesize(args=layout_args)
+
+    # initialize the simulator
+    simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.from_ini_file(config_file_name=cluster_file_path)
+    simulator.init_scheduler(scheduling_method=scheduling_method, args=None)
+    simulator.init_query_manager()
+    simulator.mark_as_ready()
+
+    # load the models into the simulator and update scheduler
+    finish_model_loading_time = layout_synthesizer.set_layout(simulator=simulator)
+    simulator.update_scheduler()
+
+    # run simulation
+    warm_up, duration = 0, 1800
+    auto_test = OnlineRequestFeeder(cluster_token_throughput=avg_throughput,
+                                    start_time=finish_model_loading_time,
+                                    duration=duration, seed=0)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+
+    # result processing
+    analysis_start_time = finish_model_loading_time + warm_up
+    analysis_end_time = finish_model_loading_time + warm_up + duration
+    # decode throughput
+    total_tokens = 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if request.phase == RequestPhase.Initialization:
+            continue
+        if analysis_start_time <= time <= analysis_end_time:
+            assert request.token_seq_length == 1, "Only count decode requests!"
+            total_tokens += request.token_seq_length
+    decode_throughput = total_tokens / duration
+    # save prompt and decode latency
+    prompt_latency_list, decode_latency_list = [], []
+    # prompt and decode latency
+    sum_prompt_latency, sum_decode_latency = 0, 0
+    valid_prompts, valid_decodes = 0, 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if analysis_start_time <= time <= analysis_end_time:
+            if request.phase == RequestPhase.Initialization:
+                sum_prompt_latency += request.location_history[-1][1] - request.location_history[0][1]
+                prompt_latency_list.append((time, request.location_history[-1][1] - request.location_history[0][1]))
+                valid_prompts += 1
+            elif request.phase == RequestPhase.Increment:
+                sum_decode_latency += request.location_history[-1][1] - request.location_history[0][1]
+                decode_latency_list.append((time, request.location_history[-1][1] - request.location_history[0][1]))
+                valid_decodes += 1
+            else:
+                assert False, "Found unknown requests phase!"
+
+    # save the latency data with pickle
+    prompt_file_name = os.path.join(workspace_path, "prompt_latency.pkl")
+    decode_file_name = os.path.join(workspace_path, "decode_latency.pkl")
+    with open(prompt_file_name, "wb") as f:
+        pickle.dump(prompt_latency_list, f)
+    with open(decode_file_name, "wb") as f:
+        pickle.dump(decode_latency_list, f)
+    return decode_throughput
+
+
 def simulate_heuristic_offline(
         model_name: ModelName,
         solution_file_name: str,
@@ -321,8 +406,25 @@ def main():
                 print("*" * 60)
 
             elif method == "swarm":
-                # TODO: implement this
-                raise NotImplementedError
+                os.makedirs("./simulation_llama30b/swarm_online", exist_ok=True)
+                decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/swarm_online",
+                    solution_file_name="./layout_llama30b/swarm/swarm_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama30b/swarm/simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Swarm,
+                    avg_throughput=450,
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
+                )
+                print("*" * 60)
+                print(f"LLaMa30B online simulation results: Swarm")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama30b/swarm_online/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama30b/swarm_online/decode_latency.pkl"])
+                print("*" * 60)
 
             elif method == "separate":
                 # TODO: implement this

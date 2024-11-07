@@ -150,6 +150,39 @@ Latency 75th percentile: 0.37 s
 Latency 95th percentile: 0.70 s
 ************************************************************
 ```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama30b/ilp_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(5) Run LLaMA 30B in online setup using Swarm and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 5(b)'s Simulation - Swarm; the
+prompt latency corresponds to Figure 5(e)'s Simulation - Swarm; the decode latency corresponds
+to Figure 5(f)'s Simulation - Swarm.
+```bash
+python step3_simulation.py swarm llama30b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B online simulation results: Swarm
+Total decode throughput: 104.9 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.42 s
+Latency 25th percentile: 0.71 s
+Latency 50th percentile: 1.42 s
+Latency 75th percentile: 1.75 s
+Latency 95th percentile: 2.28 s
+Decode latency:
+Latency 5th percentile: 0.22 s
+Latency 25th percentile: 0.25 s
+Latency 50th percentile: 0.26 s
+Latency 75th percentile: 0.29 s
+Latency 95th percentile: 0.47 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama30b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
 
 TODO: describe the steps and result & files
 
