@@ -40,7 +40,8 @@ def swarm_layout(model_name: ModelName, save_path: str, num_stages: int):
     layout_synthesizer.synthesize(args=swarm_args)
 
 
-def ilp_layout30b(cluster_file_path: str, save_path: str, machine_num_dict: dict, heuristic_path: str):
+def ilp_layout30b(cluster_file_path: str, save_path: str, machine_num_dict: dict, heuristic_path: str,
+                  use_heuristic: bool):
     # initialize the layout synthesizer
     layout_synthesizer = LayoutSynthesizer(
         complete_cluster_file_name=cluster_file_path,
@@ -67,7 +68,7 @@ def ilp_layout30b(cluster_file_path: str, save_path: str, machine_num_dict: dict
         "early_stop_threshold": 0.9,
         "existing_sol_path": "path/to/existing/ilp_solution.sol",
         # heuristic
-        "start_from_heuristic": True,
+        "start_from_heuristic": use_heuristic,
         "heuristic_sol_path": heuristic_path,
     }
 
@@ -131,18 +132,21 @@ def main():
                 cluster_file_path="./config/a100.ini",
                 save_path="./layout_llama30b/ilp/a100",
                 machine_num_dict={"A100": 4},
-                heuristic_path="./layout_llama30b/heuristic/a100_solution_file.ini"
+                use_heuristic=False,
+                heuristic_path="./path/to/existing/ilp_solution.sol"
             )
             ilp_layout30b(
                 cluster_file_path="./config/l4.ini",
                 save_path="./layout_llama30b/ilp/l4",
                 machine_num_dict={"L4": 8},
+                use_heuristic=True,
                 heuristic_path="./layout_llama30b/heuristic/l4_solution_file.ini"
             )
             ilp_layout30b(
                 cluster_file_path="./config/t4.ini",
                 save_path="./layout_llama30b/ilp/t4",
                 machine_num_dict={"T4": 12},
+                use_heuristic=True,
                 heuristic_path="./layout_llama30b/heuristic/t4_solution_file.ini"
             )
             print("Layout for LLaMa30B model is generated using ILP method.")
