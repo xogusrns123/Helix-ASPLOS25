@@ -917,7 +917,8 @@ cd artifact_evaluation/model_placement
 ```
 This section performs the ablation of different model placement method. We will show steps to reproduce
 the decode throughput shown in Figure 9(a) in the paper. To start with, we have copied the model
-placements to `./layout_single` and `./layout_distributed`. (Generated previously in Sec 6.3 and 6.4)
+placements to `./layout_single` and `./layout_distributed` (Generated previously in Sec 6.3 and 6.4).
+We have also copied the config files to `./config_single` and `./config_distributed`.
 
 ### Setup 1: LLaMA 70B Single Cluster (Real System)
 
