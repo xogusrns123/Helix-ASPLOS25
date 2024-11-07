@@ -116,6 +116,81 @@ def simulate_maxflow_online(
     return decode_throughput
 
 
+def simulate_maxflow_offline(
+        model_name: ModelName,
+        solution_file_name: str,
+        complete_cluster_file_name: str,
+        simulator_cluster_file_name: str,
+        machine_num_dict: Dict[str, int],
+):
+    # load cluster
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name=complete_cluster_file_name,
+        machine_profile_name="config/machine_profiles.ini",
+        model_name=model_name,
+        workspace_path="./tmp",
+        layout_method=LayoutMethod.LoadExisting,
+        machine_num_dict=machine_num_dict
+    )
+    layout_args = {
+        "solution_file_name": solution_file_name,
+        "simulator_cluster_file_name": simulator_cluster_file_name,
+    }
+    cluster_file_path = layout_synthesizer.synthesize(args=layout_args)
+
+    # initialize the simulator
+    simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.from_ini_file(config_file_name=cluster_file_path)
+    scheduler_args = {
+        # offline
+        "kv_param": KVParameters(expected_kv_hwm=0.85, expected_output_length_ratio=1),
+        "scheduling_mode": SchedulingMode.Offline,
+    }
+    simulator.init_scheduler(scheduling_method=SchedulingMethod.MaxFlow, args=scheduler_args)
+    simulator.init_query_manager()
+    simulator.mark_as_ready()
+
+    # load the models into the simulator and update scheduler
+    finish_model_loading_time = layout_synthesizer.set_layout(simulator=simulator)
+    simulator.update_scheduler()
+
+    # run simulation
+    warm_up, duration = 60, 600
+    auto_test = OfflineRequestFeeder(initial_query_count=20, start_time=finish_model_loading_time,
+                                     duration=warm_up + duration, stop_at_duration=True, feed_hwm=0.8, seed=0)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+
+    # result processing
+    analysis_start_time = finish_model_loading_time + warm_up
+    analysis_end_time = finish_model_loading_time + warm_up + duration
+    # decode throughput
+    total_tokens = 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if request.phase == RequestPhase.Initialization:
+            continue
+        if analysis_start_time <= time <= analysis_end_time:
+            assert request.token_seq_length == 1, "Only count decode requests!"
+            total_tokens += request.token_seq_length
+    decode_throughput = total_tokens / duration
+    # prompt and decode latency
+    sum_prompt_latency, sum_decode_latency = 0, 0
+    valid_prompts, valid_decodes = 0, 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if analysis_start_time <= time <= analysis_end_time:
+            if request.phase == RequestPhase.Initialization:
+                sum_prompt_latency += request.location_history[-1][1] - request.location_history[0][1]
+                valid_prompts += 1
+            elif request.phase == RequestPhase.Increment:
+                sum_decode_latency += request.location_history[-1][1] - request.location_history[0][1]
+                valid_decodes += 1
+            else:
+                assert False, "Found unknown requests phase!"
+
+    return decode_throughput
+
+
 def main():
     # parse arguments
     assert len(sys.argv) == 4, (f"Usage: python {sys.argv[0]} <helix/swarm/separate> <llama30b/llama70b>"
@@ -148,7 +223,7 @@ def main():
                     complete_cluster_file_name="./config/l4.ini",
                     simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
                     avg_throughput=200,
-                    machine_num_dict={"L4": 4}
+                    machine_num_dict={"L4": 8}
                 )
                 t4_decode_throughput = simulate_maxflow_online(
                     model_name=ModelName.LLaMa30B,
@@ -157,10 +232,10 @@ def main():
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
                     avg_throughput=170,
-                    machine_num_dict={"T4": 4}
+                    machine_num_dict={"T4": 12}
                 )
                 sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
-                print("*" * 120)
+                print("*" * 60)
                 print(f"LLaMa30B online simulation results: Helix")
                 print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
                 print("Prompt latency:")
@@ -171,7 +246,7 @@ def main():
                 analyze_latency(["./simulation_llama30b/ilp_online/a100/decode_latency.pkl",
                                  "./simulation_llama30b/ilp_online/l4/decode_latency.pkl",
                                  "./simulation_llama30b/ilp_online/t4/decode_latency.pkl"])
-                print("*" * 120)
+                print("*" * 60)
 
             elif method == "swarm":
                 # TODO: implement this
@@ -186,8 +261,32 @@ def main():
 
         elif serving_mode == "offline":
             if method == "helix":
-                # TODO: implement this
-                raise NotImplementedError
+                a100_decode_throughput = simulate_maxflow_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
+                    machine_num_dict={"A100": 4}
+                )
+                l4_decode_throughput = simulate_maxflow_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
+                    machine_num_dict={"L4": 8}
+                )
+                t4_decode_throughput = simulate_maxflow_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
+                    machine_num_dict={"T4": 12}
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 60)
+                print(f"LLaMa30B offline simulation results: Helix")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             elif method == "swarm":
                 # TODO: implement this

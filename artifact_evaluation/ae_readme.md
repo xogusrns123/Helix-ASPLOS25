@@ -81,3 +81,25 @@ After running the commands above, you will get model placement files located in:
 + **ilp & llama 30b**: `./layout_llama30b/ilp/a100`, `./layout_llama30b/ilp/l4`, `./layout_llama30b/ilp/t4`, each containing the model placement for a sub-cluster
 + **ilp & llama 70b**: `./layout_llama70b/ilp` (`ilp_sol.ini` and `simulator_cluster.ini`, and 3 other files that records information about the MILP problem)
 
+### Step 3: Run Simulation
+With the model placement files generated, we can run the simulation and reproduce the results in the
+paper.
+
+(1) Run LLaMA 30B in offline setup using Helix and observe its decode throughput. This
+corresponds to Figure 5(a)'s Simulation - Helix in the paper.
+```bash
+python step3_simulation.py helix llama30b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Helix
+Total decode throughput: 339.6 tokens/s
+************************************************************
+```
+
+(2) Run LLaMA 30B in offline setup using Swarm and observe its decode throughput. This
+corresponds to Figure 5(a)'s Simulation - Swarm in the paper.
+
+TODO: describe the steps and result & files
+
