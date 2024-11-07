@@ -514,9 +514,9 @@ def main():
                 decode_throughput = simulate_heuristic_offline(
                     model_name=ModelName.LLaMa30B,
                     solution_file_name="./layout_llama30b/swarm/swarm_sol.ini",
-                    complete_cluster_file_name="./config/cluster24.ini",
+                    complete_cluster_file_name="./config/3cluster24.ini",
                     simulator_cluster_file_name="./layout_llama30b/swarm/simulator_cluster.ini",
-                    initial_feed_num=50,
+                    initial_feed_num=60,
                     scheduling_method=SchedulingMethod.Swarm,
                     machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
                 )
@@ -531,7 +531,7 @@ def main():
                     solution_file_name="./layout_llama30b/separate/a100_solution_file.ini",
                     complete_cluster_file_name="./config/a100.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/a100_simulator_cluster.ini",
-                    initial_feed_num=30,
+                    initial_feed_num=35,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"A100": 4}
                 )
@@ -540,7 +540,7 @@ def main():
                     solution_file_name="./layout_llama30b/separate/l4_solution_file.ini",
                     complete_cluster_file_name="./config/l4.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/l4_simulator_cluster.ini",
-                    initial_feed_num=25,
+                    initial_feed_num=40,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"L4": 8}
                 )
@@ -549,7 +549,7 @@ def main():
                     solution_file_name="./layout_llama30b/separate/t4_solution_file.ini",
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/t4_simulator_cluster.ini",
-                    initial_feed_num=25,
+                    initial_feed_num=40,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"T4": 12}
                 )

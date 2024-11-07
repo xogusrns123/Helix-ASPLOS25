@@ -434,8 +434,32 @@ After running the simulation, you will see a log like the following at the end:
 ```
 ************************************************************
 LLaMa30B offline simulation results: Helix
-Total decode throughput: 226.9 tokens/s
+Total decode throughput: 232.7 tokens/s
 ************************************************************
 ```
-This number is slightly lower than the number in the paper because the model placement found
-in step 2 is slightly different.
+
+(2) Run LLaMA 30B in offline setup using Swarm and observe its decode throughput. This
+corresponds to Figure 7(a)'s offline - Swarm in the paper.
+```bash
+python step3_simulation.py swarm llama30b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Swarm
+Total decode throughput: 98.7 tokens/s
+************************************************************
+```
+
+(3) Run LLaMA 30B in offline setup using Separate Pipelines and observe its decode
+throughput. This corresponds to Figure 7(a)'s offline - Separate Pipelines (SP) in the paper.
+```bash
+python step3_simulation.py separate llama30b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Separate
+Total decode throughput: 223.2 tokens/s
+************************************************************
+```
