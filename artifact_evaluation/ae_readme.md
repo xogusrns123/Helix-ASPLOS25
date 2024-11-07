@@ -468,8 +468,8 @@ Total decode throughput: 223.2 tokens/s
 
 (4) Run LLaMA 30B in online setup using Helix and observe its decode throughput, prompt latency
 and decode latency. The decode throughput corresponds to Figure 7(a)'s online - Helix; the
-prompt latency corresponds to Figure 7(c)'s Helix; the decode latency corresponds to Figure
-7(d)'s Helix.
+prompt latency corresponds to Figure 7(c)'s Helix (H); the decode latency corresponds to Figure
+7(d)'s Helix (H).
 ```bash
 python step3_simulation.py helix llama30b online
 ```
@@ -501,8 +501,8 @@ if you want to parse and check them.
 
 (5) Run LLaMA 30B in online setup using Swarm and observe its decode throughput, prompt latency
 and decode latency. The decode throughput corresponds to Figure 7(a)'s online - Swarm; the
-prompt latency corresponds to Figure 7(c)'s Swarm; the decode latency corresponds to Figure
-7(d)'s Swarm.
+prompt latency corresponds to Figure 7(c)'s Swarm (S); the decode latency corresponds to Figure
+7(d)'s Swarm (S).
 ```bash
 python step3_simulation.py swarm llama30b online
 ```
@@ -597,3 +597,93 @@ LLaMa70B offline simulation results: Separate
 Total decode throughput: 61.9 tokens/s
 ************************************************************
 ```
+
+(10) Run LLaMA 70B in online setup using Helix and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 7(b)'s online - Helix; the
+prompt latency corresponds to Figure 7(e)'s Helix (H); the decode latency corresponds to Figure
+7(f)'s Helix (H).
+```bash
+python step3_simulation.py helix llama70b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Helix
+Total decode throughput: 59.3 tokens/s
+Prompt latency:
+Latency 5th percentile: 1.50 s
+Latency 25th percentile: 2.63 s
+Latency 50th percentile: 5.79 s
+Latency 75th percentile: 7.53 s
+Latency 95th percentile: 9.41 s
+Decode latency:
+Latency 5th percentile: 0.60 s
+Latency 25th percentile: 0.79 s
+Latency 50th percentile: 0.93 s
+Latency 75th percentile: 2.34 s
+Latency 95th percentile: 7.72 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/ilp_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(11) Run LLaMA 70B in online setup using Swarm and observe its decode throughput, prompt latency
+and decode latency. The decode throughput corresponds to Figure 7(b)'s online - Swarm; the
+prompt latency corresponds to Figure 7(e)'s Swarm (S); the decode latency corresponds to Figure
+7(f)'s Swarm (S).
+```bash
+python step3_simulation.py swarm llama70b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Swarm
+Total decode throughput: 31.0 tokens/s
+Prompt latency:
+Latency 5th percentile: 2.11 s
+Latency 25th percentile: 3.96 s
+Latency 50th percentile: 7.22 s
+Latency 75th percentile: 10.71 s
+Latency 95th percentile: 14.83 s
+Decode latency:
+Latency 5th percentile: 0.77 s
+Latency 25th percentile: 0.97 s
+Latency 50th percentile: 1.23 s
+Latency 75th percentile: 2.39 s
+Latency 95th percentile: 6.50 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
+
+(12) Run LLaMA 70B in online setup using Separate Pipelines and observe its decode throughput,
+prompt latency and decode latency. The decode throughput corresponds to Figure 7(b)'s online -
+Separate Pipelines (SP); the prompt latency corresponds to Figure 7(e)'s Separate Pipelines (SP);
+the decode latency corresponds to Figure 7(f)'s Separate Pipelines (SP).
+```bash
+python step3_simulation.py separate llama70b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B online simulation results: Separate
+Total decode throughput: 33.6 tokens/s
+Prompt latency:
+Latency 5th percentile: 1.27 s
+Latency 25th percentile: 2.20 s
+Latency 50th percentile: 4.96 s
+Latency 75th percentile: 6.02 s
+Latency 95th percentile: 15.82 s
+Decode latency:
+Latency 5th percentile: 0.71 s
+Latency 25th percentile: 0.97 s
+Latency 50th percentile: 1.20 s
+Latency 75th percentile: 1.37 s
+Latency 95th percentile: 5.01 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama70b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.

@@ -593,10 +593,10 @@ def main():
                     model_name=ModelName.LLaMa70B,
                     workspace_path="./simulation_llama70b/swarm_online",
                     solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
-                    complete_cluster_file_name="./config/cluster24.ini",
+                    complete_cluster_file_name="./config/3cluster24.ini",
                     simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Swarm,
-                    avg_throughput=350,
+                    avg_throughput=160,
                     machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
                 )
                 print("*" * 60)
@@ -619,7 +619,7 @@ def main():
                     complete_cluster_file_name="./config/a100.ini",
                     simulator_cluster_file_name="./layout_llama70b/separate/a100_simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Naive,
-                    avg_throughput=240,
+                    avg_throughput=1,  # it always exceeds KV limit with larger throughput, therefore, set to 1
                     machine_num_dict={"A100": 4},
                     force_set=True
                 )
@@ -641,7 +641,7 @@ def main():
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama70b/separate/t4_simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Naive,
-                    avg_throughput=10,
+                    avg_throughput=60,
                     machine_num_dict={"T4": 12},
                     force_set=True
                 )
