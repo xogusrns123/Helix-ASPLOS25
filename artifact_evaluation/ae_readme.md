@@ -46,15 +46,15 @@ Helix's MILP model placement planner, as we bootstrap the solver with `petals`' 
 > We set the max running time to 10 hours, but you can stop the solver at any time with `ctrl +c`. 
 > In our experiments, on a machine with 14 cores and academic license, we manually early-stop
 > the solver at round 10 minutes. This solution at this point already has good quality. The
-> objective value (Incumbent)equals to 1289.
+> objective value (Incumbent) equals to 1289.
 
 > **Notes:** We notice that Gurobi produces completely different optimization traces when
-> using **different licenses and hardware, even when using the same random seed**. Specifically,
-> when using the default limited license, the optimization performance is much worse than that
-> of using the academic license. Unfortunately, we are not allowed to bind our academic Gurobi
-> license to the cluster provided. We want to state that this is an issue with Gurobi instead
-> of our system, and we provide our optimization trace in `./layout_llama70b/ilp/trace.txt`
-> for you to compare against.
+> using **different licenses, even when using the same random seed**. When using the default
+> limited license, the optimization performance is much worse than that of using the academic
+> license. (objective value = 952 v.s. 1289) Unfortunately, we are not allowed and unable to
+> bind our academic Gurobi license to the cluster provided. We want to state that this is an
+> issue with Gurobi instead of our system, and we provide our optimization trace in
+> `./layout_llama70b/ilp/trace.txt` for you to compare against.
 
 ```bash
 # Generate model placement using heuristic method Petals
