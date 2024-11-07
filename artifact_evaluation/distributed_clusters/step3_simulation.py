@@ -680,7 +680,7 @@ def main():
                 decode_throughput = simulate_heuristic_offline(
                     model_name=ModelName.LLaMa70B,
                     solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
-                    complete_cluster_file_name="./config/cluster24.ini",
+                    complete_cluster_file_name="./config/3cluster24.ini",
                     simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
                     initial_feed_num=180,
                     scheduling_method=SchedulingMethod.Swarm,
@@ -697,7 +697,7 @@ def main():
                     solution_file_name="./layout_llama70b/separate/a100_solution_file.ini",
                     complete_cluster_file_name="./config/a100.ini",
                     simulator_cluster_file_name="./layout_llama70b/separate/a100_simulator_cluster.ini",
-                    initial_feed_num=18,
+                    initial_feed_num=1,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"A100": 4},
                     force_set=True
@@ -707,7 +707,7 @@ def main():
                     solution_file_name="./layout_llama70b/separate/l4_solution_file.ini",
                     complete_cluster_file_name="./config/l4.ini",
                     simulator_cluster_file_name="./layout_llama70b/separate/l4_simulator_cluster.ini",
-                    initial_feed_num=40,
+                    initial_feed_num=60,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"L4": 8},
                     force_set=True
@@ -717,7 +717,7 @@ def main():
                     solution_file_name="./layout_llama70b/separate/t4_solution_file.ini",
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama70b/separate/t4_simulator_cluster.ini",
-                    initial_feed_num=3,
+                    initial_feed_num=50,
                     scheduling_method=SchedulingMethod.Naive,
                     machine_num_dict={"T4": 12},
                     force_set=True

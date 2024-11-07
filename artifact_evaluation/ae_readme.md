@@ -558,3 +558,42 @@ Latency 95th percentile: 0.92 s
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama30b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
+
+(7) Run LLaMA 70B in offline setup using Helix and observe its decode throughput. This
+corresponds to Figure 7(b)'s offline - Helix in the paper.
+```bash
+python step3_simulation.py helix llama70b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Helix
+Total decode throughput: 98.0 tokens/s
+************************************************************
+```
+    
+(8) Run LLaMA 70B in offline setup using Swarm and observe its decode throughput. This
+corresponds to Figure 7(b)'s offline - Swarm in the paper.
+```bash
+python step3_simulation.py swarm llama70b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Swarm
+Total decode throughput: 51.9 tokens/s
+************************************************************
+```
+
+(9) Run LLaMA 70B in offline setup using Separate Pipelines and observe its decode throughput.
+This corresponds to Figure 7(b)'s offline - Separate Pipelines (SP) in the paper.
+```bash
+python step3_simulation.py separate llama70b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Separate
+Total decode throughput: 61.9 tokens/s
+************************************************************
+```
