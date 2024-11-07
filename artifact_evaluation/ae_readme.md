@@ -39,7 +39,7 @@ to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different mod
 methods. Notice that before running Helix's MILP-based model placement planner, you need to
 remove the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
 contains the result we get. We suggest moving them to a backup place if you want to compare
-the your results with ours. Also, for `llama70b`, you need to run `petals` before running
+your results with ours. Also, for `llama70b`, you need to run `petals` before running
 Helix's MILP model placement planner, as we bootstrap the solver with `petals`' solution.
 
 > **Notes:** Running Helix to search for a model placement for LLaMA 70B may take a long time.
@@ -358,6 +358,7 @@ Start from the root directory of the repository:
 ```bash
 cd artifact_evaluation/distributed_clusters
 ```
+The workflow is similar to the single cluster experiments.
 
 ### Step 1: Generate Cluster Config Files
 Run the following command to generate cluster config files:
@@ -372,3 +373,50 @@ It also creates the config files that represent a sub-cluster formed by each typ
 `config/a100.ini`, `config/l4.ini` and `config/t4.ini`.
 
 ### Step 2: Model Placement
+
+The next step is to generate the model placement for the cluster. Run the following commands
+to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
+methods. Notice that before running Helix's MILP-based model placement planner, you need to
+remove the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
+contains the result we get. We suggest moving them to a backup place if you want to compare
+your results with ours. Also, for `llama70b`, you need to run `swarm` before running
+Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s solution.
+
+> **Notes:** Running Helix to search for a model placement for LLaMA 70B may take a long time.
+> We set the max running time to 10 hours, but you can stop the solver at any time with `ctrl +c`. 
+> In our experiments, on a machine with 14 cores and academic license, we manually early-stop
+> the solver at round 45 minutes. This solution at this point already has good quality. The
+> objective value (Incumbent) equals to 1212.
+
+> **Notes:** We notice that Gurobi produces completely different optimization traces when
+> using **different licenses, even when using the same random seed**. When using the default
+> limited license, the optimization performance is much worse than that of using the academic
+> license. (objective value = 952 v.s. 1212) Unfortunately, we are not allowed and unable to
+> bind our academic Gurobi license to the cluster provided. We want to state that this is an
+> issue with Gurobi instead of our system, and we provide our optimization trace in
+> `./layout_llama70b/ilp/trace.txt` for you to compare against.
+
+```bash
+# Generate model placement using heuristic method Petals
+python step2_gen_layout.py petals llama30b
+python step2_gen_layout.py petals llama70b
+# Generate model placement using heuristic method Swarm
+python step2_gen_layout.py swarm llama30b
+python step2_gen_layout.py swarm llama70b
+# Generate model placement using heuristic method separate pipelines
+python step2_gen_layout.py separate llama30b
+python step2_gen_layout.py separate llama70b
+# Generate model placement using Helix's MILP-based method
+python step2_gen_layout.py ilp llama30b  # remove ./layout_llama30b/ilp before running
+python step2_gen_layout.py ilp llama70b  # remove ./layout_llama70b/ilp before running
+```
+
+After running the commands above, you will get model placement files located in:
++ **petals & llama 30b**: `./layout_llama30b/petals` (`petals_sol.ini` and `simulator_cluster.ini`)
++ **petals & llama 70b**: `./layout_llama70b/petals` (`petals_sol.ini` and `simulator_cluster.ini`)
++ **swarm & llama 30b**: `./layout_llama30b/swarm` (`swarm_sol.ini` and `simulator_cluster.ini`)
++ **swarm & llama 70b**: `./layout_llama70b/swarm` (`swarm_sol.ini` and `simulator_cluster.ini`)
++ **separate & llama 30b**: `./layout_llama30b/separate` (6 manually created files)
++ **separate & llama 70b**: `./layout_llama70b/separate` (6 manually created files)
++ **ilp & llama 30b**: `./layout_llama30b/ilp/a100`, `./layout_llama30b/ilp/l4`, `./layout_llama30b/ilp/t4`, each containing the model placement for a sub-cluster
++ **ilp & llama 70b**: `./layout_llama70b/ilp` (`ilp_sol.ini` and `simulator_cluster.ini`, and 3 other files that records information about the MILP problem)
