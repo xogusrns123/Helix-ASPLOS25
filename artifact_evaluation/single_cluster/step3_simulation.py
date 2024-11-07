@@ -593,8 +593,19 @@ def main():
                 print("*" * 60)
 
             elif method == "swarm":
-                # TODO: implement this
-                raise NotImplementedError
+                decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa70B,
+                    solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
+                    initial_feed_num=180,
+                    scheduling_method=SchedulingMethod.Swarm,
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+                )
+                print("*" * 60)
+                print(f"LLaMa70B offline simulation results: Swarm")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             elif method == "separate":
                 # TODO: implement this

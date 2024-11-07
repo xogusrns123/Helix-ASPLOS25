@@ -226,3 +226,16 @@ LLaMa70B offline simulation results: Helix
 Total decode throughput: 252.1 tokens/s
 ************************************************************
 ```
+
+(8) Run LLaMA 70B in offline setup using Swarm and observe its decode throughput. This
+corresponds to Figure 5(c)'s Simulation - Swarm in the paper.
+```bash
+python step3_simulation.py swarm llama70b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Swarm
+Total decode throughput: 124.7 tokens/s
+************************************************************
+```
