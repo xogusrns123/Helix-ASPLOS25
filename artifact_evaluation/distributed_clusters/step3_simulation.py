@@ -374,7 +374,7 @@ def main():
                     solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
                     complete_cluster_file_name="./config/a100.ini",
                     simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
-                    avg_throughput=600,
+                    avg_throughput=560,
                     machine_num_dict={"A100": 4}
                 )
                 l4_decode_throughput = simulate_maxflow_online(
@@ -383,7 +383,7 @@ def main():
                     solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
                     complete_cluster_file_name="./config/l4.ini",
                     simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
-                    avg_throughput=200,
+                    avg_throughput=140,
                     machine_num_dict={"L4": 8}
                 )
                 t4_decode_throughput = simulate_maxflow_online(
@@ -392,7 +392,7 @@ def main():
                     solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
-                    avg_throughput=170,
+                    avg_throughput=140,
                     machine_num_dict={"T4": 12}
                 )
                 sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
@@ -415,10 +415,10 @@ def main():
                     model_name=ModelName.LLaMa30B,
                     workspace_path="./simulation_llama30b/swarm_online",
                     solution_file_name="./layout_llama30b/swarm/swarm_sol.ini",
-                    complete_cluster_file_name="./config/cluster24.ini",
+                    complete_cluster_file_name="./config/3cluster24.ini",
                     simulator_cluster_file_name="./layout_llama30b/swarm/simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Swarm,
-                    avg_throughput=450,
+                    avg_throughput=380,
                     machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
                 )
                 print("*" * 60)
@@ -441,7 +441,7 @@ def main():
                     complete_cluster_file_name="./config/a100.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/a100_simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Naive,
-                    avg_throughput=500,
+                    avg_throughput=520,
                     machine_num_dict={"A100": 4}
                 )
                 l4_decode_throughput = simulate_heuristic_online(
@@ -451,7 +451,7 @@ def main():
                     complete_cluster_file_name="./config/l4.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/l4_simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Naive,
-                    avg_throughput=150,
+                    avg_throughput=100,
                     machine_num_dict={"L4": 8}
                 )
                 t4_decode_throughput = simulate_heuristic_online(
@@ -461,7 +461,7 @@ def main():
                     complete_cluster_file_name="./config/t4.ini",
                     simulator_cluster_file_name="./layout_llama30b/separate/t4_simulator_cluster.ini",
                     scheduling_method=SchedulingMethod.Naive,
-                    avg_throughput=150,
+                    avg_throughput=140,
                     machine_num_dict={"T4": 12}
                 )
                 sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
