@@ -1,0 +1,247 @@
+# 2024.11.06 Yixuan Mei
+import os.path
+import sys
+import pickle
+from typing import Dict, List
+from simulator.initial_layout.layout_synthesizer import LayoutMethod, LayoutSynthesizer
+from simulator.event_simulator.cluster_simulator import ClusterSimulator, ModelName, SchedulingMethod, RequestPhase
+from simulator.trace_generator.simulator_query_feeder import OnlineRequestFeeder, OfflineRequestFeeder
+from simulator.scheduler.global_maxflow.global_maxflow_scheduler import KVParameters, SchedulingMode
+
+
+def get_latency(file_path: str) -> List[float]:
+    with open(file_path, "rb") as f:
+        latency_list = pickle.load(f)
+    return [latency for arrival_time, latency in latency_list]
+
+
+def analyze_latency(file_paths: List[str]) -> None:
+    latency_list = []
+    for file_path in file_paths:
+        latency_list.extend(get_latency(file_path))
+    latency_list.sort()
+    print(f"Latency 5th percentile: {latency_list[int(len(latency_list) * 0.05)]:.2f} ms")
+    print(f"Latency 25th percentile: {latency_list[int(len(latency_list) * 0.25)]:.2f} ms")
+    print(f"Latency 50th percentile: {latency_list[int(len(latency_list) * 0.5)]:.2f} ms")
+    print(f"Latency 75th percentile: {latency_list[int(len(latency_list) * 0.75)]:.2f} ms")
+    print(f"Latency 95th percentile: {latency_list[int(len(latency_list) * 0.95)]:.2f} ms")
+
+
+def simulate_maxflow_online(
+        model_name: ModelName,
+        workspace_path: str,
+        solution_file_name: str,
+        complete_cluster_file_name: str,
+        simulator_cluster_file_name: str,
+        avg_throughput: float,
+        machine_num_dict: Dict[str, int],
+) -> float:
+    # load cluster
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name=complete_cluster_file_name,
+        machine_profile_name="config/machine_profiles.ini",
+        model_name=model_name,
+        workspace_path=workspace_path,
+        layout_method=LayoutMethod.LoadExisting,
+        machine_num_dict=machine_num_dict
+    )
+    layout_args = {
+        "solution_file_name": solution_file_name,
+        "simulator_cluster_file_name": simulator_cluster_file_name,
+    }
+    cluster_file_path = layout_synthesizer.synthesize(args=layout_args)
+
+    # initialize the simulator
+    simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.from_ini_file(config_file_name=cluster_file_path)
+    scheduler_args = {
+        # offline
+        "kv_param": KVParameters(expected_kv_hwm=0.9, expected_output_length_ratio=0.6),
+        "scheduling_mode": SchedulingMode.Online,
+    }
+    simulator.init_scheduler(scheduling_method=SchedulingMethod.MaxFlow, args=scheduler_args)
+    simulator.init_query_manager()
+    simulator.mark_as_ready()
+
+    # load the models into the simulator and update scheduler
+    finish_model_loading_time = layout_synthesizer.set_layout(simulator=simulator)
+    simulator.update_scheduler()
+
+    # run simulation
+    warm_up, duration = 0, 1800
+    auto_test = OnlineRequestFeeder(cluster_token_throughput=avg_throughput,
+                                    start_time=finish_model_loading_time,
+                                    duration=duration, seed=0)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+
+    # result processing
+    analysis_start_time = finish_model_loading_time + warm_up
+    analysis_end_time = finish_model_loading_time + warm_up + duration
+    # decode throughput
+    total_tokens = 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if request.phase == RequestPhase.Initialization:
+            continue
+        if analysis_start_time <= time <= analysis_end_time:
+            assert request.token_seq_length == 1, "Only count decode requests!"
+            total_tokens += request.token_seq_length
+    decode_throughput = total_tokens / duration
+    # save prompt and decode latency
+    prompt_latency_list, decode_latency_list = [], []
+    # prompt and decode latency
+    sum_prompt_latency, sum_decode_latency = 0, 0
+    valid_prompts, valid_decodes = 0, 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if analysis_start_time <= time <= analysis_end_time:
+            if request.phase == RequestPhase.Initialization:
+                sum_prompt_latency += request.location_history[-1][1] - request.location_history[0][1]
+                prompt_latency_list.append((time, request.location_history[-1][1] - request.location_history[0][1]))
+                valid_prompts += 1
+            elif request.phase == RequestPhase.Increment:
+                sum_decode_latency += request.location_history[-1][1] - request.location_history[0][1]
+                decode_latency_list.append((time, request.location_history[-1][1] - request.location_history[0][1]))
+                valid_decodes += 1
+            else:
+                assert False, "Found unknown requests phase!"
+
+    # save the latency data with pickle
+    prompt_file_name = os.path.join(workspace_path, "prompt_latency.pkl")
+    decode_file_name = os.path.join(workspace_path, "decode_latency.pkl")
+    with open(prompt_file_name, "wb") as f:
+        pickle.dump(prompt_latency_list, f)
+    with open(decode_file_name, "wb") as f:
+        pickle.dump(decode_latency_list, f)
+    return decode_throughput
+
+
+def main():
+    # parse arguments
+    assert len(sys.argv) == 4, (f"Usage: python {sys.argv[0]} <helix/swarm/separate> <llama30b/llama70b>"
+                                f" <online/offline>")
+    method, model_name, serving_mode = sys.argv[1], sys.argv[2], sys.argv[3]
+    assert method in ["helix", "swarm", "separate"], f"Invalid method: {method}"
+    assert model_name in ["llama30b", "llama70b"], f"Invalid model name: {model_name}"
+    assert serving_mode in ["online", "offline"], f"Invalid serving mode: {serving_mode}"
+
+    # launch simulation
+    if model_name == "llama30b":
+        if serving_mode == "online":
+            if method == "helix":
+                os.makedirs("./simulation_llama30b/ilp_online/a100", exist_ok=True)
+                os.makedirs("./simulation_llama30b/ilp_online/l4", exist_ok=True)
+                os.makedirs("./simulation_llama30b/ilp_online/t4", exist_ok=True)
+                a100_decode_throughput = simulate_maxflow_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/ilp_online/a100",
+                    solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
+                    avg_throughput=600,
+                    machine_num_dict={"A100": 4}
+                )
+                l4_decode_throughput = simulate_maxflow_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/ilp_online/l4",
+                    solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
+                    avg_throughput=200,
+                    machine_num_dict={"L4": 4}
+                )
+                t4_decode_throughput = simulate_maxflow_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/ilp_online/t4",
+                    solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
+                    avg_throughput=170,
+                    machine_num_dict={"T4": 4}
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 120)
+                print(f"LLaMa30B online simulation results: Helix")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama30b/ilp_online/a100/prompt_latency.pkl",
+                                 "./simulation_llama30b/ilp_online/l4/prompt_latency.pkl",
+                                 "./simulation_llama30b/ilp_online/t4/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama30b/ilp_online/a100/decode_latency.pkl",
+                                 "./simulation_llama30b/ilp_online/l4/decode_latency.pkl",
+                                 "./simulation_llama30b/ilp_online/t4/decode_latency.pkl"])
+                print("*" * 120)
+
+            elif method == "swarm":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "separate":
+                # TODO: implement this
+                raise NotImplementedError
+
+            else:
+                raise ValueError(f"Invalid method: {method}")
+
+        elif serving_mode == "offline":
+            if method == "helix":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "swarm":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "separate":
+                # TODO: implement this
+                raise NotImplementedError
+
+            else:
+                raise ValueError(f"Invalid method: {method}")
+
+        else:
+            raise ValueError(f"Invalid serving mode: {serving_mode}")
+
+    elif model_name == "llama70b":
+        if serving_mode == "online":
+            if method == "helix":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "swarm":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "separate":
+                # TODO: implement this
+                raise NotImplementedError
+
+            else:
+                raise ValueError(f"Invalid method: {method}")
+
+        elif serving_mode == "offline":
+            if method == "helix":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "swarm":
+                # TODO: implement this
+                raise NotImplementedError
+
+            elif method == "separate":
+                # TODO: implement this
+                raise NotImplementedError
+
+            else:
+                raise ValueError(f"Invalid method: {method}")
+
+        else:
+            raise ValueError(f"Invalid serving mode: {serving_mode}")
+
+    else:
+        raise ValueError(f"Invalid model name: {model_name}")
+
+
+if __name__ == '__main__':
+    main()
