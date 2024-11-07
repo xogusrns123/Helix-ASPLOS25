@@ -100,6 +100,16 @@ Total decode throughput: 339.6 tokens/s
 
 (2) Run LLaMA 30B in offline setup using Swarm and observe its decode throughput. This
 corresponds to Figure 5(a)'s Simulation - Swarm in the paper.
+```bash
+python step3_simulation.py swarm llama30b offline
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Swarm
+Total decode throughput: 151.6 tokens/s
+************************************************************
+```
 
 TODO: describe the steps and result & files
 

@@ -191,6 +191,78 @@ def simulate_maxflow_offline(
     return decode_throughput
 
 
+def simulate_heuristic_offline(
+        model_name: ModelName,
+        solution_file_name: str,
+        complete_cluster_file_name: str,
+        simulator_cluster_file_name: str,
+        initial_feed_num: int,
+        scheduling_method: SchedulingMethod,
+        machine_num_dict: Dict[str, int],
+) -> float:
+    # load cluster
+    layout_synthesizer = LayoutSynthesizer(
+        complete_cluster_file_name=complete_cluster_file_name,
+        machine_profile_name="config/machine_profiles.ini",
+        model_name=model_name,
+        workspace_path="./tmp",
+        layout_method=LayoutMethod.LoadExisting,
+        machine_num_dict=machine_num_dict
+    )
+    layout_args = {
+        "solution_file_name": solution_file_name,
+        "simulator_cluster_file_name": simulator_cluster_file_name,
+    }
+    cluster_file_path = layout_synthesizer.synthesize(args=layout_args)
+
+    # initialize the simulator
+    simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.from_ini_file(config_file_name=cluster_file_path)
+    simulator.init_scheduler(scheduling_method=scheduling_method, args=None)
+    simulator.init_query_manager()
+    simulator.mark_as_ready()
+
+    # load the models into the simulator and update scheduler
+    finish_model_loading_time = layout_synthesizer.set_layout(simulator=simulator)
+    simulator.update_scheduler()
+
+    # run simulation
+    warm_up, duration = 60, 600
+    auto_test = OfflineRequestFeeder(initial_query_count=initial_feed_num, start_time=finish_model_loading_time,
+                                     duration=warm_up + duration, stop_at_duration=True, feed_hwm=0.8, seed=0)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+
+    # result processing
+    analysis_start_time = finish_model_loading_time + warm_up
+    analysis_end_time = finish_model_loading_time + warm_up + duration
+    # decode throughput
+    total_tokens = 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if request.phase == RequestPhase.Initialization:
+            continue
+        if analysis_start_time <= time <= analysis_end_time:
+            assert request.token_seq_length == 1, "Only count decode requests!"
+            total_tokens += request.token_seq_length
+    decode_throughput = total_tokens / duration
+    # prompt and decode latency
+    sum_prompt_latency, sum_decode_latency = 0, 0
+    valid_prompts, valid_decodes = 0, 0
+    for request_uid, time_request in simulator.finished_requests.items():
+        time, request = time_request
+        if analysis_start_time <= time <= analysis_end_time:
+            if request.phase == RequestPhase.Initialization:
+                sum_prompt_latency += request.location_history[-1][1] - request.location_history[0][1]
+                valid_prompts += 1
+            elif request.phase == RequestPhase.Increment:
+                sum_decode_latency += request.location_history[-1][1] - request.location_history[0][1]
+                valid_decodes += 1
+            else:
+                assert False, "Found unknown requests phase!"
+
+    return decode_throughput
+
+
 def main():
     # parse arguments
     assert len(sys.argv) == 4, (f"Usage: python {sys.argv[0]} <helix/swarm/separate> <llama30b/llama70b>"
@@ -289,8 +361,19 @@ def main():
                 print("*" * 60)
 
             elif method == "swarm":
-                # TODO: implement this
-                raise NotImplementedError
+                decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa30B,
+                    solution_file_name="./layout_llama30b/swarm/swarm_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama30b/swarm/simulator_cluster.ini",
+                    initial_feed_num=50,
+                    scheduling_method=SchedulingMethod.Swarm,
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+                )
+                print("*" * 60)
+                print(f"LLaMa30B offline simulation results: Swarm")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             elif method == "separate":
                 # TODO: implement this
