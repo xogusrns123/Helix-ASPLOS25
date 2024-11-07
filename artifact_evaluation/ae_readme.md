@@ -687,3 +687,21 @@ Latency 95th percentile: 5.01 s
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama70b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
+
+## Section 6.5 High GPU-Heterogeneity Cluster
+All files related to this group of experiments are located in `artifact_evaluation/high_heterogeneity`.
+Start from the root directory of the repository:
+```bash
+cd artifact_evaluation/high_heterogeneity
+```
+The workflow is similar to the first two groups of experiments.
+
+### Step 1: Generate Cluster Config Files
+Run the following command to generate cluster config files:
+```bash
+python step1_gen_cluster.py
+```
+This will automatically generate the config file that represents a single cluster with
+42 machines (4 1xA100 machines, 6 1xV100 machines, 8 1xL4 machines, 4 2xL4 machines, 10 1xT4 machines,
+6 2xT4 machines and 4 4xT4 machines) in `config/cluster42.ini`.
+
