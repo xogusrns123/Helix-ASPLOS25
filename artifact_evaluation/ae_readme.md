@@ -705,3 +705,43 @@ This will automatically generate the config file that represents a single cluste
 42 machines (4 1xA100 machines, 6 1xV100 machines, 8 1xL4 machines, 4 2xL4 machines, 10 1xT4 machines,
 6 2xT4 machines and 4 4xT4 machines) in `config/cluster42.ini`.
 
+### Step 2: Model Placement
+
+The next step is to generate the model placement for the cluster. Different from the previous
+two groups of experiments, we only deploy LLaMA-2 70B in this 42-node cluster. Run the following
+commands to generate model placements using different model placement methods. Notice that before
+running Helix's MILP-based model placement planner, you need to remove the `./layout_llama70b/ilp`
+directories, which currently contains the result we get. We suggest moving them to a backup place
+if you want to compare your results with ours. Also, for `llama70b`, you need to run `swarm`
+before running Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s
+solution.
+
+> **Notes:** The default limited license for Gurobi has a size limit on the MILP problem. The size
+> of the MILP problem for LLaMA 70B on this 42-node cluster exceeds the limit. Gurobi will refuse
+> to solve and throw an error: "gurobipy.GurobiError: Model too large for size-limited license;
+> visit https://gurobi.com/unrestricted for more information". Note that this is an issue with
+> Gurobi **licensing** instead of our system, and we provide our optimization trace in
+> `./layout_llama70b/ilp/trace.txt` for you to compare against.
+
+> **Notes:** Running Helix to search for a model placement for LLaMA 70B may take a long time.
+> We set the max running time to 10 hours, but you can stop the solver at any time with `ctrl +c`. 
+> In our experiments, on a machine with 14 cores and academic license, we manually early-stop
+> the solver at round 50 minutes. This solution at this point already has good quality. The
+> objective value (Incumbent) equals to 4137.
+
+```bash
+# Generate model placement using heuristic method Petals
+python step2_gen_layout.py petals
+# Generate model placement using heuristic method Swarm
+python step2_gen_layout.py swarm
+# Generate model placement using heuristic method separate pipelines
+python step2_gen_layout.py separate
+# Generate model placement using Helix's MILP-based method
+python step2_gen_layout.py ilp  # remove ./layout_llama70b/ilp before running
+```
+
+After running the commands above, you will get model placement files located in:
++ **petals**: `./layout_llama70b/petals` (`petals_sol.ini` and `simulator_cluster.ini`)
++ **swarm**: `./layout_llama70b/swarm` (`swarm_sol.ini` and `simulator_cluster.ini`)
++ **separate**: `./layout_llama70b/separate` (12 manually created files in 6 directories)
++ **ilp**: `./layout_llama70b/ilp` (`ilp_sol.ini` and `simulator_cluster.ini`, and 4 other files that records information about the MILP problem)
