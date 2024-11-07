@@ -15,7 +15,8 @@ def main():
         cross_partition_avg_latency=50 * MilliSec, cross_partition_var_latency=10 * MilliSec
     )
     os.makedirs("./config", exist_ok=True)
-    generator.generator_fake_cluster(file_name="./config/3cluster24.ini", seed=0)
+    generator.generator_fake_cluster(file_name="./config/3cluster24.ini", seed=0,
+                                     create_separate=True, separate_path="./config")
     print("Generated a cluster in 3 regions with 24 nodes!")
     print("Check the config file at ./config/3cluster24.ini")
 

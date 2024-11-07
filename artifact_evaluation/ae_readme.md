@@ -368,7 +368,7 @@ This will automatically generate the config file that represents a geo-distribut
 24 machines (4 1xA100 machines, 8 1xL4 machines, 12 1xT4 machines) in `config/3cluster24.ini`.
 The cluster contains three regions. In region 1, there are 4 A100 machines; in region 2, there
 are 2 L4 machines and 8 T4 machines; in region 3, there are 6 L4 machines and 4 T4 machines.
-We manually created the config files that represent a sub-cluster formed by each type of machine:
+It also creates the config files that represent a sub-cluster formed by each type of machine:
 `config/a100.ini`, `config/l4.ini` and `config/t4.ini`.
 
 ### Step 2: Model Placement

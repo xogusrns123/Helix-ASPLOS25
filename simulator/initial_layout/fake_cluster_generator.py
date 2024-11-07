@@ -1,5 +1,5 @@
 # 2023.02.22 Yixuan Mei
-
+import os.path
 import random
 import itertools
 
@@ -351,7 +351,8 @@ class PartitionedClusterGenerator:
         self.cross_partition_avg_latency = cross_partition_avg_latency
         self.cross_partition_var_latency = cross_partition_var_latency
 
-    def generator_fake_cluster(self, file_name: str, seed: int = 0, create_separate: bool = True) -> None:
+    def generator_fake_cluster(self, file_name: str, seed: int = 0, create_separate: bool = True,
+                               separate_path: str = "./") -> None:
         """
         Generate a fake cluster and write into the given file.
         File format convention:
@@ -361,6 +362,7 @@ class PartitionedClusterGenerator:
         :param file_name: name of the file
         :param seed: random seed
         :param create_separate: whether to create separate cluster files for each type
+        :param separate_path: the path to store the separate cluster files
         :return: None
         """
         # set random seed
@@ -520,7 +522,7 @@ class PartitionedClusterGenerator:
         # use in_type_edges to write separate files
         if create_separate:
             for type_name, all_edges in in_type_edges.items():
-                with open(f"./{type_name}_cluster.ini", "w") as sub_file:
+                with open(os.path.join(separate_path, f"./{type_name.lower()}.ini"), "w") as sub_file:
                     # node names
                     sub_file.write(f"[NodeNames]\n")
                     sub_file.write(f"total_compute_nodes={node_type_count[type_name]}\n")
