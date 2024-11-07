@@ -785,7 +785,10 @@ python step3_simulation.py separate offline
 ```
 After running the simulation, you will see a log like the following at the end:
 ```
-
+************************************************************
+LLaMa70B offline simulation results: Separate
+Total decode throughput: 219.3 tokens/s
+************************************************************
 ```
 
 (4) Run LLaMA 70B in offline setup using Separate Pipelines Plus and observe its decode throughput.
@@ -795,5 +798,8 @@ python step3_simulation.py sp_plus offline
 ```
 After running the simulation, you will see a log like the following at the end:
 ```
-
+************************************************************
+LLaMa70B offline simulation results: Separate
+Total decode throughput: 285.1 tokens/s
+************************************************************
 ```

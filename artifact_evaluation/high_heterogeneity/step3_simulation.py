@@ -494,7 +494,7 @@ def main():
                 simulator_cluster_file_name="./layout_llama70b/separate/a100/simulator_cluster.ini",
                 initial_feed_num=1,
                 scheduling_method=SchedulingMethod.Naive,
-                machine_num_dict={"A100": 4},
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
             l4_decode_throughput = simulate_heuristic_offline(
@@ -504,7 +504,7 @@ def main():
                 simulator_cluster_file_name="./layout_llama70b/separate/l4/simulator_cluster.ini",
                 initial_feed_num=60,
                 scheduling_method=SchedulingMethod.Naive,
-                machine_num_dict={"L4": 8},
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
             l4x2_decode_throughput = simulate_heuristic_offline(
@@ -514,7 +514,7 @@ def main():
                 simulator_cluster_file_name="./layout_llama70b/separate/l4x2/simulator_cluster.ini",
                 initial_feed_num=35,
                 scheduling_method=SchedulingMethod.Naive,
-                machine_num_dict={"L4x2": 4},
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
             t4x4_decode_throughput = simulate_heuristic_offline(
@@ -524,12 +524,71 @@ def main():
                 simulator_cluster_file_name="./layout_llama70b/separate/t4x4/simulator_cluster.ini",
                 initial_feed_num=110,
                 scheduling_method=SchedulingMethod.Naive,
-                machine_num_dict={"T4x4": 4},
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
                 force_set=True
             )
             # T4 / T4x2 / V100 unable to form pipeline
             sum_decode_throughput = (a100_decode_throughput + l4_decode_throughput + l4x2_decode_throughput +
                                      t4x4_decode_throughput)
+            print("*" * 60)
+            print(f"LLaMa70B offline simulation results: Separate")
+            print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+            print("*" * 60)
+
+        elif method == "sp_plus":
+            a100_decode_throughput = simulate_heuristic_offline(
+                model_name=ModelName.LLaMa70B,
+                solution_file_name="./layout_llama70b/separate/a100/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/a100/simulator_cluster.ini",
+                initial_feed_num=1,
+                scheduling_method=SchedulingMethod.Naive,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            l4_decode_throughput = simulate_heuristic_offline(
+                model_name=ModelName.LLaMa70B,
+                solution_file_name="./layout_llama70b/separate/l4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4/simulator_cluster.ini",
+                initial_feed_num=60,
+                scheduling_method=SchedulingMethod.Naive,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            l4x2_decode_throughput = simulate_heuristic_offline(
+                model_name=ModelName.LLaMa70B,
+                solution_file_name="./layout_llama70b/separate/l4x2/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/l4x2/simulator_cluster.ini",
+                initial_feed_num=35,
+                scheduling_method=SchedulingMethod.Naive,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            t4x4_decode_throughput = simulate_heuristic_offline(
+                model_name=ModelName.LLaMa70B,
+                solution_file_name="./layout_llama70b/separate/t4x4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/t4x4/simulator_cluster.ini",
+                initial_feed_num=110,
+                scheduling_method=SchedulingMethod.Naive,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            v100_t4_decode_throughput = simulate_heuristic_offline(
+                model_name=ModelName.LLaMa70B,
+                solution_file_name="./layout_llama70b/separate/v100_t4/solution_file.ini",
+                complete_cluster_file_name="./config/cluster42.ini",  # not used
+                simulator_cluster_file_name="./layout_llama70b/separate/v100_t4/simulator_cluster.ini",
+                initial_feed_num=90,
+                scheduling_method=SchedulingMethod.Naive,
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4},
+                force_set=True
+            )
+            # T4 unable to form pipeline
+            sum_decode_throughput = (a100_decode_throughput + l4_decode_throughput + l4x2_decode_throughput +
+                                     t4x4_decode_throughput + v100_t4_decode_throughput)
             print("*" * 60)
             print(f"LLaMa70B offline simulation results: Separate")
             print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
