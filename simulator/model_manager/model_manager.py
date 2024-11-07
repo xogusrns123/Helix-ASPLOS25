@@ -32,6 +32,7 @@ class ModelManager:
         # model name
         self.model_name: ModelName = model_name
         self.machine_num_dict: Dict[str, int] = machine_num_dict
+        self.allow_force_set: bool = False
 
         # model
         if self.model_name == ModelName.ExampleSmall:
@@ -73,6 +74,10 @@ class ModelManager:
         :param num_on_node_layers: number of layers on node
         :return: InferenceSettings
         """
+        if self.allow_force_set:
+            # this is only used when you want to load more than the recommended number of layers
+            max_num_layers = self.get_max_num_layers(machine_type=machine_type)
+            num_on_node_layers = min(num_on_node_layers, max_num_layers)
         return self.model_statistics.get_inference_settings(machine_type=machine_type,
                                                             num_on_node_layers=num_on_node_layers)
 

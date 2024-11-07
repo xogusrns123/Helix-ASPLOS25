@@ -284,6 +284,7 @@ def simulate_heuristic_offline(
         initial_feed_num: int,
         scheduling_method: SchedulingMethod,
         machine_num_dict: Dict[str, int],
+        force_set: bool = False,
 ) -> float:
     # load cluster
     layout_synthesizer = LayoutSynthesizer(
@@ -302,6 +303,7 @@ def simulate_heuristic_offline(
 
     # initialize the simulator
     simulator = ClusterSimulator(model_name=model_name, machine_num_dict=machine_num_dict)
+    simulator.model_manager.allow_force_set = force_set  # for baseline: separate pipelines
     simulator.from_ini_file(config_file_name=cluster_file_path)
     simulator.init_scheduler(scheduling_method=scheduling_method, args=None)
     simulator.init_query_manager()
@@ -608,8 +610,41 @@ def main():
                 print("*" * 60)
 
             elif method == "separate":
-                # TODO: implement this
-                raise NotImplementedError
+                a100_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa70B,
+                    solution_file_name="./layout_llama70b/separate/a100_solution_file.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/a100_simulator_cluster.ini",
+                    initial_feed_num=18,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"A100": 4},
+                    force_set=True
+                )
+                l4_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa70B,
+                    solution_file_name="./layout_llama70b/separate/l4_solution_file.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/l4_simulator_cluster.ini",
+                    initial_feed_num=40,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"L4": 8},
+                    force_set=True
+                )
+                t4_decode_throughput = simulate_heuristic_offline(
+                    model_name=ModelName.LLaMa70B,
+                    solution_file_name="./layout_llama70b/separate/t4_solution_file.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama70b/separate/t4_simulator_cluster.ini",
+                    initial_feed_num=3,
+                    scheduling_method=SchedulingMethod.Naive,
+                    machine_num_dict={"T4": 12},
+                    force_set=True
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 60)
+                print(f"LLaMa70B offline simulation results: Separate")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             else:
                 raise ValueError(f"Invalid method: {method}")

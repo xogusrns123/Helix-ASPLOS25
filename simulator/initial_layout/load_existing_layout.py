@@ -97,8 +97,8 @@ class LoadExistingLayout:
             # compute max number of layers that can be stored on this node
             # Note: max # layers = (VRAM size / 2) / layer size
             max_num_layers: int = self.model_manager.get_max_num_layers(machine_type=machine_type.type_name)
-            assert 2 * max_num_layers * max(self.model_manager.get_model_params()) <= machine_type.vram_size + 1, \
-                "Trying to use more than half the vram to load model parameters!"
+            assert max_num_layers * max(self.model_manager.get_model_params()) <= machine_type.vram_size + 1, \
+                "Trying to use more than the vram to load model parameters!"
 
             # compute layer count to throughput
             # Note: 1. inference throughput is computed under typical batch size
