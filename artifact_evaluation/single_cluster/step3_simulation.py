@@ -580,8 +580,17 @@ def main():
 
         elif serving_mode == "offline":
             if method == "helix":
-                # TODO: implement this
-                raise NotImplementedError
+                decode_throughput = simulate_maxflow_offline(
+                    model_name=ModelName.LLaMa70B,
+                    solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+                )
+                print("*" * 60)
+                print(f"LLaMa70B offline simulation results: Helix")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("*" * 60)
 
             elif method == "swarm":
                 # TODO: implement this
