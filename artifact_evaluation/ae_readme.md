@@ -908,3 +908,20 @@ Latency 95th percentile: 2.62 s
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama70b/sp_plus_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
+
+## Section 6.6 Model Placement Deep Dive
+All files related to this group of experiments are located in `artifact_evaluation/model_placement`.
+Start from the root directory of the repository:
+```bash
+cd artifact_evaluation/model_placement
+```
+This section performs the ablation of different model placement method. We will show steps to reproduce
+the decode throughput shown in Figure 9(a) in the paper. To start with, we have copied the model
+placements to `./layout_single` and `./layout_distributed`. (Generated previously in Sec 6.3 and 6.4)
+
+### Setup 1: LLaMA 70B Single Cluster (Real System)
+
+TODO!!
+
+### Setup 2: LLaMA 70B Distributed Clusters (Simulation)
+
