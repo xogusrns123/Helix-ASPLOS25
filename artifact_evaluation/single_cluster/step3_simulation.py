@@ -586,8 +586,25 @@ def main():
                 print("*" * 60)
 
             elif method == "swarm":
-                # TODO: implement this
-                raise NotImplementedError
+                os.makedirs("./simulation_llama70b/swarm_online", exist_ok=True)
+                decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa70B,
+                    workspace_path="./simulation_llama70b/swarm_online",
+                    solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
+                    complete_cluster_file_name="./config/cluster24.ini",
+                    simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Swarm,
+                    avg_throughput=350,
+                    machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
+                )
+                print("*" * 60)
+                print(f"LLaMa70B online simulation results: Swarm")
+                print(f"Total decode throughput: {decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama70b/swarm_online/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama70b/swarm_online/decode_latency.pkl"])
+                print("*" * 60)
 
             elif method == "separate":
                 # TODO: implement this
