@@ -427,8 +427,52 @@ def main():
                 print("*" * 60)
 
             elif method == "separate":
-                # TODO: implement this
-                raise NotImplementedError
+                os.makedirs("./simulation_llama30b/separate_online/a100", exist_ok=True)
+                os.makedirs("./simulation_llama30b/separate_online/l4", exist_ok=True)
+                os.makedirs("./simulation_llama30b/separate_online/t4", exist_ok=True)
+                a100_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/separate_online/a100",
+                    solution_file_name="./layout_llama30b/separate/a100_solution_file.ini",
+                    complete_cluster_file_name="./config/a100.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/a100_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=500,
+                    machine_num_dict={"A100": 4}
+                )
+                l4_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/separate_online/l4",
+                    solution_file_name="./layout_llama30b/separate/l4_solution_file.ini",
+                    complete_cluster_file_name="./config/l4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/l4_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=150,
+                    machine_num_dict={"L4": 8}
+                )
+                t4_decode_throughput = simulate_heuristic_online(
+                    model_name=ModelName.LLaMa30B,
+                    workspace_path="./simulation_llama30b/separate_online/t4",
+                    solution_file_name="./layout_llama30b/separate/t4_solution_file.ini",
+                    complete_cluster_file_name="./config/t4.ini",
+                    simulator_cluster_file_name="./layout_llama30b/separate/t4_simulator_cluster.ini",
+                    scheduling_method=SchedulingMethod.Naive,
+                    avg_throughput=150,
+                    machine_num_dict={"T4": 12}
+                )
+                sum_decode_throughput = a100_decode_throughput + l4_decode_throughput + t4_decode_throughput
+                print("*" * 60)
+                print(f"LLaMa30B online simulation results: Separate")
+                print(f"Total decode throughput: {sum_decode_throughput:.1f} tokens/s")
+                print("Prompt latency:")
+                analyze_latency(["./simulation_llama30b/separate_online/a100/prompt_latency.pkl",
+                                 "./simulation_llama30b/separate_online/l4/prompt_latency.pkl",
+                                 "./simulation_llama30b/separate_online/t4/prompt_latency.pkl"])
+                print("Decode latency:")
+                analyze_latency(["./simulation_llama30b/separate_online/a100/decode_latency.pkl",
+                                 "./simulation_llama30b/separate_online/l4/decode_latency.pkl",
+                                 "./simulation_llama30b/separate_online/t4/decode_latency.pkl"])
+                print("*" * 60)
 
             else:
                 raise ValueError(f"Invalid method: {method}")

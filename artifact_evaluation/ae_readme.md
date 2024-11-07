@@ -112,7 +112,7 @@ Total decode throughput: 151.6 tokens/s
 ```
 
 (3) Run LLaMA 30B in offline setup using Separate Pipelines and observe its decode 
-throughput. This corresponds to Figure 5(a)'s Simulation - Separate Pipelines in the paper.
+throughput. This corresponds to Figure 5(a)'s Simulation - Separate Pipelines (SP) in the paper.
 ```bash
 python step3_simulation.py separate llama30b offline
 ```
@@ -184,5 +184,32 @@ We also store the raw latency distribution files as pickle files in
 `./simulation_llama30b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
 
-TODO: describe the steps and result & files
-
+(6) Run LLaMA 30B in online setup using Separate Pipelines and observe its decode throughput,
+prompt latency and decode latency. The decode throughput corresponds to Figure 5(b)'s Simulation -
+Separate Pipelines (SP); the prompt latency corresponds to Figure 5(e)'s Simulation - Separate
+Pipelines (SP); the decode latency corresponds to Figure 5(f)'s Simulation - Separate Pipelines (SP).
+```bash
+python step3_simulation.py separate llama30b online
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B online simulation results: Separate
+Total decode throughput: 189.8 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.09 s
+Latency 25th percentile: 0.16 s
+Latency 50th percentile: 0.42 s
+Latency 75th percentile: 1.07 s
+Latency 95th percentile: 2.99 s
+Decode latency:
+Latency 5th percentile: 0.06 s
+Latency 25th percentile: 0.08 s
+Latency 50th percentile: 0.11 s
+Latency 75th percentile: 0.33 s
+Latency 95th percentile: 0.57 s
+************************************************************
+```
+We also store the raw latency distribution files as pickle files in
+`./simulation_llama30b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
+if you want to parse and check them.
