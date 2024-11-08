@@ -127,6 +127,12 @@ def main():
         parse_result("./real_llama30b/helix_offline/l4/events.txt", warm_up_time=60, finish_time=300)
     if model_name == "llama30b" and serving_mode == "offline" and method == "helix_t4":
         parse_result("./real_llama30b/helix_offline/t4/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_a100":
+        parse_result("./real_llama30b/helix_online/a100/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_l4":
+        parse_result("./real_llama30b/helix_online/l4/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_t4":
+        parse_result("./real_llama30b/helix_online/t4/events.txt", warm_up_time=60, finish_time=300)
 
 if __name__ == '__main__':
     main()

@@ -159,6 +159,69 @@ def main():
             result_logging_dir="./real_llama30b/helix_offline/t4"
         )
 
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_a100":
+        print("Running LLaMa 30B + Online + Helix (A100)")
+        os.makedirs("./real_llama30b/helix_online/a100", exist_ok=True)
+        run_maxflow_host_online(
+            # model and machine
+            machine_num_dict={"A100": 4},
+            model_name=ModelName.LLaMa30B,
+            # cluster
+            complete_cluster_file_name="./config/a100.ini",
+            machine_profile_name="./config/machine_profiles.ini",
+            # solution
+            solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
+            real_sys_config_file_name="./layout_llama30b/ilp/a100/real_sys_config.txt",
+            # throughput
+            duration=300,
+            avg_throughput=600,
+            # result
+            result_logging_dir="./real_llama30b/helix_online/a100"
+        )
+
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_l4":
+        print("Running LLaMa 30B + Online + Helix (L4)")
+        os.makedirs("./real_llama30b/helix_online/l4", exist_ok=True)
+        run_maxflow_host_online(
+            # model and machine
+            machine_num_dict={"L4": 8},
+            model_name=ModelName.LLaMa30B,
+            # cluster
+            complete_cluster_file_name="./config/l4.ini",
+            machine_profile_name="./config/machine_profiles.ini",
+            # solution
+            solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
+            real_sys_config_file_name="./layout_llama30b/ilp/l4/real_sys_config.txt",
+            # throughput
+            duration=300,
+            avg_throughput=200,
+            # result
+            result_logging_dir="./real_llama30b/helix_online/l4"
+        )
+
+    if model_name == "llama30b" and serving_mode == "online" and method == "helix_t4":
+        print("Running LLaMa 30B + Online + Helix (T4)")
+        os.makedirs("./real_llama30b/helix_online/t4", exist_ok=True)
+        run_maxflow_host_online(
+            # model and machine
+            machine_num_dict={"T4": 12},
+            model_name=ModelName.LLaMa30B,
+            # cluster
+            complete_cluster_file_name="./config/t4.ini",
+            machine_profile_name="./config/machine_profiles.ini",
+            # solution
+            solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
+            real_sys_config_file_name="./layout_llama30b/ilp/t4/real_sys_config.txt",
+            # throughput
+            duration=300,
+            avg_throughput=170,
+            # result
+            result_logging_dir="./real_llama30b/helix_online/t4"
+        )
+
 
 
 if __name__ == '__main__':

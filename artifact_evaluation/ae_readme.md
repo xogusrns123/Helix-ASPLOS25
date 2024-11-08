@@ -351,7 +351,7 @@ for the prototype system experiments.
 > **Note:** In order to keep the total expense of artifact evaluation within the budget, we reduce
 > the running time for each experiment. For offline experiments, we reduce the running time from 
 > 10 minutes to 5 minutes. For online experiments, we reduce the running time from 30 minutes to
-> 10 minutes.
+> 5 minutes. All results are based on the reduced running time.
 
 #### 1. LLaMA 30B + offline + Helix
 
@@ -465,7 +465,112 @@ Avg decode latency: 0.697s
 Throughput: 57.5 Tokens/s
 ```
 
-The results above sum to 321.2, corresponding to Figure 5(a) Prototype - Helix in the paper.
+The total decode throughput is 321.2, corresponding to Figure 5(a) Prototype - Helix in the paper.
+
+#### 2. LLaMA 30B + online + Helix
+
+The model placement has already been generated in (1). On the host and worker machines, run
+the following command, this tests the A100 sub-cluster:
+```bash
+python step5_start_host.py helix_a100 llama30b online  # on host machine
+python step6_start_worker.py llama30b maxflow          # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama30b/helix_online/a100`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_a100 llama30b online
+```
+
+You will see results like this
+```
+./real_llama30b/helix_online/a100/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000015497s
+60th percentile decode arrival interval: 0.000018120s
+70th percentile decode arrival interval: 0.000038624s
+72th percentile decode arrival interval: 0.000124931s
+75th percentile decode arrival interval: 0.019706249s
+80th percentile decode arrival interval: 0.020469427s
+85th percentile decode arrival interval: 0.021248102s
+87th percentile decode arrival interval: 0.021480322s
+90th percentile decode arrival interval: 0.022046089s
+92th percentile decode arrival interval: 0.022469997s
+95th percentile decode arrival interval: 0.023351669s
+99th percentile decode arrival interval: 0.039023399s
+Avg prompt latency: 0.367s
+Avg decode latency: 0.138s
+Throughput: 136.4 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+```bash
+python step5_start_host.py helix_l4 llama30b online  # on host machine
+python step6_start_worker.py llama30b maxflow        # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama30b/helix_online/l4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_l4 llama30b online
+```
+
+You will see results like this
+```
+./real_llama30b/helix_online/l4/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.039200306s
+60th percentile decode arrival interval: 0.039655685s
+70th percentile decode arrival interval: 0.039990664s
+72th percentile decode arrival interval: 0.040517330s
+75th percentile decode arrival interval: 0.041629314s
+80th percentile decode arrival interval: 0.041948318s
+85th percentile decode arrival interval: 0.042401791s
+87th percentile decode arrival interval: 0.042578220s
+90th percentile decode arrival interval: 0.042785168s
+92th percentile decode arrival interval: 0.042936563s
+95th percentile decode arrival interval: 0.043436527s
+99th percentile decode arrival interval: 0.172743082s
+Avg prompt latency: 1.077s
+Avg decode latency: 0.415s
+Throughput: 32.2 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+```bash
+python step5_start_host.py helix_t4 llama30b online  # on host machine
+python step6_start_worker.py llama30b maxflow        # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama30b/helix_online/t4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_t4 llama30b online
+```
+
+You will see results like this
+```
+Median decode arrival interval: 0.026262045s
+60th percentile decode arrival interval: 0.026580095s
+70th percentile decode arrival interval: 0.027352810s
+72th percentile decode arrival interval: 0.027828932s
+75th percentile decode arrival interval: 0.028565407s
+80th percentile decode arrival interval: 0.029286623s
+85th percentile decode arrival interval: 0.030496597s
+87th percentile decode arrival interval: 0.031460762s
+90th percentile decode arrival interval: 0.035567522s
+92th percentile decode arrival interval: 0.040454388s
+95th percentile decode arrival interval: 0.055979013s
+99th percentile decode arrival interval: 0.166379690s
+Avg prompt latency: 2.146s
+Avg decode latency: 0.472s
+Throughput: 29.3 Tokens/s
+```
+
+The total decode throughput is 198, corresponding to Figure 5(b) Prototype - Helix in the paper.
+The average prompt latency is 0.740, corresponding to Figure 5(e) Prototype - Helix in the paper.
+The average decode latency is 0.231, corresponding to Figure 5(f) Prototype - Helix in the paper.
 
 ## Section 6.4 Geo-Distributed Clusters
 
