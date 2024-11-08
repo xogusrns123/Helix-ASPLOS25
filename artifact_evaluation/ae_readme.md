@@ -954,6 +954,92 @@ The decode throughput is 148.3, corresponding to Figure 5(d) Prototype - Helix i
 The average prompt latency is 2.660, corresponding to Figure 5(g) Prototype - Helix in the paper.
 The average decode latency is 2.020, corresponding to Figure 5(h) Prototype - Helix in the paper.
 
+#### 9. LLaMA 70B + offline + Swarm
+
+Generate the real system config file with the following command:
+```bash
+python step4_gen_sys_config.py swarm llama70b
+```
+
+This will generate the real system config file in each folder in `./layout_llama70b/swarm`. Next,
+we will start running the real system experiments.
+
+On the host and worker machines, run the following command:
+```bash
+python step5_start_host.py swarm llama70b offline        # on host machine
+python step6_start_worker.py llama70b swarm              # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/swarm_offline`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py swarm llama70b offline
+```
+
+You will see results like this
+```
+./real_llama70b/swarm_offline/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000009298s
+72th percentile decode arrival interval: 0.000010490s
+75th percentile decode arrival interval: 0.000013590s
+80th percentile decode arrival interval: 0.000023365s
+85th percentile decode arrival interval: 0.000053167s
+87th percentile decode arrival interval: 0.000098944s
+90th percentile decode arrival interval: 0.031455517s
+92th percentile decode arrival interval: 0.033137798s
+95th percentile decode arrival interval: 0.034678221s
+99th percentile decode arrival interval: 0.062320948s
+Avg prompt latency: 3.060s
+Avg decode latency: 1.598s
+Throughput: 111.7 Tokens/s
+```
+
+The total decode throughput is 111.7, corresponding to Figure 5(c) Prototype - Swarm in the paper.
+
+#### 10. LLaMA 70B + online + Swarm
+
+The model placement has already been generated in (9). On the host and worker machines, run
+the following command:
+```bash
+python step5_start_host.py swarm llama70b online         # on host machine
+python step6_start_worker.py llama70b swarm              # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/swarm_online`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py swarm llama70b online
+```
+
+You will see results like this
+```
+./real_llama70b/swarm_online/events.txt (excluding first 200s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000005245s
+70th percentile decode arrival interval: 0.000009537s
+72th percentile decode arrival interval: 0.000010967s
+75th percentile decode arrival interval: 0.000014305s
+80th percentile decode arrival interval: 0.000027418s
+85th percentile decode arrival interval: 0.000069618s
+87th percentile decode arrival interval: 0.000242710s
+90th percentile decode arrival interval: 0.031656981s
+92th percentile decode arrival interval: 0.033603668s
+95th percentile decode arrival interval: 0.034790039s
+99th percentile decode arrival interval: 0.172259808s
+Avg prompt latency: 3.022s
+Avg decode latency: 1.639s
+Throughput: 81.1 Tokens/s
+```
+
+The decode throughput is xxx, corresponding to Figure 5(d) Prototype - Swarm in the paper.
+The average prompt latency is xxx, corresponding to Figure 5(g) Prototype - Swarm in the paper.
+The average decode latency is xxx, corresponding to Figure 5(h) Prototype - Swarm in the paper.
+
+
 ## Section 6.4 Geo-Distributed Clusters
 
 All files related to this group of experiments are located in `artifact_evaluation/distributed_clusters`.

@@ -136,6 +136,20 @@ def main():
             machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
         )
 
+    if model_name == "llama70b" and method == "swarm":
+        os.makedirs("./layout_llama70b/swarm", exist_ok=True)
+        generate_real_system_config(
+            model_name=ModelName.LLaMa70B,
+            complete_cluster_file_name="./config/cluster24.ini",
+            solution_file_name="./layout_llama70b/swarm/swarm_sol.ini",
+            simulator_cluster_file_name="./layout_llama70b/swarm/simulator_cluster.ini",
+            output_dir="./layout_llama70b/swarm",
+            machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+        )
+
+    if model_name == "llama70b" and method == "separate":
+        print("We manually generated it in: ./layout_llama70b/separate")
+
 
 if __name__ == '__main__':
     main()

@@ -153,6 +153,10 @@ def main():
         parse_result("./real_llama70b/helix_offline/events.txt", warm_up_time=60, finish_time=300)
     if model_name == "llama70b" and serving_mode == "online" and method == "helix":
         parse_result("./real_llama70b/helix_online/events.txt", warm_up_time=200, finish_time=300)
+    if model_name == "llama70b" and serving_mode == "offline" and method == "swarm":
+        parse_result("./real_llama70b/swarm_offline/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama70b" and serving_mode == "online" and method == "swarm":
+        parse_result("./real_llama70b/swarm_online/events.txt", warm_up_time=200, finish_time=300)
 
 if __name__ == '__main__':
     main()

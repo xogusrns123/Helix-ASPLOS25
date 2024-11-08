@@ -353,6 +353,28 @@ def main():
             result_logging_dir="./real_llama70b/helix_online"
         )
 
+    if model_name == "llama70b" and serving_mode == "offline" and method == "swarm":
+        print("Running LLaMa 70B + Offline + Swarm")
+        os.makedirs("./real_llama70b/swarm_offline", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="swarm",
+            real_sys_config_file_name="./layout_llama70b/swarm/real_sys_config.txt",
+            initial_launch_num=180,
+            duration=300,
+            result_logging_dir="./real_llama70b/swarm_offline"
+        )
+
+    if model_name == "llama70b" and serving_mode == "online" and method == "swarm":
+        print("Running LLaMa 70B + Online + Swarm")
+        os.makedirs("./real_llama70b/swarm_online", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="swarm",
+            real_sys_config_file_name="./layout_llama70b/swarm/real_sys_config.txt",
+            avg_throughput=700,
+            duration=300,
+            result_logging_dir="./real_llama70b/swarm_online"
+        )
+
 
 
 if __name__ == '__main__':
