@@ -2306,8 +2306,7 @@ those experiments (corresponds to Table 8). Now, we will show the performance wi
 pruning, which corresponds to the `w/o prune` results in Figure 11(a).
 
 > **Note:** Because of Gurobi licensing issues, the results you get using limited license might
-> be different from ours. We show our Gurobi optimization trace in each sub-directory of `./layouts`
-> as a reference.
+> be different from ours. This is an issue with the Gurobi solver instead of our system.
 
 (1) First, let's disable cluster pruning for the 24 node cluster. Run the following command to
 generate model placement with Helix:
@@ -2362,3 +2361,39 @@ corresponds to Figure 11 (a) - 42-node w/o prune in the paper:
 ```
 TODO
 ```
+
+### Ablation on Initial Values
+
+In this part, we show the results of ablation study on initial values. Previously in reproducing
+Section 6.4 and 6.5, we have already shown the results when using initial values, which corresponds
+to the `heuristic` results in Figure 11(b). Now, we will show the optimizer running time without
+initial values, which corresponds to the `raw` results in Figure 11(b).
+
+For the 24 node and 42 node cluster, run:
+
+```bash
+python ablation2_initial.py 24   # no initial values for 24 node cluster
+python ablation2_initial.py 42   # no initial values for 42 node cluster
+```
+
+When running on our side, the no initial values cases takes slightly longer than the cases with
+initial values (to find the same objective). Matching the results shown in Figure 11(b) in the
+paper.
+
+> **Note:** Because of the difference of Gurobi license and hardware, the running time you get might
+> be different from ours. This is an issue with the Gurobi solver instead of our system.
+
+### Model Placement Quality (Section 6.9)
+
+This experiment studies the optimality of Helix's model placement planner on a small cluster that
+can be solved optimally. To produce the trace we use to plot Figure 12, run the following command:
+
+```bash
+python ablation3_quality.py
+```
+
+We save the trace we get after running this command in `./layouts/quality/trace.txt`. This trace
+matches the trend in Figure 12.
+
+> **Note:** Because of the difference of Gurobi license and hardware, the trace you get might
+> be different from ours. This is an issue with the Gurobi solver instead of our system.
