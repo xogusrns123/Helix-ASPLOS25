@@ -1153,3 +1153,51 @@ LLaMa70B offline simulation results: ShortestQueue
 Total decode throughput: 83.6 tokens/s
 ************************************************************
 ```
+
+## Section 6.8 Ablation Study on Optimization
+In this section, we reproduce the results for ablation study about cluster pruning and initial
+values. All files related to this group of experiments are located in `artifact_evaluation/ablation`.
+Start from the root directory of the repository:
+```bash
+cd artifact_evaluation/ablation
+```
+We have already placed the cluster config files in `./config`.
+
+### Ablation on Cluster Pruning
+Previously in reproducing Section 6.4 and 6.5, we have already shown the results when cluster
+pruning is enabled, which corresponds to the `w/ prune` results in Figure 11(a). In the figure,
+`24-node` corresponds to the setup in Section 6.4, and `42-node` corresponds to the setup in
+Section 6.5. You can also get the problem size from the optimization log you got when running
+those experiments (corresponds to Table 8). Now, we will show the performance without cluster
+pruning, which corresponds to the `w/o prune` results in Figure 11(a).
+
+> **Note:** Because of Gurobi licensing issues, the results you get using limited license might
+> be different from ours. We show our Gurobi optimization trace in each sub-directory of `./layouts`
+> as a reference.
+
+(1) First, let's disable cluster pruning for the 24 node cluster. Run the following command to
+generate model placement with Helix:
+
+```bash
+python ablation1_pruning.py layout 24
+```
+
+You will first see a line like this in the Gurobi output, which corresponds to 24-node without
+pruning in Table 8:
+
+```
+Optimize a model with 1848 rows, 1376 columns and 13960 nonzeros
+```
+
+We terminate the solving process at around 45 minutes. Then, we run the simulation:
+
+```bash
+python ablation1_pruning.py simulate 24
+```
+
+After running the simulation, you will see a log like the following at the end:
+```
+
+```
+
+(2) TODO!!
