@@ -922,6 +922,22 @@ We have also copied the config files to `./config_single` and `./config_distribu
 
 ### Setup 1: LLaMA 70B Single Cluster (Real System)
 
+#### Model Placement Visualization
+
+First, let's visualize the model placements found by different methods in the single cluster setup.
+This corresponds to Figure 9(b) in the paper. Run the following command:
+```bash
+python setup1_visualization.py helix   # visualize Helix's model placement
+python setup1_visualization.py swarm   # visualize Swarm's model placement
+python setup1_visualization.py petals  # visualize Petals' model placement
+```
+The files are store in `./visualization`. Notice that the visualization looks slightly different
+from the one shown in the paper, because of the slight difference in model placement found by the
+solver. Despite the difference, overall Helix's model placement has higher GPU utilization (red
+indicates high utilization), which verifies our claim in the paper.
+
+#### Decode Throughput
+
 TODO!!
 
 ### Setup 2: LLaMA 70B Distributed Clusters (Simulation)

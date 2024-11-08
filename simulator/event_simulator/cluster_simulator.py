@@ -1684,12 +1684,13 @@ class ClusterSimulator:
         self.query_manager.latency_analyzer.visualize_request_latency(ignore_initialize=ignore_initialize,
                                                                       save_file_path=save_path)
 
-    def visualize_cluster(self, title: str, save_path: Optional[str] = None) -> None:
+    def visualize_cluster(self, title: str, save_path: Optional[str] = None, show_fig: bool = True) -> None:
         """
         Visualize the cluster.
 
         :param title: title of the figure
         :param save_path: save path of the figure (a directory)
+        :param show_fig: whether to show the figure
         :return: None
         """
         # check scheduler type and simulator condition
@@ -1780,4 +1781,5 @@ class ClusterSimulator:
         plt.title(title, fontsize=60)
         if save_path is not None:
             plt.savefig(os.path.join(save_path, f"{title}.jpg"))
-        plt.show()
+        if show_fig:
+            plt.show()
