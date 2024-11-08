@@ -8,6 +8,7 @@ from simulator.event_simulator.cluster_simulator import ClusterSimulator, Schedu
 from simulator.trace_generator.simulator_query_feeder import OnlineRequestFeeder, OfflineRequestFeeder
 from simulator.scheduler.global_maxflow.global_maxflow_scheduler import KVParameters, SchedulingMode
 
+
 def cluster24_ilp_layout70b():
     # initialize the layout synthesizer
     layout_synthesizer = LayoutSynthesizer(

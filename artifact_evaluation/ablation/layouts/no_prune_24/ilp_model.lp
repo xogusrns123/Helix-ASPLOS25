@@ -1,4 +1,4 @@
-\ Model 2024-11-07_21-42-47
+\ Model 2024-11-08_16-15-10
 \ LP format - for model browsing. Use MPS format to capture full model detail.
 Maximize
   flow_source_0 + flow_source_1 + flow_source_2 + flow_source_3

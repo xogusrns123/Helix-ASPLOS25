@@ -1,5 +1,5 @@
-# Solution for model 2024-11-08_05-22-04
-# Objective value = 4.8922424296039990e+03
+# Solution for model 2024-11-08_17-04-45
+# Objective value = 4.8922424322090146e+03
 start_0 76
 start_1 44
 start_2 44
@@ -426,15 +426,15 @@ flow_source_30 0
 flow_source_31 0
 flow_source_32 0
 flow_source_33 0
-flow_source_34 0
+flow_source_34 1.6262677859174844e-06
 flow_source_35 0
 flow_source_36 0
 flow_source_37 0
 flow_source_38 0
 flow_source_39 0
-flow_source_40 4.8922424296039990e+03
+flow_source_40 4.8922424305827471e+03
 flow_source_41 0
-flow_0_sink 9.2762370958201427e+02
+flow_0_sink 2.3423155318505451e-01
 flow_1_sink 0
 flow_2_sink 0
 flow_3_sink 0
@@ -446,7 +446,7 @@ flow_8_sink 0
 flow_9_sink 0
 flow_10_sink 0
 flow_11_sink 0
-flow_12_sink 1.9821922450459729e+03
+flow_12_sink 1.9821922450459826e+03
 flow_13_sink 0
 flow_14_sink 0
 flow_15_sink 0
@@ -460,7 +460,7 @@ flow_22_sink 0
 flow_23_sink 0
 flow_24_sink 0
 flow_25_sink 0
-flow_26_sink 1.9821922450459729e+03
+flow_26_sink 1.9821922450459863e+03
 flow_27_sink 0
 flow_28_sink 0
 flow_29_sink 0
@@ -470,7 +470,7 @@ flow_32_sink 0
 flow_33_sink 0
 flow_34_sink 0
 flow_35_sink 0
-flow_36_sink 2.3422993003896408e-01
+flow_36_sink 9.2762370958248732e+02
 flow_37_sink 0
 flow_38_sink 0
 flow_39_sink 0
@@ -503,7 +503,7 @@ flow_12_0 0
 flow_0_13 0
 flow_13_0 0
 flow_0_14 0
-flow_14_0 9.2762370958201427e+02
+flow_14_0 0
 flow_0_15 0
 flow_15_0 0
 flow_0_16 0
@@ -557,7 +557,7 @@ flow_39_0 0
 flow_0_40 0
 flow_40_0 0
 flow_0_41 0
-flow_41_0 0
+flow_41_0 2.3423155318505451e-01
 flow_1_2 0
 flow_2_1 0
 flow_1_3 0
@@ -565,10 +565,10 @@ flow_3_1 0
 flow_1_4 0
 flow_4_1 0
 flow_1_5 0
-flow_5_1 1.2677237911538768e+03
+flow_5_1 2.9665902671606791e+03
 flow_1_6 0
-flow_6_1 1.8122593192250611e+03
-flow_1_7 1.0975566354029261e+03
+flow_6_1 9.6282608122035344e+02
+flow_1_7 1.9469898734082292e+03
 flow_7_1 0
 flow_1_8 0
 flow_8_1 0
@@ -622,7 +622,7 @@ flow_1_32 0
 flow_32_1 0
 flow_1_33 0
 flow_33_1 0
-flow_1_34 1.9824264749760118e+03
+flow_1_34 1.9824264749729002e+03
 flow_34_1 0
 flow_1_35 0
 flow_35_1 0
@@ -643,10 +643,10 @@ flow_3_2 0
 flow_2_4 0
 flow_4_2 0
 flow_2_5 0
-flow_5_2 1.8122593192250611e+03
+flow_5_2 9.6282608121985481e+02
 flow_2_6 0
 flow_6_2 0
-flow_2_7 8.8463560964304679e+02
+flow_2_7 3.5202371637743681e+01
 flow_7_2 0
 flow_2_8 0
 flow_8_2 0
@@ -664,7 +664,7 @@ flow_2_14 0
 flow_14_2 0
 flow_2_15 0
 flow_15_2 0
-flow_2_16 9.2762370958201427e+02
+flow_2_16 9.2762370958202337e+02
 flow_16_2 0
 flow_2_17 0
 flow_17_2 0
@@ -723,7 +723,7 @@ flow_5_3 0
 flow_3_6 0
 flow_6_3 0
 flow_3_7 0
-flow_7_3 0
+flow_7_3 1.9821922450459729e+03
 flow_3_8 0
 flow_8_3 0
 flow_3_9 0
@@ -741,7 +741,7 @@ flow_14_3 0
 flow_3_15 0
 flow_15_3 0
 flow_3_16 0
-flow_16_3 9.2762370958201427e+02
+flow_16_3 0
 flow_3_17 0
 flow_17_3 0
 flow_3_18 0
@@ -752,7 +752,7 @@ flow_3_20 0
 flow_20_3 0
 flow_3_21 0
 flow_21_3 0
-flow_3_22 1.2585190994953718e+03
+flow_3_22 1.0975566354029261e+03
 flow_22_3 0
 flow_3_23 0
 flow_23_3 0
@@ -777,7 +777,7 @@ flow_32_3 0
 flow_3_33 0
 flow_33_3 0
 flow_3_34 0
-flow_34_3 3.3089538991335758e+02
+flow_34_3 0
 flow_3_35 0
 flow_35_3 0
 flow_3_36 0
@@ -786,7 +786,7 @@ flow_3_37 0
 flow_37_3 0
 flow_3_38 0
 flow_38_3 0
-flow_3_39 0
+flow_3_39 8.8463560964304679e+02
 flow_39_3 0
 flow_3_40 0
 flow_40_3 0
@@ -818,7 +818,7 @@ flow_4_16 0
 flow_16_4 0
 flow_4_17 0
 flow_17_4 0
-flow_4_18 1.8122593192250611e+03
+flow_4_18 1812.2593192251
 flow_18_4 0
 flow_4_19 0
 flow_19_4 0
@@ -837,7 +837,7 @@ flow_25_4 0
 flow_4_26 0
 flow_26_4 0
 flow_4_27 0
-flow_27_4 4.8922424296039990e+03
+flow_27_4 4.8922424296008876e+03
 flow_4_28 0
 flow_28_4 0
 flow_4_29 0
@@ -846,7 +846,7 @@ flow_4_30 0
 flow_30_4 0
 flow_4_31 0
 flow_31_4 0
-flow_4_32 3.0799831103789379e+03
+flow_4_32 3.0799831103757460e+03
 flow_32_4 0
 flow_4_33 0
 flow_33_4 0
@@ -885,7 +885,7 @@ flow_13_5 0
 flow_5_14 0
 flow_14_5 0
 flow_5_15 0
-flow_15_5 1.8122593192250611e+03
+flow_15_5 0
 flow_5_16 0
 flow_16_5 0
 flow_5_17 0
@@ -895,7 +895,7 @@ flow_18_5 0
 flow_5_19 0
 flow_19_5 0
 flow_5_20 0
-flow_20_5 1.2677237911538768e+03
+flow_20_5 3.9294163483805341e+03
 flow_5_21 0
 flow_21_5 0
 flow_5_22 0
@@ -955,7 +955,7 @@ flow_13_6 0
 flow_6_14 0
 flow_14_6 0
 flow_6_15 0
-flow_15_6 0
+flow_15_6 9.6282608122035344e+02
 flow_6_16 0
 flow_16_6 0
 flow_6_17 0
@@ -965,7 +965,7 @@ flow_18_6 0
 flow_6_19 0
 flow_19_6 0
 flow_6_20 0
-flow_20_6 1.8122593192250611e+03
+flow_20_6 0
 flow_6_21 0
 flow_21_6 0
 flow_6_22 0
@@ -1040,7 +1040,7 @@ flow_7_22 0
 flow_22_7 0
 flow_7_23 0
 flow_23_7 0
-flow_7_24 1.9821922450459729e+03
+flow_7_24 0
 flow_24_7 0
 flow_7_25 0
 flow_25_7 0
@@ -1101,7 +1101,7 @@ flow_19_8 0
 flow_8_20 0
 flow_20_8 0
 flow_8_21 0
-flow_21_8 4.8922424296039990e+03
+flow_21_8 4.8922424305826753e+03
 flow_8_22 0
 flow_22_8 0
 flow_8_23 0
@@ -1124,7 +1124,7 @@ flow_8_31 0
 flow_31_8 0
 flow_8_32 0
 flow_32_8 0
-flow_8_33 4.8922424296039990e+03
+flow_8_33 4.8922424296010940e+03
 flow_33_8 0
 flow_8_34 0
 flow_34_8 0
@@ -1142,15 +1142,15 @@ flow_8_40 0
 flow_40_8 0
 flow_8_41 0
 flow_41_8 0
-flow_9_10 0
+flow_9_10 9.2762370958202337e+02
 flow_10_9 0
 flow_9_11 0
-flow_11_9 3.4010008157186257e+02
+flow_11_9 0
 flow_9_12 0
 flow_12_9 0
 flow_9_13 0
 flow_13_9 0
-flow_9_14 1.0545685354639586e+03
+flow_9_14 0
 flow_14_9 0
 flow_9_15 0
 flow_15_9 0
@@ -1173,13 +1173,13 @@ flow_23_9 0
 flow_9_24 0
 flow_24_9 0
 flow_9_25 0
-flow_25_9 0
+flow_25_9 8.9384030130154270e+02
 flow_9_26 0
 flow_26_9 0
 flow_9_27 0
 flow_27_9 0
 flow_9_28 0
-flow_28_9 1.8122593192250611e+03
+flow_28_9 1.8122593192250702e+03
 flow_9_29 0
 flow_29_9 0
 flow_9_30 0
@@ -1198,17 +1198,17 @@ flow_9_36 0
 flow_36_9 0
 flow_9_37 0
 flow_37_9 0
-flow_9_38 1.0975566354029261e+03
+flow_9_38 1.7784759109445895e+03
 flow_38_9 0
 flow_9_39 0
 flow_39_9 0
 flow_9_40 0
 flow_40_9 0
-flow_9_41 2.3422993003896408e-01
+flow_9_41 0
 flow_41_9 0
 flow_10_11 0
 flow_11_10 0
-flow_10_12 9.2762370958201427e+02
+flow_10_12 0
 flow_12_10 0
 flow_10_13 0
 flow_13_10 0
@@ -1231,7 +1231,7 @@ flow_21_10 0
 flow_10_22 0
 flow_22_10 0
 flow_10_23 0
-flow_23_10 9.2762370958201427e+02
+flow_23_10 0
 flow_10_24 0
 flow_24_10 0
 flow_10_25 0
@@ -1256,7 +1256,7 @@ flow_10_34 0
 flow_34_10 0
 flow_10_35 0
 flow_35_10 0
-flow_10_36 0
+flow_10_36 9.2762370958202337e+02
 flow_36_10 0
 flow_10_37 0
 flow_37_10 0
@@ -1279,10 +1279,10 @@ flow_15_11 0
 flow_11_16 0
 flow_16_11 0
 flow_11_17 0
-flow_17_11 2.1523594007969236e+03
+flow_17_11 1.2247356928380555e+03
 flow_11_18 0
 flow_18_11 0
-flow_11_19 9.2762370958201427e+02
+flow_11_19 3.4010008319500730e+02
 flow_19_11 0
 flow_11_20 0
 flow_20_11 0
@@ -1290,7 +1290,7 @@ flow_11_21 0
 flow_21_11 0
 flow_11_22 0
 flow_22_11 0
-flow_11_23 8.8463560964304679e+02
+flow_11_23 1.8122593192250624e+03
 flow_23_11 0
 flow_11_24 0
 flow_24_11 0
@@ -1303,7 +1303,7 @@ flow_27_11 0
 flow_11_28 0
 flow_28_11 0
 flow_11_29 0
-flow_29_11 0
+flow_29_11 9.2762370958201427e+02
 flow_11_30 0
 flow_30_11 0
 flow_11_31 0
@@ -1331,7 +1331,7 @@ flow_41_11 0
 flow_12_13 0
 flow_13_12 0
 flow_12_14 0
-flow_14_12 0
+flow_14_12 1.9821922450459961e+03
 flow_12_15 0
 flow_15_12 0
 flow_12_16 0
@@ -1379,7 +1379,7 @@ flow_36_12 0
 flow_12_37 0
 flow_37_12 0
 flow_12_38 0
-flow_38_12 1.0545685354639586e+03
+flow_38_12 0
 flow_12_39 0
 flow_39_12 0
 flow_12_40 0
@@ -1391,7 +1391,7 @@ flow_14_13 0
 flow_13_15 0
 flow_15_13 0
 flow_13_16 0
-flow_16_13 0
+flow_16_13 9.2762370958201427e+02
 flow_13_17 0
 flow_17_13 0
 flow_13_18 0
@@ -1427,7 +1427,7 @@ flow_32_13 0
 flow_13_33 0
 flow_33_13 0
 flow_13_34 0
-flow_34_13 9.2762370958201427e+02
+flow_34_13 0
 flow_13_35 0
 flow_35_13 0
 flow_13_36 0
@@ -1451,7 +1451,7 @@ flow_17_14 0
 flow_14_18 0
 flow_18_14 0
 flow_14_19 0
-flow_19_14 9.2762370958201427e+02
+flow_19_14 1.6993292582091044e+02
 flow_14_20 0
 flow_20_14 0
 flow_14_21 0
@@ -1459,12 +1459,12 @@ flow_21_14 0
 flow_14_22 0
 flow_22_14 0
 flow_14_23 0
-flow_23_14 0
+flow_23_14 1.8122593192250624e+03
 flow_14_24 0
 flow_24_14 0
 flow_14_25 0
 flow_25_14 0
-flow_14_26 1.0545685354639586e+03
+flow_14_26 0
 flow_26_14 0
 flow_14_27 0
 flow_27_14 0
@@ -1484,7 +1484,7 @@ flow_14_34 0
 flow_34_14 0
 flow_14_35 0
 flow_35_14 0
-flow_14_36 0
+flow_14_36 4.6440747922863763e-10
 flow_36_14 0
 flow_14_37 0
 flow_37_14 0
@@ -1529,7 +1529,7 @@ flow_30_15 0
 flow_15_31 0
 flow_31_15 0
 flow_15_32 0
-flow_32_15 1.8122593192250611e+03
+flow_32_15 9.6282608122035344e+02
 flow_15_33 0
 flow_33_15 0
 flow_15_34 0
@@ -1607,18 +1607,18 @@ flow_20_17 0
 flow_17_21 0
 flow_21_17 0
 flow_17_22 0
-flow_22_17 2.7060996205266129e+03
+flow_22_17 3.4010008319498274e+02
 flow_17_23 0
 flow_23_17 0
 flow_17_24 0
 flow_24_17 0
-flow_17_25 0
+flow_17_25 9.2762370958202337e+02
 flow_25_17 0
 flow_17_26 0
 flow_26_17 0
 flow_17_27 0
 flow_27_17 0
-flow_17_28 5.5374021972968922e+02
+flow_17_28 0
 flow_28_17 0
 flow_17_29 0
 flow_29_17 0
@@ -1641,14 +1641,14 @@ flow_37_17 0
 flow_17_38 0
 flow_38_17 0
 flow_17_39 0
-flow_39_17 0
+flow_39_17 1.8122593192250961e+03
 flow_17_40 0
 flow_40_17 0
 flow_17_41 0
 flow_41_17 0
 flow_18_19 0
 flow_19_18 0
-flow_18_20 1.8122593192250611e+03
+flow_18_20 1.8122593192250670e+03
 flow_20_18 0
 flow_18_21 0
 flow_21_18 0
@@ -1703,7 +1703,7 @@ flow_23_19 0
 flow_19_24 0
 flow_24_19 0
 flow_19_25 0
-flow_25_19 0
+flow_25_19 3.3783408280471576e+01
 flow_19_26 0
 flow_26_19 0
 flow_19_27 0
@@ -1728,13 +1728,13 @@ flow_19_36 0
 flow_36_19 0
 flow_19_37 0
 flow_37_19 0
-flow_19_38 0
+flow_19_38 2.0371633410138338e+02
 flow_38_19 0
 flow_19_39 0
 flow_39_19 0
 flow_19_40 0
 flow_40_19 0
-flow_19_41 0
+flow_19_41 2.3423155318505451e-01
 flow_41_19 0
 flow_20_21 0
 flow_21_20 0
@@ -1759,7 +1759,7 @@ flow_30_20 0
 flow_20_31 0
 flow_31_20 0
 flow_20_32 0
-flow_32_20 1.2677237911538768e+03
+flow_32_20 2.1171570291553926e+03
 flow_20_33 0
 flow_33_20 0
 flow_20_34 0
@@ -1805,7 +1805,7 @@ flow_33_21 0
 flow_21_34 0
 flow_34_21 0
 flow_21_35 0
-flow_35_21 4.8922424296039990e+03
+flow_35_21 4.8922424305827481e+03
 flow_21_36 0
 flow_36_21 0
 flow_21_37 0
@@ -1821,7 +1821,7 @@ flow_41_21 0
 flow_22_23 0
 flow_23_22 0
 flow_22_24 0
-flow_24_22 1.4475805210312410e+03
+flow_24_22 1.0548027670171437e+03
 flow_22_25 0
 flow_25_22 0
 flow_22_26 0
@@ -1830,7 +1830,7 @@ flow_22_27 0
 flow_27_22 0
 flow_22_28 0
 flow_28_22 0
-flow_22_29 0
+flow_22_29 9.2762370958201427e+02
 flow_29_22 0
 flow_22_30 0
 flow_30_22 0
@@ -1846,7 +1846,7 @@ flow_22_35 0
 flow_35_22 0
 flow_22_36 0
 flow_36_22 0
-flow_22_37 0
+flow_22_37 8.8463560964307271e+02
 flow_37_22 0
 flow_22_38 0
 flow_38_22 0
@@ -1859,7 +1859,7 @@ flow_41_22 0
 flow_23_24 0
 flow_24_23 0
 flow_23_25 0
-flow_25_23 9.2762370958201427e+02
+flow_25_23 0
 flow_23_26 0
 flow_26_23 0
 flow_23_27 0
@@ -1884,7 +1884,7 @@ flow_23_36 0
 flow_36_23 0
 flow_23_37 0
 flow_37_23 0
-flow_23_38 8.8463560964304679e+02
+flow_23_38 0
 flow_38_23 0
 flow_23_39 0
 flow_39_23 0
@@ -1902,7 +1902,7 @@ flow_24_28 0
 flow_28_24 0
 flow_24_29 0
 flow_29_24 0
-flow_24_30 9.2762370958201427e+02
+flow_24_30 9.2762370958202337e+02
 flow_30_24 0
 flow_24_31 0
 flow_31_24 0
@@ -1911,7 +1911,7 @@ flow_32_24 0
 flow_24_33 0
 flow_33_24 0
 flow_24_34 0
-flow_34_24 723.90737548064
+flow_34_24 1.9824264765991670e+03
 flow_24_35 0
 flow_35_24 0
 flow_24_36 0
@@ -1920,7 +1920,7 @@ flow_24_37 0
 flow_37_24 0
 flow_24_38 0
 flow_38_24 0
-flow_24_39 3.3089538991335758e+02
+flow_24_39 0
 flow_39_24 0
 flow_24_40 0
 flow_40_24 0
@@ -1949,7 +1949,7 @@ flow_35_25 0
 flow_25_36 0
 flow_36_25 0
 flow_25_37 0
-flow_37_25 9.2762370958201427e+02
+flow_37_25 0
 flow_25_38 0
 flow_38_25 0
 flow_25_39 0
@@ -1981,7 +1981,7 @@ flow_36_26 0
 flow_26_37 0
 flow_37_26 0
 flow_26_38 0
-flow_38_26 9.2762370958201427e+02
+flow_38_26 1.9821922450459863e+03
 flow_26_39 0
 flow_39_26 0
 flow_26_40 0
@@ -1995,7 +1995,7 @@ flow_29_27 0
 flow_27_30 0
 flow_30_27 0
 flow_27_31 0
-flow_31_27 4.8922424296039990e+03
+flow_31_27 4.8922424296009458e+03
 flow_27_32 0
 flow_32_27 0
 flow_27_33 0
@@ -2017,7 +2017,7 @@ flow_40_27 0
 flow_27_41 0
 flow_41_27 0
 flow_28_29 0
-flow_29_28 9.2762370958201427e+02
+flow_29_28 0
 flow_28_30 0
 flow_30_28 0
 flow_28_31 0
@@ -2033,7 +2033,7 @@ flow_35_28 0
 flow_28_36 0
 flow_36_28 0
 flow_28_37 0
-flow_37_28 3.3089538991335758e+02
+flow_37_28 1.8122593192250702e+03
 flow_28_38 0
 flow_38_28 0
 flow_28_39 0
@@ -2061,7 +2061,7 @@ flow_37_29 0
 flow_29_38 0
 flow_38_29 0
 flow_29_39 0
-flow_39_29 9.2762370958201427e+02
+flow_39_29 0
 flow_29_40 0
 flow_40_29 0
 flow_29_41 0
@@ -2078,7 +2078,7 @@ flow_30_35 0
 flow_35_30 0
 flow_30_36 0
 flow_36_30 0
-flow_30_37 9.2762370958201427e+02
+flow_30_37 9.2762370958202337e+02
 flow_37_30 0
 flow_30_38 0
 flow_38_30 0
@@ -2091,7 +2091,7 @@ flow_41_30 0
 flow_31_32 0
 flow_32_31 0
 flow_31_33 0
-flow_33_31 4.8922424296039990e+03
+flow_33_31 4.8922424296009822e+03
 flow_31_34 0
 flow_34_31 0
 flow_31_35 0
@@ -2165,7 +2165,7 @@ flow_38_35 0
 flow_35_39 0
 flow_39_35 0
 flow_35_40 0
-flow_40_35 4.8922424296039990e+03
+flow_40_35 4.8922424305827471e+03
 flow_35_41 0
 flow_41_35 0
 flow_36_37 0
@@ -2177,11 +2177,11 @@ flow_39_36 0
 flow_36_40 0
 flow_40_36 0
 flow_36_41 0
-flow_41_36 2.3422993003896408e-01
+flow_41_36 0
 flow_37_38 0
 flow_38_37 0
 flow_37_39 0
-flow_39_37 3.3089538991335758e+02
+flow_39_37 0
 flow_37_40 0
 flow_40_37 0
 flow_37_41 0
@@ -2232,7 +2232,7 @@ switch_source_30 0
 switch_source_31 0
 switch_source_32 0
 switch_source_33 0
-switch_source_34 0
+switch_source_34 3.2425355718627373e-15
 switch_source_35 0
 switch_source_36 0
 switch_source_37 0
@@ -2301,7 +2301,7 @@ switch_8_0 0
 switch_0_9 0
 switch_9_0 0
 switch_0_10 0
-switch_10_0 1
+switch_10_0 0
 switch_0_11 0
 switch_11_0 0
 switch_0_12 0
@@ -2451,7 +2451,7 @@ switch_4_2 0
 switch_2_5 0
 switch_5_2 1
 switch_2_6 0
-switch_6_2 1
+switch_6_2 0
 switch_2_7 1
 switch_7_2 0
 switch_2_8 0
@@ -2506,7 +2506,7 @@ switch_2_32 0
 switch_32_2 0
 switch_2_33 0
 switch_33_2 0
-switch_2_34 1
+switch_2_34 0
 switch_34_2 0
 switch_2_35 0
 switch_35_2 0
@@ -2583,7 +2583,7 @@ switch_32_3 0
 switch_3_33 0
 switch_33_3 0
 switch_3_34 0
-switch_34_3 1
+switch_34_3 0
 switch_3_35 0
 switch_35_3 0
 switch_3_36 0
@@ -3037,7 +3037,7 @@ switch_21_10 0
 switch_10_22 0
 switch_22_10 0
 switch_10_23 0
-switch_23_10 1
+switch_23_10 0
 switch_10_24 0
 switch_24_10 0
 switch_10_25 0
@@ -3233,7 +3233,7 @@ switch_32_13 0
 switch_13_33 0
 switch_33_13 0
 switch_13_34 0
-switch_34_13 1
+switch_34_13 0
 switch_13_35 0
 switch_35_13 0
 switch_13_36 0
@@ -3424,12 +3424,12 @@ switch_17_26 0
 switch_26_17 0
 switch_17_27 0
 switch_27_17 0
-switch_17_28 1
+switch_17_28 0
 switch_28_17 0
 switch_17_29 0
 switch_29_17 0
 switch_17_30 0
-switch_30_17 1
+switch_30_17 0
 switch_17_31 0
 switch_31_17 0
 switch_17_32 0
@@ -3665,13 +3665,13 @@ switch_41_22 0
 switch_23_24 0
 switch_24_23 0
 switch_23_25 0
-switch_25_23 1
+switch_25_23 0
 switch_23_26 0
 switch_26_23 0
 switch_23_27 0
 switch_27_23 0
 switch_23_28 0
-switch_28_23 1
+switch_28_23 0
 switch_23_29 0
 switch_29_23 0
 switch_23_30 0
@@ -3690,13 +3690,13 @@ switch_23_36 0
 switch_36_23 0
 switch_23_37 0
 switch_37_23 0
-switch_23_38 1
+switch_23_38 0
 switch_38_23 0
 switch_23_39 0
 switch_39_23 0
 switch_23_40 0
 switch_40_23 0
-switch_23_41 1
+switch_23_41 0
 switch_41_23 0
 switch_24_25 0
 switch_25_24 0
@@ -3726,7 +3726,7 @@ switch_24_37 0
 switch_37_24 0
 switch_24_38 0
 switch_38_24 0
-switch_24_39 1
+switch_24_39 0
 switch_39_24 0
 switch_24_40 0
 switch_40_24 0
@@ -3739,7 +3739,7 @@ switch_27_25 0
 switch_25_28 0
 switch_28_25 0
 switch_25_29 0
-switch_29_25 1
+switch_29_25 0
 switch_25_30 0
 switch_30_25 0
 switch_25_31 0
@@ -3823,7 +3823,7 @@ switch_40_27 0
 switch_27_41 0
 switch_41_27 0
 switch_28_29 0
-switch_29_28 1
+switch_29_28 0
 switch_28_30 0
 switch_30_28 0
 switch_28_31 0
@@ -3849,7 +3849,7 @@ switch_40_28 0
 switch_28_41 0
 switch_41_28 0
 switch_29_30 0
-switch_30_29 1
+switch_30_29 0
 switch_29_31 0
 switch_31_29 0
 switch_29_32 0
@@ -3867,7 +3867,7 @@ switch_37_29 0
 switch_29_38 0
 switch_38_29 0
 switch_29_39 0
-switch_39_29 1
+switch_39_29 0
 switch_29_40 0
 switch_40_29 0
 switch_29_41 0

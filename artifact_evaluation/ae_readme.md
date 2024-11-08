@@ -1,7 +1,8 @@
 # Artifact Evaluation for Helix - Reproducibility
 
 We assume that the environment has already been set up based on the `readme.md` in the
-root directory of the repository. You can use the host machine in the cluster to run
+root directory of the repository. Please ask the AE chairs for access to the 24-node
+cluster we provide. You can use the host machine in the cluster to run
 simulator experiments. You will need the whole cluster of 24 machines to run the
 experiments for the prototype system. A copy of the artifact is stored in `~/helix`. 
 Before starting artifact evaluation for reproducibility, run the following command to
@@ -13,7 +14,9 @@ cd ~/helix
 ```
 
 > **Note:** For the experiments below, we provide a copy of the results we get after running
-> them.
+> them in the exact same path as they are generated. 
+
+> **Note:** For all the commends below, if not otherwise specified, please run them on the host.
 
 ## Section 6.3 Single Cluster
 
@@ -2424,14 +2427,17 @@ Previously in reproducing Section 6.4 and 6.5, we have already shown the results
 pruning is enabled, which corresponds to the `w/ prune` results in Figure 11(a). In the figure,
 `24-node` corresponds to the setup in Section 6.4, and `42-node` corresponds to the setup in
 Section 6.5. You can also get the problem size from the optimization log you got when running
-those experiments (corresponds to Table 8). Now, we will show the performance without cluster
-pruning, which corresponds to the `w/o prune` results in Figure 11(a).
+those experiments (corresponds to Table 8 - With Pruning). Now, we will show the performance
+without cluster pruning, which corresponds to the `w/o prune` results in Figure 11(a).
 
-> **Note:** Because of Gurobi licensing issues, the results you get using limited license might
-> be different from ours. This is an issue with the Gurobi solver instead of our system.
+> **Note:** Because of Gurobi licensing issues, the results you get might be different from
+> ours (especially if you are using limited license). This is an issue with the Gurobi solver
+> instead of our system.
 
-(1) First, let's disable cluster pruning for the 24 node cluster. Run the following command to
-generate model placement with Helix:
+> **Note:** Before running the experiments below, please first backup and empty `./layouts`.
+
+(1) First, let's disable cluster pruning and run Helix's model placement planner for the 24
+node cluster. Run the following command to generate model placement with Helix:
 
 ```bash
 python ablation1_pruning.py layout 24
@@ -2444,7 +2450,8 @@ pruning in Table 8:
 Optimize a model with 1848 rows, 1376 columns and 13960 nonzeros
 ```
 
-We terminate the solving process at around 45 minutes. Then, we run the simulation:
+We terminate the solving process at around 45 minutes and save the optimization trace in
+`./layouts/no_prune_24/trace.txt`. Then, we run the simulation:
 
 ```bash
 python ablation1_pruning.py simulate 24
@@ -2472,7 +2479,8 @@ pruning in Table 8:
 Optimize a model with 5502 rows, 4004 columns and 49546 nonzeros
 ```
 
-We terminate the solving process at around 50 minutes. Then, we run the simulation:
+We terminate the solving process at around 75 minutes and save the optimization trace in
+`./layouts/no_prune_42/trace.txt`. Then, we run the simulation:
 
 ```bash
 python ablation1_pruning.py simulate 42
