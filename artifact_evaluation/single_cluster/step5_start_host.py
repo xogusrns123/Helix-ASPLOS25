@@ -375,6 +375,38 @@ def main():
             result_logging_dir="./real_llama70b/swarm_online"
         )
 
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_a100":
+        print("Running LLaMa 70B + Offline + Separate (A100)")
+        os.makedirs("./real_llama70b/separate_offline/a100", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_a100.txt",
+            initial_launch_num=18,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_offline/a100"
+        )
+
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_l4":
+        print("Running LLaMa 70B + Offline + Separate (L4)")
+        os.makedirs("./real_llama70b/separate_offline/l4", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_l4.txt",
+            initial_launch_num=40,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_offline/l4"
+        )
+
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_t4":
+        print("Running LLaMa 70B + Offline + Separate (T4)")
+        os.makedirs("./real_llama70b/separate_offline/t4", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_t4.txt",
+            initial_launch_num=3,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_offline/t4"
+        )
 
 
 if __name__ == '__main__':

@@ -157,6 +157,12 @@ def main():
         parse_result("./real_llama70b/swarm_offline/events.txt", warm_up_time=60, finish_time=300)
     if model_name == "llama70b" and serving_mode == "online" and method == "swarm":
         parse_result("./real_llama70b/swarm_online/events.txt", warm_up_time=200, finish_time=300)
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_a100":
+        parse_result("./real_llama70b/separate_offline/a100/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_l4":
+        parse_result("./real_llama70b/separate_offline/l4/events.txt", warm_up_time=60, finish_time=300)
+    if model_name == "llama70b" and serving_mode == "offline" and method == "separate_t4":
+        parse_result("./real_llama70b/separate_offline/t4/events.txt", warm_up_time=60, finish_time=300)
 
 if __name__ == '__main__':
     main()

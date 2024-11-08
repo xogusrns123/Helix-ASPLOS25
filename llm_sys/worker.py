@@ -19,11 +19,11 @@ import llm_sys.engine.llama
 import llm_sys.utils as utils
 
 
-def init_engine(layer_ids, model_name):
+def init_engine(layer_ids, model_name, vram_usage=0.8):
     engine_args = EngineArgs(model=model_name, block_size=16,
                              load_format="dummy", enforce_eager=True,
                              swap_space=32, max_num_batched_tokens=4096,
-                             gpu_memory_utilization=0.8)
+                             gpu_memory_utilization=vram_usage)
 
     engine = PipelineStageEngine.from_engine_args(engine_args, layer_ids)
     return engine
@@ -79,7 +79,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     return parsed_prompt
 
 
-def run_worker(scheduling_method: str, model_name: str):
+def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
     # warm up gpu and initialize llm_sys
     utils.warm_up()
     worker_ip: str = utils.get_local_ip()
@@ -92,7 +92,7 @@ def run_worker(scheduling_method: str, model_name: str):
 
     # init vllm
     layer_ids = list(range(start_idx, end_idx))
-    engine: PipelineStageEngine = init_engine(layer_ids, model_name)
+    engine: PipelineStageEngine = init_engine(layer_ids, model_name, vram_usage=vram_usage)
     hidden_size = engine.model_config.get_hidden_size()
 
     last_log_time = time.time()
