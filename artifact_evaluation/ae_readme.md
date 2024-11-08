@@ -931,10 +931,10 @@ python setup1_visualization.py helix   # visualize Helix's model placement
 python setup1_visualization.py swarm   # visualize Swarm's model placement
 python setup1_visualization.py petals  # visualize Petals' model placement
 ```
-The files are store in `./visualization`. Notice that the visualization looks slightly different
-from the one shown in the paper, because of the slight difference in model placement found by the
-solver. Despite the difference, overall Helix's model placement has higher GPU utilization (red
-indicates high utilization), which verifies our claim in the paper.
+The files are store in `./visualization`. Notice that the visualization of Helix's model placement
+looks slightly different from the one shown in the paper, because of the slight difference in model
+placement found by the solver. Despite the difference, overall Helix's model placement has higher
+GPU utilization (red indicates high utilization), which verifies our claim in the paper.
 
 #### Decode Throughput
 
