@@ -9,6 +9,7 @@ activate the conda environment:
 
 ```bash
 conda activate runtime
+cd ~/helix
 ```
 
 > **Note:** For the experiments below, we provide a copy of the results we get after running
@@ -37,10 +38,14 @@ also generate the three sub-cluster config files with each type of machine: `con
 The next step is to generate the model placement for the cluster. Run the following commands
 to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
 methods. Notice that before running Helix's MILP-based model placement planner, you need to
-remove the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
-contains the result we get. We suggest moving them to a backup place if you want to compare
-your results with ours. Also, for `llama70b`, you need to run `petals` before running
-Helix's MILP model placement planner, as we bootstrap the solver with `petals`' solution.
+empty the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
+contains the result we get. Otherwise you will get an error from the model placement planner
+saying that the directory is not empty. We suggest moving them to a backup place if you want
+to compare your results with ours. You can restore the two directories after you have finished
+evaluation on Helix's model placement planner.
+
+Also, for `llama70b`, you need to run `petals` before running Helix's MILP model placement
+planner, as we bootstrap the solver with `petals`' solution.
 
 > **Notes:** We notice that Gurobi produces completely different optimization traces when
 > using **different licenses, even when using the same random seed**. When using the default
@@ -48,7 +53,7 @@ Helix's MILP model placement planner, as we bootstrap the solver with `petals`' 
 > license. (objective value = 952 v.s. 1289) Unfortunately, we are not allowed and unable to
 > bind our academic Gurobi license to the cluster provided. Note that this is an issue with
 > Gurobi **licensing** instead of our system, and we provide our optimization trace in
-> `./layout_llama70b/ilp/trace.txt` for you to compare against."
+> `./layout_llama70b/ilp/trace.txt` for you to compare against.
 
 > **Notes:** Running Helix to search for a model placement for LLaMA 70B may take a long time.
 > We set the max running time to 10 hours, but you can stop the solver at any time with `ctrl +c`. 
@@ -67,8 +72,8 @@ python step2_gen_layout.py swarm llama70b
 python step2_gen_layout.py separate llama30b
 python step2_gen_layout.py separate llama70b
 # Generate model placement using Helix's MILP-based method
-python step2_gen_layout.py ilp llama30b  # remove ./layout_llama30b/ilp before running
-python step2_gen_layout.py ilp llama70b  # remove ./layout_llama70b/ilp before running
+python step2_gen_layout.py ilp llama30b  # empty ./layout_llama30b/ilp before running
+python step2_gen_layout.py ilp llama70b  # empty ./layout_llama70b/ilp before running
 ```
 
 After running the commands above, you will get model placement files located in:
@@ -351,7 +356,8 @@ for the prototype system experiments.
 > **Note:** In order to keep the total expense of artifact evaluation within the budget, we reduce
 > the running time for each experiment. For offline experiments, we reduce the running time from 
 > 10 minutes to 5 minutes. For online experiments, we reduce the running time from 30 minutes to
-> 5 minutes. All results are based on the reduced running time.
+> 5 minutes. All results are based on the reduced running time, which might be slightly different
+> from the results in the paper.
 
 #### 1. LLaMA 30B + offline + Helix
 
@@ -371,9 +377,11 @@ python step6_start_worker.py llama30b maxflow           # on all 24 worker machi
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/a100`.
 
 > **Note:** You need to run the worker command on all 24 worker machines. After system initialization
-> the unused machines will automatically shut down. Also, you might get a core dumped when the host
-> machine finishes. This is normal and expected, the results will be preserved. This applies to all
-> following experiments.
+> the unused machines will automatically throw an error an terminate. Also, you might get a core dumped
+> when the host machine finishes. This is normal and expected, the results will be preserved.
+> This applies to all following real machine experiments.
+
+> **Note:** In the case above, the unused machines refer to the 8 L4 machines and 12 T4 machines.
 
 Parse the results with the following command on the host machine:
 ```bash
@@ -383,18 +391,19 @@ python step7_parse_results.py helix_a100 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/helix_offline/a100/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000016689s
-72th percentile decode arrival interval: 0.000017405s
-75th percentile decode arrival interval: 0.000018358s
-80th percentile decode arrival interval: 0.000024557s
-85th percentile decode arrival interval: 0.019630194s
-87th percentile decode arrival interval: 0.020752192s
-90th percentile decode arrival interval: 0.022538185s
-92th percentile decode arrival interval: 0.023577452s
-95th percentile decode arrival interval: 0.025068045s
-99th percentile decode arrival interval: 0.037998915s
+Prompt latency:
+Latency 5th percentile: 0.14 s
+Latency 25th percentile: 0.20 s
+Latency 50th percentile: 0.40 s
+Latency 75th percentile: 0.45 s
+Latency 95th percentile: 0.66 s
+Decode latency:
+Latency 5th percentile: 0.11 s
+Latency 25th percentile: 0.12 s
+Latency 50th percentile: 0.14 s
+Latency 75th percentile: 0.16 s
+Latency 95th percentile: 0.43 s
+Summary:
 Avg prompt latency: 0.358s
 Avg decode latency: 0.169s
 Throughput: 198.9 Tokens/s
@@ -415,18 +424,19 @@ python step7_parse_results.py helix_l4 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/helix_offline/l4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000020027s
-60th percentile decode arrival interval: 0.000023365s
-70th percentile decode arrival interval: 0.000052691s
-72th percentile decode arrival interval: 0.000241756s
-75th percentile decode arrival interval: 0.039864779s
-80th percentile decode arrival interval: 0.042426586s
-85th percentile decode arrival interval: 0.043032646s
-87th percentile decode arrival interval: 0.043360472s
-90th percentile decode arrival interval: 0.044373035s
-92th percentile decode arrival interval: 0.044862509s
-95th percentile decode arrival interval: 0.046271801s
-99th percentile decode arrival interval: 0.073158503s
+Prompt latency:
+Latency 5th percentile: 0.45 s
+Latency 25th percentile: 0.57 s
+Latency 50th percentile: 0.98 s
+Latency 75th percentile: 1.41 s
+Latency 95th percentile: 1.65 s
+Decode latency:
+Latency 5th percentile: 0.39 s
+Latency 25th percentile: 0.43 s
+Latency 50th percentile: 0.46 s
+Latency 75th percentile: 0.51 s
+Latency 95th percentile: 1.22 s
+Summary:
 Avg prompt latency: 1.001s
 Avg decode latency: 0.533s
 Throughput: 64.8 Tokens/s
@@ -448,18 +458,19 @@ python step7_parse_results.py helix_t4 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/helix_offline/t4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000025034s
-60th percentile decode arrival interval: 0.000030279s
-70th percentile decode arrival interval: 0.026171207s
-72th percentile decode arrival interval: 0.026499033s
-75th percentile decode arrival interval: 0.028123379s
-80th percentile decode arrival interval: 0.028793097s
-85th percentile decode arrival interval: 0.029223204s
-87th percentile decode arrival interval: 0.029447794s
-90th percentile decode arrival interval: 0.029864550s
-92th percentile decode arrival interval: 0.030179739s
-95th percentile decode arrival interval: 0.030982971s
-99th percentile decode arrival interval: 0.060351133s
+Prompt latency:
+Latency 5th percentile: 0.55 s
+Latency 25th percentile: 1.03 s
+Latency 50th percentile: 2.79 s
+Latency 75th percentile: 3.51 s
+Latency 95th percentile: 6.10 s
+Decode latency:
+Latency 5th percentile: 0.39 s
+Latency 25th percentile: 0.43 s
+Latency 50th percentile: 0.46 s
+Latency 75th percentile: 0.51 s
+Latency 95th percentile: 2.79 s
+Summary:
 Avg prompt latency: 2.405s
 Avg decode latency: 0.697s
 Throughput: 57.5 Tokens/s
@@ -469,7 +480,7 @@ The total decode throughput is 321.2, corresponding to Figure 5(a) Prototype - H
 
 #### 2. LLaMA 30B + online + Helix
 
-The model placement has already been generated in (1). On the host and worker machines, run
+The real system config has already been generated in (1). On the host and worker machines, run
 the following command, this tests the A100 sub-cluster:
 ```bash
 python step5_start_host.py helix_a100 llama30b online  # on host machine
@@ -486,18 +497,19 @@ python step7_parse_results.py helix_a100 llama30b online
 You will see results like this
 ```
 ./real_llama30b/helix_online/a100/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000015497s
-60th percentile decode arrival interval: 0.000018120s
-70th percentile decode arrival interval: 0.000038624s
-72th percentile decode arrival interval: 0.000124931s
-75th percentile decode arrival interval: 0.019706249s
-80th percentile decode arrival interval: 0.020469427s
-85th percentile decode arrival interval: 0.021248102s
-87th percentile decode arrival interval: 0.021480322s
-90th percentile decode arrival interval: 0.022046089s
-92th percentile decode arrival interval: 0.022469997s
-95th percentile decode arrival interval: 0.023351669s
-99th percentile decode arrival interval: 0.039023399s
+Prompt latency:
+Latency 5th percentile: 0.17 s
+Latency 25th percentile: 0.21 s
+Latency 50th percentile: 0.41 s
+Latency 75th percentile: 0.46 s
+Latency 95th percentile: 0.63 s
+Decode latency:
+Latency 5th percentile: 0.10 s
+Latency 25th percentile: 0.11 s
+Latency 50th percentile: 0.12 s
+Latency 75th percentile: 0.13 s
+Latency 95th percentile: 0.26 s
+Summary:
 Avg prompt latency: 0.367s
 Avg decode latency: 0.138s
 Throughput: 136.4 Tokens/s
@@ -519,18 +531,19 @@ python step7_parse_results.py helix_l4 llama30b online
 You will see results like this
 ```
 ./real_llama30b/helix_online/l4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.039200306s
-60th percentile decode arrival interval: 0.039655685s
-70th percentile decode arrival interval: 0.039990664s
-72th percentile decode arrival interval: 0.040517330s
-75th percentile decode arrival interval: 0.041629314s
-80th percentile decode arrival interval: 0.041948318s
-85th percentile decode arrival interval: 0.042401791s
-87th percentile decode arrival interval: 0.042578220s
-90th percentile decode arrival interval: 0.042785168s
-92th percentile decode arrival interval: 0.042936563s
-95th percentile decode arrival interval: 0.043436527s
-99th percentile decode arrival interval: 0.172743082s
+Prompt latency:
+Latency 5th percentile: 0.46 s
+Latency 25th percentile: 0.61 s
+Latency 50th percentile: 1.24 s
+Latency 75th percentile: 1.39 s
+Latency 95th percentile: 1.97 s
+Decode latency:
+Latency 5th percentile: 0.31 s
+Latency 25th percentile: 0.34 s
+Latency 50th percentile: 0.37 s
+Latency 75th percentile: 0.41 s
+Latency 95th percentile: 0.57 s
+Summary:
 Avg prompt latency: 1.077s
 Avg decode latency: 0.415s
 Throughput: 32.2 Tokens/s
@@ -551,18 +564,20 @@ python step7_parse_results.py helix_t4 llama30b online
 
 You will see results like this
 ```
-Median decode arrival interval: 0.026262045s
-60th percentile decode arrival interval: 0.026580095s
-70th percentile decode arrival interval: 0.027352810s
-72th percentile decode arrival interval: 0.027828932s
-75th percentile decode arrival interval: 0.028565407s
-80th percentile decode arrival interval: 0.029286623s
-85th percentile decode arrival interval: 0.030496597s
-87th percentile decode arrival interval: 0.031460762s
-90th percentile decode arrival interval: 0.035567522s
-92th percentile decode arrival interval: 0.040454388s
-95th percentile decode arrival interval: 0.055979013s
-99th percentile decode arrival interval: 0.166379690s
+./real_llama30b/helix_online/t4/events.txt (excluding first 60s as warm up)
+Prompt latency:
+Latency 5th percentile: 0.55 s
+Latency 25th percentile: 0.87 s
+Latency 50th percentile: 1.35 s
+Latency 75th percentile: 3.03 s
+Latency 95th percentile: 5.10 s
+Decode latency:
+Latency 5th percentile: 0.29 s
+Latency 25th percentile: 0.32 s
+Latency 50th percentile: 0.35 s
+Latency 75th percentile: 0.38 s
+Latency 95th percentile: 0.90 s
+Summary:
 Avg prompt latency: 2.146s
 Avg decode latency: 0.472s
 Throughput: 29.3 Tokens/s
@@ -571,6 +586,31 @@ Throughput: 29.3 Tokens/s
 The total decode throughput is 198, corresponding to Figure 5(b) Prototype - Helix in the paper.
 The average prompt latency is 0.740, corresponding to Figure 5(e) Prototype - Helix in the paper.
 The average decode latency is 0.231, corresponding to Figure 5(f) Prototype - Helix in the paper.
+
+Run the following command to get the aggregated percentile latency distribution for this setup:
+```bash
+python step7_parse_results.py helix llama30b online
+```
+
+You will see the following results that correspond to Figure 5(e) and Figure 5(f) Prototype - 
+Helix in the paper:
+```
+./real_llama30b/helix_online/a100/events.txt (excluding first 60s as warm up)
+./real_llama30b/helix_online/l4/events.txt (excluding first 60s as warm up)
+./real_llama30b/helix_online/t4/events.txt (excluding first 60s as warm up)
+Prompt latency:
+Latency 5th percentile: 0.18 s
+Latency 25th percentile: 0.37 s
+Latency 50th percentile: 0.46 s
+Latency 75th percentile: 0.84 s
+Latency 95th percentile: 2.92 s
+Decode latency:
+Latency 5th percentile: 0.11 s
+Latency 25th percentile: 0.11 s
+Latency 50th percentile: 0.13 s
+Latency 75th percentile: 0.33 s
+Latency 95th percentile: 0.45 s
+```
 
 #### 3. LLaMA 30B + offline + Swarm
 
@@ -596,18 +636,19 @@ python step7_parse_results.py swarm llama30b offline
 You will see results like this
 ```
 ./real_llama30b/swarm_offline/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000473261s
-60th percentile decode arrival interval: 0.004304409s
-70th percentile decode arrival interval: 0.008976936s
-72th percentile decode arrival interval: 0.010055304s
-75th percentile decode arrival interval: 0.011784792s
-80th percentile decode arrival interval: 0.015065908s
-85th percentile decode arrival interval: 0.018713951s
-87th percentile decode arrival interval: 0.020253658s
-90th percentile decode arrival interval: 0.022897005s
-92th percentile decode arrival interval: 0.024780512s
-95th percentile decode arrival interval: 0.027924299s
-99th percentile decode arrival interval: 0.033450365s
+Prompt latency:
+Latency 5th percentile: 0.42 s
+Latency 25th percentile: 0.66 s
+Latency 50th percentile: 1.36 s
+Latency 75th percentile: 1.65 s
+Latency 95th percentile: 2.16 s
+Decode latency:
+Latency 5th percentile: 0.26 s
+Latency 25th percentile: 0.29 s
+Latency 50th percentile: 0.31 s
+Latency 75th percentile: 0.35 s
+Latency 95th percentile: 0.58 s
+Summary:
 Avg prompt latency: 1.237s
 Avg decode latency: 0.345s
 Throughput: 142.9 Tokens/s
@@ -616,7 +657,7 @@ The total decode throughput is 142.9, corresponding to Figure 5(a) Prototype - S
 
 #### 4. LLaMA 30B + online + Swarm
 
-The model placement has already been generated in (3). On the host and worker machines, run
+The real system config has already been generated in (3). On the host and worker machines, run
 the following command:
 ```bash
 python step5_start_host.py swarm llama30b online  # on host machine
@@ -633,18 +674,19 @@ python step7_parse_results.py swarm llama30b online
 You will see results like this
 ```
 ./real_llama30b/swarm_online/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.004875183s
-60th percentile decode arrival interval: 0.008800030s
-70th percentile decode arrival interval: 0.014255047s
-72th percentile decode arrival interval: 0.015548706s
-75th percentile decode arrival interval: 0.017560720s
-80th percentile decode arrival interval: 0.020750523s
-85th percentile decode arrival interval: 0.023903847s
-87th percentile decode arrival interval: 0.025160074s
-90th percentile decode arrival interval: 0.027175426s
-92th percentile decode arrival interval: 0.028275490s
-95th percentile decode arrival interval: 0.030082703s
-99th percentile decode arrival interval: 0.034574032s
+Prompt latency:
+Latency 5th percentile: 0.43 s
+Latency 25th percentile: 0.70 s
+Latency 50th percentile: 1.35 s
+Latency 75th percentile: 1.65 s
+Latency 95th percentile: 2.06 s
+Decode latency:
+Latency 5th percentile: 0.23 s
+Latency 25th percentile: 0.26 s
+Latency 50th percentile: 0.28 s
+Latency 75th percentile: 0.32 s
+Latency 95th percentile: 0.51 s
+Summary:
 Avg prompt latency: 1.243s
 Avg decode latency: 0.309s
 Throughput: 102.3 Tokens/s
@@ -653,6 +695,7 @@ Throughput: 102.3 Tokens/s
 The decode throughput is 102.3, corresponding to Figure 5(b) Prototype - Swarm in the paper.
 The average prompt latency is 1.243, corresponding to Figure 5(e) Prototype - Swarm in the paper.
 The average decode latency is 0.309, corresponding to Figure 5(f) Prototype - Swarm in the paper.
+The prompt and decode latency percentiles correspond to Figure 5(e) and Figure 5(f) Prototype - Swarm in the paper.
 
 #### 5. LLaMA 30B + offline + Separate Pipelines
 
@@ -678,18 +721,19 @@ python step7_parse_results.py separate_a100 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/separate_offline/a100/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000006914s
-70th percentile decode arrival interval: 0.000010252s
-72th percentile decode arrival interval: 0.000012636s
-75th percentile decode arrival interval: 0.000018358s
-80th percentile decode arrival interval: 0.000042439s
-85th percentile decode arrival interval: 0.020485401s
-87th percentile decode arrival interval: 0.021564484s
-90th percentile decode arrival interval: 0.022869587s
-92th percentile decode arrival interval: 0.023560286s
-95th percentile decode arrival interval: 0.024858236s
-99th percentile decode arrival interval: 0.034927130s
+Prompt latency:
+Latency 5th percentile: 0.13 s
+Latency 25th percentile: 0.20 s
+Latency 50th percentile: 0.40 s
+Latency 75th percentile: 0.46 s
+Latency 95th percentile: 0.66 s
+Decode latency:
+Latency 5th percentile: 0.10 s
+Latency 25th percentile: 0.12 s
+Latency 50th percentile: 0.14 s
+Latency 75th percentile: 0.14 s
+Latency 95th percentile: 0.41 s
+Summary:
 Avg prompt latency: 0.357s
 Avg decode latency: 0.159s
 Throughput: 187.3 Tokens/s
@@ -711,18 +755,19 @@ python step7_parse_results.py separate_l4 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/separate_offline/l4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000008583s
-60th percentile decode arrival interval: 0.000012875s
-70th percentile decode arrival interval: 0.039647579s
-72th percentile decode arrival interval: 0.039922953s
-75th percentile decode arrival interval: 0.041729927s
-80th percentile decode arrival interval: 0.042512417s
-85th percentile decode arrival interval: 0.042974710s
-87th percentile decode arrival interval: 0.043194532s
-90th percentile decode arrival interval: 0.043971777s
-92th percentile decode arrival interval: 0.044412851s
-95th percentile decode arrival interval: 0.045628309s
-99th percentile decode arrival interval: 0.071908951s
+Prompt latency:
+Latency 5th percentile: 0.44 s
+Latency 25th percentile: 0.55 s
+Latency 50th percentile: 1.22 s
+Latency 75th percentile: 1.41 s
+Latency 95th percentile: 1.68 s
+Decode latency:
+Latency 5th percentile: 0.37 s
+Latency 25th percentile: 0.43 s
+Latency 50th percentile: 0.44 s
+Latency 75th percentile: 0.48 s
+Latency 95th percentile: 1.11 s
+Summary:
 Avg prompt latency: 1.039s
 Avg decode latency: 0.507s
 Throughput: 58.6 Tokens/s
@@ -744,18 +789,19 @@ python step7_parse_results.py separate_t4 llama30b offline
 You will see results like this
 ```
 ./real_llama30b/separate_offline/t4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000015020s
-60th percentile decode arrival interval: 0.026038170s
-70th percentile decode arrival interval: 0.027609587s
-72th percentile decode arrival interval: 0.028145075s
-75th percentile decode arrival interval: 0.028446436s
-80th percentile decode arrival interval: 0.028845072s
-85th percentile decode arrival interval: 0.029188156s
-87th percentile decode arrival interval: 0.029350519s
-90th percentile decode arrival interval: 0.029661417s
-92th percentile decode arrival interval: 0.029947042s
-95th percentile decode arrival interval: 0.030622721s
-99th percentile decode arrival interval: 0.074801683s
+Prompt latency:
+Latency 5th percentile: 0.51 s
+Latency 25th percentile: 0.83 s
+Latency 50th percentile: 1.14 s
+Latency 75th percentile: 3.06 s
+Latency 95th percentile: 4.01 s
+Decode latency:
+Latency 5th percentile: 0.36 s
+Latency 25th percentile: 0.40 s
+Latency 50th percentile: 0.43 s
+Latency 75th percentile: 0.47 s
+Latency 95th percentile: 2.42 s
+Summary:
 Avg prompt latency: 1.896s
 Avg decode latency: 0.601s
 Throughput: 49.2 Tokens/s
@@ -765,7 +811,7 @@ The total decode throughput is 295.1, corresponding to Figure 5(a) Prototype - S
 
 #### 6. LLaMA 30B + online + Separate Pipelines
 
-The model placement has already been generated in (5). On the host and worker machines, run
+The real system config has already been generated in (5). On the host and worker machines, run
 the following command, this tests the A100 sub-cluster:
 ```bash
 python step5_start_host.py separate_a100 llama30b online  # on host machine
@@ -782,18 +828,19 @@ python step7_parse_results.py separate_a100 llama30b online
 You will see results like this
 ```
 ./real_llama30b/separate_online/a100/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000007629s
-60th percentile decode arrival interval: 0.000013828s
-70th percentile decode arrival interval: 0.019665956s
-72th percentile decode arrival interval: 0.019973993s
-75th percentile decode arrival interval: 0.020226717s
-80th percentile decode arrival interval: 0.020450830s
-85th percentile decode arrival interval: 0.020963669s
-87th percentile decode arrival interval: 0.021226168s
-90th percentile decode arrival interval: 0.021579266s
-92th percentile decode arrival interval: 0.021926165s
-95th percentile decode arrival interval: 0.022525311s
-99th percentile decode arrival interval: 0.040825844s
+Prompt latency:
+Latency 5th percentile: 0.13 s
+Latency 25th percentile: 0.21 s
+Latency 50th percentile: 0.41 s
+Latency 75th percentile: 0.45 s
+Latency 95th percentile: 0.63 s
+Decode latency:
+Latency 5th percentile: 0.09 s
+Latency 25th percentile: 0.10 s
+Latency 50th percentile: 0.11 s
+Latency 75th percentile: 0.12 s
+Latency 95th percentile: 0.18 s
+Summary:
 Avg prompt latency: 0.359s
 Avg decode latency: 0.126s
 Throughput: 118.9 Tokens/s
@@ -815,18 +862,19 @@ python step7_parse_results.py separate_l4 llama30b online
 You will see results like this
 ```
 ./real_llama30b/separate_online/l4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.039650440s
-60th percentile decode arrival interval: 0.039791822s
-70th percentile decode arrival interval: 0.039984703s
-72th percentile decode arrival interval: 0.040131569s
-75th percentile decode arrival interval: 0.041092634s
-80th percentile decode arrival interval: 0.041924477s
-85th percentile decode arrival interval: 0.042470455s
-87th percentile decode arrival interval: 0.042638063s
-90th percentile decode arrival interval: 0.042831898s
-92th percentile decode arrival interval: 0.043096304s
-95th percentile decode arrival interval: 0.049180508s
-99th percentile decode arrival interval: 0.173440456s
+Prompt latency:
+Latency 5th percentile: 0.44 s
+Latency 25th percentile: 0.61 s
+Latency 50th percentile: 0.74 s
+Latency 75th percentile: 1.38 s
+Latency 95th percentile: 1.63 s
+Decode latency:
+Latency 5th percentile: 0.28 s
+Latency 25th percentile: 0.32 s
+Latency 50th percentile: 0.33 s
+Latency 75th percentile: 0.36 s
+Latency 95th percentile: 0.47 s
+Summary:
 Avg prompt latency: 0.999s
 Avg decode latency: 0.368s
 Throughput: 27.8 Tokens/s
@@ -848,18 +896,19 @@ python step7_parse_results.py separate_t4 llama30b online
 You will see results like this
 ```
 ./real_llama30b/separate_online/t4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.026481867s
-60th percentile decode arrival interval: 0.026876211s
-70th percentile decode arrival interval: 0.027818680s
-72th percentile decode arrival interval: 0.028215408s
-75th percentile decode arrival interval: 0.028787613s
-80th percentile decode arrival interval: 0.030151129s
-85th percentile decode arrival interval: 0.033002138s
-87th percentile decode arrival interval: 0.034899473s
-90th percentile decode arrival interval: 0.040243387s
-92th percentile decode arrival interval: 0.045241594s
-95th percentile decode arrival interval: 0.056210995s
-99th percentile decode arrival interval: 0.250986814s
+Prompt latency:
+Latency 5th percentile: 0.53 s
+Latency 25th percentile: 0.86 s
+Latency 50th percentile: 1.35 s
+Latency 75th percentile: 3.01 s
+Latency 95th percentile: 4.21 s
+Decode latency:
+Latency 5th percentile: 0.29 s
+Latency 25th percentile: 0.29 s
+Latency 50th percentile: 0.32 s
+Latency 75th percentile: 0.34 s
+Latency 95th percentile: 0.74 s
+Summary:
 Avg prompt latency: 2.042s
 Avg decode latency: 0.416s
 Throughput: 26.4 Tokens/s
@@ -868,6 +917,31 @@ Throughput: 26.4 Tokens/s
 The total decode throughput is 173.1, corresponding to Figure 5(b) Prototype - Separate Pipelines (SP) in the paper.
 The average prompt latency is 0.719, corresponding to Figure 5(e) Prototype - Separate Pipelines (SP) in the paper.
 The average decode latency is 0.209, corresponding to Figure 5(f) Prototype - Separate Pipelines (SP) in the paper.
+
+Run the following command to get the aggregated percentile latency distribution for this setup:
+```bash
+python step7_parse_results.py separate llama30b online
+```
+
+You will see the following results that correspond to Figure 5(e) and Figure 5(f) Prototype -
+Separate Pipelines (SP) in the paper:
+```
+./real_llama30b/separate_online/a100/events.txt (excluding first 60s as warm up)
+./real_llama30b/separate_online/l4/events.txt (excluding first 60s as warm up)
+./real_llama30b/separate_online/t4/events.txt (excluding first 60s as warm up)
+Prompt latency:
+Latency 5th percentile: 0.14 s
+Latency 25th percentile: 0.36 s
+Latency 50th percentile: 0.45 s
+Latency 75th percentile: 0.77 s
+Latency 95th percentile: 2.97 s
+Decode latency:
+Latency 5th percentile: 0.09 s
+Latency 25th percentile: 0.11 s
+Latency 50th percentile: 0.12 s
+Latency 75th percentile: 0.31 s
+Latency 95th percentile: 0.40 s
+```
 
 #### 7. LLaMA 70B + offline + Helix
 
@@ -895,18 +969,19 @@ python step7_parse_results.py helix llama70b offline
 You will see results like this
 ```
 ./real_llama70b/helix_offline/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000000000s
-85th percentile decode arrival interval: 0.000000000s
-87th percentile decode arrival interval: 0.000000000s
-90th percentile decode arrival interval: 0.000033617s
-92th percentile decode arrival interval: 0.000384092s
-95th percentile decode arrival interval: 0.026100159s
-99th percentile decode arrival interval: 0.056120634s
+Prompt latency:
+Latency 5th percentile: 1.02 s
+Latency 25th percentile: 1.78 s
+Latency 50th percentile: 3.24 s
+Latency 75th percentile: 4.16 s
+Latency 95th percentile: 5.35 s
+Decode latency:
+Latency 5th percentile: 0.69 s
+Latency 25th percentile: 1.00 s
+Latency 50th percentile: 1.42 s
+Latency 75th percentile: 2.23 s
+Latency 95th percentile: 3.76 s
+Summary:
 Avg prompt latency: 3.147s
 Avg decode latency: 1.750s
 Throughput: 223.4 Tokens/s
@@ -916,7 +991,7 @@ The total decode throughput is 223.4, corresponding to Figure 5(c) Prototype - H
 
 #### 8. LLaMA 70B + online + Helix
 
-The model placement has already been generated in (7). On the host and worker machines, run
+The real system config has already been generated in (7). On the host and worker machines, run
 the following command:
 ```bash
 python step5_start_host.py helix llama70b online        # on host machine
@@ -933,18 +1008,19 @@ python step7_parse_results.py helix llama70b online
 You will see results like this
 ```
 ./real_llama70b/helix_online/events.txt (excluding first 200s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000000000s
-85th percentile decode arrival interval: 0.000000000s
-87th percentile decode arrival interval: 0.000000000s
-90th percentile decode arrival interval: 0.000033379s
-92th percentile decode arrival interval: 0.000321150s
-95th percentile decode arrival interval: 0.025971413s
-99th percentile decode arrival interval: 0.089863539s
+Prompt latency:
+Latency 5th percentile: 1.03 s
+Latency 25th percentile: 1.60 s
+Latency 50th percentile: 2.86 s
+Latency 75th percentile: 3.58 s
+Latency 95th percentile: 4.33 s
+Decode latency:
+Latency 5th percentile: 0.78 s
+Latency 25th percentile: 1.13 s
+Latency 50th percentile: 1.80 s
+Latency 75th percentile: 2.87 s
+Latency 95th percentile: 3.60 s
+Summary:
 Avg prompt latency: 2.660s
 Avg decode latency: 2.020s
 Throughput: 148.3 Tokens/s
@@ -953,6 +1029,7 @@ Throughput: 148.3 Tokens/s
 The decode throughput is 148.3, corresponding to Figure 5(d) Prototype - Helix in the paper.
 The average prompt latency is 2.660, corresponding to Figure 5(g) Prototype - Helix in the paper.
 The average decode latency is 2.020, corresponding to Figure 5(h) Prototype - Helix in the paper.
+The prompt and decode latency percentiles correspond to Figure 5(g) and Figure 5(h) Prototype - Helix in the paper.
 
 #### 9. LLaMA 70B + offline + Swarm
 
@@ -980,18 +1057,19 @@ python step7_parse_results.py swarm llama70b offline
 You will see results like this
 ```
 ./real_llama70b/swarm_offline/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000009298s
-72th percentile decode arrival interval: 0.000010490s
-75th percentile decode arrival interval: 0.000013590s
-80th percentile decode arrival interval: 0.000023365s
-85th percentile decode arrival interval: 0.000053167s
-87th percentile decode arrival interval: 0.000098944s
-90th percentile decode arrival interval: 0.031455517s
-92th percentile decode arrival interval: 0.033137798s
-95th percentile decode arrival interval: 0.034678221s
-99th percentile decode arrival interval: 0.062320948s
+Prompt latency:
+Latency 5th percentile: 1.04 s
+Latency 25th percentile: 1.64 s
+Latency 50th percentile: 3.47 s
+Latency 75th percentile: 4.04 s
+Latency 95th percentile: 5.18 s
+Decode latency:
+Latency 5th percentile: 0.73 s
+Latency 25th percentile: 0.97 s
+Latency 50th percentile: 1.49 s
+Latency 75th percentile: 1.93 s
+Latency 95th percentile: 3.23 s
+Summary:
 Avg prompt latency: 3.060s
 Avg decode latency: 1.598s
 Throughput: 111.7 Tokens/s
@@ -1001,7 +1079,7 @@ The total decode throughput is 111.7, corresponding to Figure 5(c) Prototype - S
 
 #### 10. LLaMA 70B + online + Swarm
 
-The model placement has already been generated in (9). On the host and worker machines, run
+The real system config has already been generated in (9). On the host and worker machines, run
 the following command:
 ```bash
 python step5_start_host.py swarm llama70b online         # on host machine
@@ -1018,18 +1096,19 @@ python step7_parse_results.py swarm llama70b online
 You will see results like this
 ```
 ./real_llama70b/swarm_online/events.txt (excluding first 200s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000005245s
-70th percentile decode arrival interval: 0.000009537s
-72th percentile decode arrival interval: 0.000010967s
-75th percentile decode arrival interval: 0.000014305s
-80th percentile decode arrival interval: 0.000027418s
-85th percentile decode arrival interval: 0.000069618s
-87th percentile decode arrival interval: 0.000242710s
-90th percentile decode arrival interval: 0.031656981s
-92th percentile decode arrival interval: 0.033603668s
-95th percentile decode arrival interval: 0.034790039s
-99th percentile decode arrival interval: 0.172259808s
+Prompt latency:
+Latency 5th percentile: 0.99 s
+Latency 25th percentile: 1.82 s
+Latency 50th percentile: 3.53 s
+Latency 75th percentile: 4.04 s
+Latency 95th percentile: 4.37 s
+Decode latency:
+Latency 5th percentile: 0.76 s
+Latency 25th percentile: 1.16 s
+Latency 50th percentile: 1.52 s
+Latency 75th percentile: 1.98 s
+Latency 95th percentile: 3.19 s
+Summary:
 Avg prompt latency: 3.022s
 Avg decode latency: 1.639s
 Throughput: 81.1 Tokens/s
@@ -1038,6 +1117,7 @@ Throughput: 81.1 Tokens/s
 The decode throughput is 81.1, corresponding to Figure 5(d) Prototype - Swarm in the paper.
 The average prompt latency is 3.022, corresponding to Figure 5(g) Prototype - Swarm in the paper.
 The average decode latency is 1.639, corresponding to Figure 5(h) Prototype - Swarm in the paper.
+The prompt and decode latency percentiles correspond to Figure 5(g) and Figure 5(h) Prototype - Swarm in the paper.
 
 #### 11. LLaMA 70B + offline + Separate Pipelines
 
@@ -1050,8 +1130,8 @@ On the host and worker machines, run the following command, this tests the A100 
 python step5_start_host.py separate_a100 llama70b offline  # on host machine
 python step6_start_worker.py llama70b random 0.9           # on all 24 worker machines
 ```
-We need to set max vram usage to 0.9 to avoid out-of-memory errors. This is because the number
-of layers assigned to each GPU is larger than its capacity, reflecting that the model placement
+We need to set vLLM's max vram usage to 0.9 to avoid out-of-memory errors. This is because the number
+of layers assigned to each GPU is larger than the recommended value, reflecting that the model placement
 is not optimal.
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_offline/a100`.
@@ -1064,18 +1144,19 @@ python step7_parse_results.py separate_a100 llama70b offline
 You will see results like this
 ```
 ./real_llama70b/separate_offline/a100/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000008106s
-60th percentile decode arrival interval: 0.000016928s
-70th percentile decode arrival interval: 0.035156727s
-72th percentile decode arrival interval: 0.035243750s
-75th percentile decode arrival interval: 0.035449266s
-80th percentile decode arrival interval: 0.036103487s
-85th percentile decode arrival interval: 0.036521673s
-87th percentile decode arrival interval: 0.036737204s
-90th percentile decode arrival interval: 0.037084341s
-92th percentile decode arrival interval: 0.037394762s
-95th percentile decode arrival interval: 0.038146257s
-99th percentile decode arrival interval: 0.060304403s
+Prompt latency:
+Latency 5th percentile: 0.31 s
+Latency 25th percentile: 5.80 s
+Latency 50th percentile: 19.25 s
+Latency 75th percentile: 65.52 s
+Latency 95th percentile: 85.37 s
+Decode latency:
+Latency 5th percentile: 0.16 s
+Latency 25th percentile: 0.19 s
+Latency 50th percentile: 0.21 s
+Latency 75th percentile: 0.22 s
+Latency 95th percentile: 0.40 s
+Summary:
 Avg prompt latency: 31.670s
 Avg decode latency: 0.284s
 Throughput: 68.7 Tokens/s
@@ -1097,18 +1178,19 @@ python step7_parse_results.py separate_l4 llama70b offline
 You will see results like this
 ```
 ./real_llama70b/separate_offline/l4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000009537s
-70th percentile decode arrival interval: 0.000027418s
-72th percentile decode arrival interval: 0.000041723s
-75th percentile decode arrival interval: 0.072596312s
-80th percentile decode arrival interval: 0.073047161s
-85th percentile decode arrival interval: 0.075764418s
-87th percentile decode arrival interval: 0.075996876s
-90th percentile decode arrival interval: 0.076390266s
-92th percentile decode arrival interval: 0.076716661s
-95th percentile decode arrival interval: 0.077787161s
-99th percentile decode arrival interval: 0.104536057s
+Prompt latency:
+Latency 5th percentile: 0.88 s
+Latency 25th percentile: 1.26 s
+Latency 50th percentile: 1.33 s
+Latency 75th percentile: 2.87 s
+Latency 95th percentile: 3.46 s
+Decode latency:
+Latency 5th percentile: 0.71 s
+Latency 25th percentile: 0.83 s
+Latency 50th percentile: 0.89 s
+Latency 75th percentile: 1.05 s
+Latency 95th percentile: 2.50 s
+Summary:
 Avg prompt latency: 1.984s
 Avg decode latency: 1.048s
 Throughput: 37.9 Tokens/s
@@ -1130,18 +1212,19 @@ python step7_parse_results.py separate_t4 llama70b offline
 You will see results like this
 ```
 ./real_llama70b/separate_offline/t4/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.058849573s
-60th percentile decode arrival interval: 0.465484142s
-70th percentile decode arrival interval: 0.468283176s
-72th percentile decode arrival interval: 0.468930006s
-75th percentile decode arrival interval: 0.470664024s
-80th percentile decode arrival interval: 0.591396570s
-85th percentile decode arrival interval: 0.593034029s
-87th percentile decode arrival interval: 0.593272686s
-90th percentile decode arrival interval: 0.593639851s
-92th percentile decode arrival interval: 0.593865395s
-95th percentile decode arrival interval: 0.594511986s
-99th percentile decode arrival interval: 0.596149206s
+Prompt latency:
+Latency 5th percentile: 0.91 s
+Latency 25th percentile: 2.17 s
+Latency 50th percentile: 2.22 s
+Latency 75th percentile: 6.56 s
+Latency 95th percentile: 6.56 s
+Decode latency:
+Latency 5th percentile: 0.57 s
+Latency 25th percentile: 0.57 s
+Latency 50th percentile: 0.57 s
+Latency 75th percentile: 0.58 s
+Latency 95th percentile: 0.59 s
+Summary:
 Avg prompt latency: 2.964s
 Avg decode latency: 0.614s
 Throughput: 3.4 Tokens/s
@@ -1152,7 +1235,7 @@ The total decode throughput is 110.0, corresponding to Figure 5(c) Prototype - S
 
 #### 12. LLaMA 70B + online + Separate Pipelines
 
-The model placement has already been generated in (11). On the host and worker machines, run
+The real system config has already been generated in (11). On the host and worker machines, run
 the following command, this tests the A100 sub-cluster:
 ```bash
 python step5_start_host.py separate_a100 llama70b online  # on host machine
@@ -1169,18 +1252,19 @@ python step7_parse_results.py separate_a100 llama70b online
 You will see results like this
 ```
 ./real_llama70b/separate_online/a100/events.txt (excluding first 200s as warm up)
-Median decode arrival interval: 0.000011206s
-60th percentile decode arrival interval: 0.034784317s
-70th percentile decode arrival interval: 0.035211086s
-72th percentile decode arrival interval: 0.035501719s
-75th percentile decode arrival interval: 0.035760641s
-80th percentile decode arrival interval: 0.035935879s
-85th percentile decode arrival interval: 0.036245108s
-87th percentile decode arrival interval: 0.036394119s
-90th percentile decode arrival interval: 0.036656857s
-92th percentile decode arrival interval: 0.036857367s
-95th percentile decode arrival interval: 0.037255049s
-99th percentile decode arrival interval: 0.047487974s
+Prompt latency:
+Latency 5th percentile: 0.26 s
+Latency 25th percentile: 0.37 s
+Latency 50th percentile: 0.71 s
+Latency 75th percentile: 0.77 s
+Latency 95th percentile: 0.83 s
+Decode latency:
+Latency 5th percentile: 0.18 s
+Latency 25th percentile: 0.18 s
+Latency 50th percentile: 0.21 s
+Latency 75th percentile: 0.22 s
+Latency 95th percentile: 0.25 s
+Summary:
 Avg prompt latency: 0.571s
 Avg decode latency: 0.212s
 Throughput: 57.8 Tokens/s
@@ -1202,18 +1286,19 @@ python step7_parse_results.py separate_l4 llama70b online
 You will see results like this
 ```
 ./real_llama70b/separate_online/l4/events.txt (excluding first 200s as warm up)
-Median decode arrival interval: 0.072774410s
-60th percentile decode arrival interval: 0.072939396s
-70th percentile decode arrival interval: 0.073096037s
-72th percentile decode arrival interval: 0.073170424s
-75th percentile decode arrival interval: 0.075470209s
-80th percentile decode arrival interval: 0.075643063s
-85th percentile decode arrival interval: 0.075788260s
-87th percentile decode arrival interval: 0.075847626s
-90th percentile decode arrival interval: 0.075979948s
-92th percentile decode arrival interval: 0.076183319s
-95th percentile decode arrival interval: 0.076648712s
-99th percentile decode arrival interval: 0.258536339s
+Prompt latency:
+Latency 5th percentile: 0.88 s
+Latency 25th percentile: 1.32 s
+Latency 50th percentile: 2.82 s
+Latency 75th percentile: 2.87 s
+Latency 95th percentile: 3.72 s
+Decode latency:
+Latency 5th percentile: 0.66 s
+Latency 25th percentile: 0.75 s
+Latency 50th percentile: 0.82 s
+Latency 75th percentile: 0.88 s
+Latency 95th percentile: 2.20 s
+Summary:
 Avg prompt latency: 2.282s
 Avg decode latency: 0.915s
 Throughput: 18.9 Tokens/s
@@ -1235,18 +1320,19 @@ python step7_parse_results.py separate_t4 llama70b online
 You will see results like this
 ```
 ./real_llama70b/separate_online/t4/events.txt (excluding first 200s as warm up)
-Median decode arrival interval: 0.249931335s
-60th percentile decode arrival interval: 0.528264523s
-70th percentile decode arrival interval: 0.529386044s
-72th percentile decode arrival interval: 0.529504538s
-75th percentile decode arrival interval: 0.529738665s
-80th percentile decode arrival interval: 0.530241966s
-85th percentile decode arrival interval: 0.530862808s
-87th percentile decode arrival interval: 0.530986786s
-90th percentile decode arrival interval: 0.531407595s
-92th percentile decode arrival interval: 0.531675100s
-95th percentile decode arrival interval: 0.532525539s
-99th percentile decode arrival interval: 0.534957647s
+Prompt latency:
+Latency 5th percentile: 3.27 s
+Latency 25th percentile: 3.27 s
+Latency 50th percentile: 3.27 s
+Latency 75th percentile: 3.27 s
+Latency 95th percentile: 3.27 s
+Decode latency:
+Latency 5th percentile: 0.58 s
+Latency 25th percentile: 0.58 s
+Latency 50th percentile: 0.58 s
+Latency 75th percentile: 0.58 s
+Latency 95th percentile: 0.59 s
+Summary:
 Avg prompt latency: 3.266s
 Avg decode latency: 0.599s
 Throughput: 3.4 Tokens/s
@@ -1255,6 +1341,31 @@ Throughput: 3.4 Tokens/s
 The total decode throughput is 80.1, corresponding to Figure 5(d) Prototype - Separate Pipelines (SP) in the paper.
 The average prompt latency is 1.119, corresponding to Figure 5(g) Prototype - Separate Pipelines (SP) in the paper.
 The average decode latency is 0.401, corresponding to Figure 5(h) Prototype - Separate Pipelines (SP) in the paper.
+
+Run the following command to get the aggregated percentile latency distribution for this setup:
+```bash
+python step7_parse_results.py separate llama70b online
+```
+
+You will see the following results that correspond to Figure 5(g) and Figure 5(h) Prototype -
+Separate Pipelines (SP) in the paper:
+```
+./real_llama70b/separate_online/a100/events.txt (excluding first 200s as warm up)
+./real_llama70b/separate_online/l4/events.txt (excluding first 200s as warm up)
+./real_llama70b/separate_online/t4/events.txt (excluding first 200s as warm up)
+Prompt latency:
+Latency 5th percentile: 0.26 s
+Latency 25th percentile: 0.40 s
+Latency 50th percentile: 0.77 s
+Latency 75th percentile: 1.32 s
+Latency 95th percentile: 3.27 s
+Decode latency:
+Latency 5th percentile: 0.18 s
+Latency 25th percentile: 0.18 s
+Latency 50th percentile: 0.21 s
+Latency 75th percentile: 0.59 s
+Latency 95th percentile: 0.89 s
+```
 
 ## Section 6.4 Geo-Distributed Clusters
 
