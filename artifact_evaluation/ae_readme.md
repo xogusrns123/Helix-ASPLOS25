@@ -2329,9 +2329,36 @@ We terminate the solving process at around 45 minutes. Then, we run the simulati
 python ablation1_pruning.py simulate 24
 ```
 
-After running the simulation, you will see a log like the following at the end:
+After running the simulation, you will see a log like the following at the end. This
+corresponds to Figure 11 (a) - 24-node w/o prune in the paper:
+```
+************************************************************
+Decode throughput for 24-node cluster: 74.92333333333333 (w/o pruning)
+************************************************************
 ```
 
+(2) Next, let's disable cluster pruning for the 42 node cluster. Run the following command to
+generate model placement with Helix:
+
+```bash
+python ablation1_pruning.py layout 42
 ```
 
-(2) TODO!!
+You will first see a line like this in the Gurobi output, which corresponds to 42-node without
+pruning in Table 8:
+
+```
+Optimize a model with 5502 rows, 4004 columns and 49546 nonzeros
+```
+
+We terminate the solving process at around 50 minutes. Then, we run the simulation:
+
+```bash
+python ablation1_pruning.py simulate 42
+```
+
+After running the simulation, you will see a log like the following at the end. This
+corresponds to Figure 11 (a) - 42-node w/o prune in the paper:
+```
+TODO
+```

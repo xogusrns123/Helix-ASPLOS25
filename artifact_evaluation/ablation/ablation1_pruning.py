@@ -174,10 +174,26 @@ def main():
 
     elif mode == "simulate":
         if setup_name == "24":
-            raise NotImplementedError("Setup 42 is not implemented")
+            decode_throughput = simulate_maxflow_offline(
+                solution_file_name="./layouts/no_prune_24/ilp_sol.ini",
+                complete_cluster_file_name="./config/3cluster24.ini",
+                simulator_cluster_file_name="./layouts/no_prune_24/simulator_cluster.ini",
+                machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+            )
+            print("*" * 60)
+            print(f"Decode throughput for 24-node cluster: {decode_throughput} (w/o pruning)")
+            print("*" * 60)
 
         elif setup_name == "42":
-            raise NotImplementedError("Setup 42 is not implemented")
+            decode_throughput = simulate_maxflow_offline(
+                solution_file_name="./layouts/no_prune_42/ilp_sol.ini",
+                complete_cluster_file_name="./config/cluster42.ini",
+                simulator_cluster_file_name="./layouts/no_prune_42/simulator_cluster.ini",
+                machine_num_dict={"A100": 4, "V100": 6, "L4": 8, "L4x2": 4, "T4": 10, "T4x2": 6, "T4x4": 4}
+            )
+            print("*" * 60)
+            print(f"Decode throughput for 42-node cluster: {decode_throughput} (w/o pruning)")
+            print("*" * 60)
 
         else:
             raise ValueError(f"Invalid setup name: {setup_name}")
