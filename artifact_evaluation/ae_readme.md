@@ -994,3 +994,14 @@ LLaMa70B offline simulation results: Petals
 Total decode throughput: 66.6 tokens/s
 ************************************************************
 ```
+
+## Section 6.7 Request Scheduling
+All files related to this group of experiments are located in `artifact_evaluation/request_scheduling`.
+Start from the root directory of the repository:
+```bash
+cd artifact_evaluation/request_scheduling
+```
+This section performs the ablation of different request scheduling methods. We will show steps to
+reproduce the decode throughput shown in Figure 10(a) in the paper. To start with, we have copied
+the model placements to `./layout_single` and `./layout_distributed` (Generated previously in Sec 6.3 and 6.4).
+We have also copied the config files to `./config_single` and `./config_distributed`.
