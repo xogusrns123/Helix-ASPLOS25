@@ -1385,7 +1385,7 @@ This will automatically generate the config file that represents a geo-distribut
 24 machines (4 1xA100 machines, 8 1xL4 machines, 12 1xT4 machines) in `config/3cluster24.ini`.
 The cluster contains three regions. In region 1, there are 4 A100 machines; in region 2, there
 are 2 L4 machines and 8 T4 machines; in region 3, there are 6 L4 machines and 4 T4 machines.
-It also creates the config files that represent a sub-cluster formed by each type of machine:
+It also creates the config files that represent the sub-clusters formed by each type of machine:
 `config/a100.ini`, `config/l4.ini` and `config/t4.ini`.
 
 ### Step 2: Model Placement
@@ -1393,9 +1393,12 @@ It also creates the config files that represent a sub-cluster formed by each typ
 The next step is to generate the model placement for the cluster. Run the following commands
 to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
 methods. Notice that before running Helix's MILP-based model placement planner, you need to
-remove the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
+empty the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
 contains the result we get. We suggest moving them to a backup place if you want to compare
-your results with ours. Also, for `llama70b`, you need to run `swarm` before running
+your results with ours. You can restore the two directories after you have finished
+evaluation on Helix's model placement planner.
+
+Also, for `llama70b`, you need to run `swarm` before running
 Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s solution.
 
 > **Notes:** We notice that Gurobi produces completely different optimization traces when
@@ -1404,7 +1407,7 @@ Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s 
 > license. (objective value = 952 v.s. 1212) Unfortunately, we are not allowed and unable to
 > bind our academic Gurobi license to the cluster provided. Note that this is an issue with
 > Gurobi **licensing** instead of our system, and we provide our optimization trace in
-> `./layout_llama70b/ilp/trace.txt` for you to compare against."
+> `./layout_llama70b/ilp/trace.txt` for you to compare against.
 
 > **Notes:** Running Helix to search for a model placement for LLaMA 70B may take a long time.
 > We set the max running time to 10 hours, but you can stop the solver at any time with `ctrl +c`. 
@@ -1423,8 +1426,8 @@ python step2_gen_layout.py swarm llama70b
 python step2_gen_layout.py separate llama30b
 python step2_gen_layout.py separate llama70b
 # Generate model placement using Helix's MILP-based method
-python step2_gen_layout.py ilp llama30b  # remove ./layout_llama30b/ilp before running
-python step2_gen_layout.py ilp llama70b  # remove ./layout_llama70b/ilp before running
+python step2_gen_layout.py ilp llama30b  # empty ./layout_llama30b/ilp before running
+python step2_gen_layout.py ilp llama70b  # empty ./layout_llama70b/ilp before running
 ```
 
 After running the commands above, you will get model placement files located in:
@@ -1726,11 +1729,13 @@ This will automatically generate the config file that represents a single cluste
 The next step is to generate the model placement for the cluster. Different from the previous
 two groups of experiments, we only deploy LLaMA-2 70B in this 42-node cluster. Run the following
 commands to generate model placements using different model placement methods. Notice that before
-running Helix's MILP-based model placement planner, you need to remove the `./layout_llama70b/ilp`
-directories, which currently contains the result we get. We suggest moving them to a backup place
-if you want to compare your results with ours. Also, for `llama70b`, you need to run `swarm`
-before running Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s
-solution.
+running Helix's MILP-based model placement planner, you need to empty the `./layout_llama70b/ilp`
+directory, which currently contains the result we get. We suggest moving them to a backup place
+if you want to compare your results with ours. You can restore the directory after you have finished
+evaluation on Helix's model placement planner.
+
+Also, for `llama70b`, you need to run `swarm` before running Helix's MILP model placement
+planner, as we bootstrap the solver with `swarm`'s solution.
 
 > **Notes:** The default limited license for Gurobi has a size limit on the MILP problem. The size
 > of the MILP problem for LLaMA 70B on this 42-node cluster exceeds the limit. Gurobi will refuse
@@ -1753,7 +1758,7 @@ python step2_gen_layout.py swarm
 # Generate model placement using heuristic method separate pipelines
 python step2_gen_layout.py separate
 # Generate model placement using Helix's MILP-based method
-python step2_gen_layout.py ilp  # remove ./layout_llama70b/ilp before running
+python step2_gen_layout.py ilp  # empty ./layout_llama70b/ilp before running
 ```
 
 After running the commands above, you will get model placement files located in:
@@ -1964,7 +1969,7 @@ python setup1_visualization.py petals  # visualize Petals' model placement
 ```
 The files are store in `./visualization`. Notice that the visualization of Helix's model placement
 looks slightly different from the one shown in the paper, because of the slight difference in model
-placement found by the solver. Despite the difference, overall Helix's model placement has higher
+placement found by the solver. Despite the difference, Helix's model placement has higher
 GPU utilization (red indicates high utilization), which verifies our claim in the paper.
 
 #### Decode Throughput
@@ -1991,18 +1996,19 @@ python setup1_parse_results.py helix
 You will see a log like the following:
 ```
 ./real_sys_results/helix/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000000000s
-85th percentile decode arrival interval: 0.000000000s
-87th percentile decode arrival interval: 0.000000000s
-90th percentile decode arrival interval: 0.000032902s
-92th percentile decode arrival interval: 0.000232458s
-95th percentile decode arrival interval: 0.026082277s
-99th percentile decode arrival interval: 0.054884911s
+Prompt latency:
+Latency 5th percentile: 1.00 s
+Latency 25th percentile: 1.79 s
+Latency 50th percentile: 3.21 s
+Latency 75th percentile: 4.15 s
+Latency 95th percentile: 5.62 s
+Decode latency:
+Latency 5th percentile: 0.69 s
+Latency 25th percentile: 0.98 s
+Latency 50th percentile: 1.34 s
+Latency 75th percentile: 2.20 s
+Latency 95th percentile: 3.72 s
+Summary:
 Avg prompt latency: 3.143s
 Avg decode latency: 1.701s
 Throughput: 230.8 Tokens/s
@@ -2031,18 +2037,19 @@ python setup1_parse_results.py swarm
 You will see a log like the following:
 ```
 ./real_sys_results/swarm/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000000000s
-85th percentile decode arrival interval: 0.000047684s
-87th percentile decode arrival interval: 0.000508547s
-90th percentile decode arrival interval: 0.031327248s
-92th percentile decode arrival interval: 0.031858444s
-95th percentile decode arrival interval: 0.034297943s
-99th percentile decode arrival interval: 0.079137802s
+Prompt latency:
+Latency 5th percentile: 1.37 s
+Latency 25th percentile: 1.88 s
+Latency 50th percentile: 3.95 s
+Latency 75th percentile: 4.67 s
+Latency 95th percentile: 5.91 s
+Decode latency:
+Latency 5th percentile: 0.71 s
+Latency 25th percentile: 0.96 s
+Latency 50th percentile: 1.57 s
+Latency 75th percentile: 2.44 s
+Latency 95th percentile: 4.76 s
+Summary:
 Avg prompt latency: 3.533s
 Avg decode latency: 2.035s
 Throughput: 109.4 Tokens/s
@@ -2071,18 +2078,19 @@ python setup1_parse_results.py petals
 You will see a log like the following:
 ```
 ./real_sys_results/petals/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000026464s
-80th percentile decode arrival interval: 0.000035763s
-85th percentile decode arrival interval: 0.002885103s
-87th percentile decode arrival interval: 0.010337591s
-90th percentile decode arrival interval: 0.018357515s
-92th percentile decode arrival interval: 0.027698994s
-95th percentile decode arrival interval: 0.034121513s
-99th percentile decode arrival interval: 0.059822083s
+Prompt latency:
+Latency 5th percentile: 0.68 s
+Latency 25th percentile: 1.17 s
+Latency 50th percentile: 2.44 s
+Latency 75th percentile: 2.89 s
+Latency 95th percentile: 3.32 s
+Decode latency:
+Latency 5th percentile: 0.56 s
+Latency 25th percentile: 0.68 s
+Latency 50th percentile: 0.84 s
+Latency 75th percentile: 1.16 s
+Latency 95th percentile: 2.51 s
+Summary:
 Avg prompt latency: 2.105s
 Avg decode latency: 1.062s
 Throughput: 194.5 Tokens/s
@@ -2165,18 +2173,19 @@ python setup1_parse_results.py helix
 You will see a log like the following:
 ```
 ./real_sys_results/helix/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000000000s
-85th percentile decode arrival interval: 0.000000000s
-87th percentile decode arrival interval: 0.000000000s
-90th percentile decode arrival interval: 0.000032425s
-92th percentile decode arrival interval: 0.000257254s
-95th percentile decode arrival interval: 0.026052713s
-99th percentile decode arrival interval: 0.060481310s
+Prompt latency:
+Latency 5th percentile: 0.93 s
+Latency 25th percentile: 2.12 s
+Latency 50th percentile: 3.55 s
+Latency 75th percentile: 4.35 s
+Latency 95th percentile: 5.46 s
+Decode latency:
+Latency 5th percentile: 0.70 s
+Latency 25th percentile: 1.02 s
+Latency 50th percentile: 1.47 s
+Latency 75th percentile: 2.41 s
+Latency 95th percentile: 3.99 s
+Summary:
 Avg prompt latency: 3.315s
 Avg decode latency: 1.839s
 Throughput: 214.1 Tokens/s
@@ -2200,18 +2209,19 @@ python setup1_parse_results.py swarm
 You will see a log like the following:
 ```
 ./real_sys_results/swarm/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000008345s
-72th percentile decode arrival interval: 0.000009537s
-75th percentile decode arrival interval: 0.000011921s
-80th percentile decode arrival interval: 0.000021219s
-85th percentile decode arrival interval: 0.000046730s
-87th percentile decode arrival interval: 0.000069141s
-90th percentile decode arrival interval: 0.024200916s
-92th percentile decode arrival interval: 0.025789261s
-95th percentile decode arrival interval: 0.027113914s
-99th percentile decode arrival interval: 0.052825689s
+Prompt latency:
+Latency 5th percentile: 0.77 s
+Latency 25th percentile: 1.49 s
+Latency 50th percentile: 2.87 s
+Latency 75th percentile: 3.66 s
+Latency 95th percentile: 4.45 s
+Decode latency:
+Latency 5th percentile: 0.58 s
+Latency 25th percentile: 0.80 s
+Latency 50th percentile: 1.04 s
+Latency 75th percentile: 1.79 s
+Latency 95th percentile: 3.30 s
+Summary:
 Avg prompt latency: 2.630s
 Avg decode latency: 1.413s
 Throughput: 169.4 Tokens/s
@@ -2236,18 +2246,19 @@ python setup1_parse_results.py random
 You will see a log like the following:
 ```
 ./real_sys_results/random/events.txt (excluding first 60s as warm up)
-Median decode arrival interval: 0.000000000s
-60th percentile decode arrival interval: 0.000000000s
-70th percentile decode arrival interval: 0.000000000s
-72th percentile decode arrival interval: 0.000000000s
-75th percentile decode arrival interval: 0.000000000s
-80th percentile decode arrival interval: 0.000009298s
-85th percentile decode arrival interval: 0.000031233s
-87th percentile decode arrival interval: 0.000057697s
-90th percentile decode arrival interval: 0.024198532s
-92th percentile decode arrival interval: 0.025951147s
-95th percentile decode arrival interval: 0.027436018s
-99th percentile decode arrival interval: 0.054583073s
+Prompt latency:
+Latency 5th percentile: 0.89 s
+Latency 25th percentile: 1.44 s
+Latency 50th percentile: 2.85 s
+Latency 75th percentile: 3.65 s
+Latency 95th percentile: 4.82 s
+Decode latency:
+Latency 5th percentile: 0.59 s
+Latency 25th percentile: 0.80 s
+Latency 50th percentile: 1.04 s
+Latency 75th percentile: 1.77 s
+Latency 95th percentile: 3.15 s
+Summary:
 Avg prompt latency: 2.667s
 Avg decode latency: 1.402s
 Throughput: 169.5 Tokens/s

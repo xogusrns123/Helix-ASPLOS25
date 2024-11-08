@@ -2,6 +2,7 @@ from typing import Dict, Tuple, List, Optional
 
 import sys
 
+
 def parse_result(file_name: str, warm_up_time: Optional[float], finish_time: Optional[float]):
     # read the logs
     with open(file_name, "r") as log_file:
@@ -72,39 +73,32 @@ def parse_result(file_name: str, warm_up_time: Optional[float], finish_time: Opt
         if warm_up_time <= arrival_time <= finish_time:
             sum_prompt_latency += prompt_latency
             valid_prompt_count += 1
-            prompt_latency_list.append((arrival_time, prompt_latency))
+            prompt_latency_list.append(prompt_latency)
     for decode_latency, arrival_time in decode_matched_dict.values():
         if warm_up_time <= arrival_time <= finish_time:
             sum_decode_latency += decode_latency
             valid_decode_count += 1
-            decode_latency_list.append((arrival_time, decode_latency))
+            decode_latency_list.append(decode_latency)
             decode_arrival_time.append(arrival_time)
 
-    # calculate the interval between each decode arrival (examine pipeline bubbles)
-    decode_arrival_time.sort()
-    arrival_interval = [decode_arrival_time[i] - decode_arrival_time[i-1] for i in range(1, len(decode_arrival_time))]
-    arrival_interval.sort()
-    print(f"Median decode arrival interval: {arrival_interval[len(arrival_interval) // 2]:.9f}s")
-    print(f"60th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.6)]:.9f}s")
-    print(f"70th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.7)]:.9f}s")
-    print(f"72th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.72)]:.9f}s")
-    print(f"75th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.75)]:.9f}s")
-    print(f"80th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.8)]:.9f}s")
-    print(f"85th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.85)]:.9f}s")
-    print(f"87th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.87)]:.9f}s")
-    print(f"90th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.9)]:.9f}s")
-    print(f"92th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.92)]:.9f}s")
-    print(f"95th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.95)]:.9f}s")
-    print(f"99th percentile decode arrival interval: {arrival_interval[int(len(arrival_interval) * 0.99)]:.9f}s")
-
-    # use pickle to dump the latency list for plotting
-    # import pickle
-    # with open(f"prompt_latency.pkl", "wb") as f:
-    #     pickle.dump(prompt_latency_list, f)
-    # with open(f"decode_latency.pkl", "wb") as f:
-    #     pickle.dump(decode_latency_list, f)
+    # print latency
+    prompt_latency_list.sort()
+    print(f"Prompt latency:")
+    print(f"Latency 5th percentile: {prompt_latency_list[int(len(prompt_latency_list) * 0.05)]:.2f} s")
+    print(f"Latency 25th percentile: {prompt_latency_list[int(len(prompt_latency_list) * 0.25)]:.2f} s")
+    print(f"Latency 50th percentile: {prompt_latency_list[int(len(prompt_latency_list) * 0.5)]:.2f} s")
+    print(f"Latency 75th percentile: {prompt_latency_list[int(len(prompt_latency_list) * 0.75)]:.2f} s")
+    print(f"Latency 95th percentile: {prompt_latency_list[int(len(prompt_latency_list) * 0.95)]:.2f} s")
+    decode_latency_list.sort()
+    print(f"Decode latency:")
+    print(f"Latency 5th percentile: {decode_latency_list[int(len(decode_latency_list) * 0.05)]:.2f} s")
+    print(f"Latency 25th percentile: {decode_latency_list[int(len(decode_latency_list) * 0.25)]:.2f} s")
+    print(f"Latency 50th percentile: {decode_latency_list[int(len(decode_latency_list) * 0.5)]:.2f} s")
+    print(f"Latency 75th percentile: {decode_latency_list[int(len(decode_latency_list) * 0.75)]:.2f} s")
+    print(f"Latency 95th percentile: {decode_latency_list[int(len(decode_latency_list) * 0.95)]:.2f} s")
 
     # calculate throughput
+    print(f"Summary:")
     valid_decode_arrival_list = [time for time in decode_arrival_list if warm_up_time <= time <= finish_time]
     valid_decode_throughput = len(valid_decode_arrival_list) / (valid_decode_arrival_list[-1] -
                                                                 valid_decode_arrival_list[0] + 1e-6)
