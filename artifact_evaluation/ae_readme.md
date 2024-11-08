@@ -843,7 +843,22 @@ python step3_simulation.py swarm online
 ```
 After running the simulation, you will see a log like the following at the end:
 ```
-
+************************************************************
+LLaMa70B online simulation results: Swarm
+Total decode throughput: 309.6 tokens/s
+Prompt latency:
+Latency 5th percentile: 0.93 s
+Latency 25th percentile: 1.48 s
+Latency 50th percentile: 2.70 s
+Latency 75th percentile: 3.21 s
+Latency 95th percentile: 4.10 s
+Decode latency:
+Latency 5th percentile: 0.42 s
+Latency 25th percentile: 0.51 s
+Latency 50th percentile: 0.77 s
+Latency 75th percentile: 1.19 s
+Latency 95th percentile: 1.74 s
+************************************************************
 ```
 We also store the raw latency distribution files as pickle files in
 `./simulation_llama70b/swarm_online`. You can refer to `analyze_latency` in `step3_simulation.py`
