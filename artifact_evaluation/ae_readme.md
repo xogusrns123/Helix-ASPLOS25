@@ -1003,5 +1003,153 @@ cd artifact_evaluation/request_scheduling
 ```
 This section performs the ablation of different request scheduling methods. We will show steps to
 reproduce the decode throughput shown in Figure 10(a) in the paper. To start with, we have copied
-the model placements to `./layout_single` and `./layout_distributed` (Generated previously in Sec 6.3 and 6.4).
-We have also copied the config files to `./config_single` and `./config_distributed`.
+the model placements used in the paper to `./layout_single` and `./layout_distributed`. We have also
+copied the config files to `./config_single` and `./config_distributed`.
+
+### Setup 1: LLaMA 70B Single Cluster (Real System)
+
+TODO!!
+
+### Setup 2: LLaMA 70B Distributed Clusters (Simulation)
+We will show the decode throughput of different request scheduling methods (correspond to
+Figure 10 (a)) and the congestion of Swarm and Random scheduling (correspond to Figure 10 (b)).
+
+(1) Run LLaMA 70B in offline setup using Helix's model placement and Helix's request scheduling,
+and observe its decode throughput. This corresponds to Figure 10(a)'s Distributed - Helix in the paper.
+```bash
+python setup2_distributed.py helix
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Helix
+Total decode throughput: 99.8 tokens/s
+************************************************************
+```
+
+(2) Run LLaMA 70B in offline setup using Helix's model placement and Swarm's request scheduling,
+and observe its decode throughput. This corresponds to Figure 10(a)'s Distributed - Swarm in the paper.
+```bash
+python setup2_distributed.py swarm
+```
+After running the simulation, you will first see a log like the following at the end:
+```
+************************************************************
+Congestion analysis: SchedulingMethod.Swarm
+RequestLocation.ComputeNode-13: 10.642573522737315s
+RequestLocation.ComputeNode-16: 0.2297687153968934s
+RequestLocation.ComputeNode-17: 0.1375851532262901s
+RequestLocation.ComputeNode-23: 0.24706526547356375s
+RequestLocation.ComputeNode-8: 0.20593923281874615s
+RequestLocation.ComputeNode-6: 0.2264234774325119s
+RequestLocation.ComputeNode-7: 0.2004372137780166s
+RequestLocation.ComputeNode-10: 0.053729825948366346s
+RequestLocation.ComputeNode-15: 6.010935175942984s
+RequestLocation.ComputeNode-5: 0.07598068956073936s
+RequestLocation.ComputeNode-4: 0.07319502782480897s
+RequestLocation.ComputeNode-2: 0.07416888513400685s
+RequestLocation.ComputeNode-3: 0.06961344295568916s
+RequestLocation.ComputeNode-21: 0.03798450119303149s
+RequestLocation.ComputeNode-24: 18.768433269215418s
+RequestLocation.ComputeNode-12: 0.654829423289039s
+RequestLocation.ComputeNode-22: 0.8254657527797614s
+RequestLocation.ComputeNode-9: 0.3024842419124777s
+RequestLocation.ComputeNode-19: 0.3019372612291324s
+RequestLocation.ComputeNode-18: 0.2484524768867684s
+RequestLocation.ComputeNode-20: 0.24794287992468222s
+************************************************************
+```
+Notice the high latency on compute node 13, 15 and 24. This indicates the congestion problem
+of Swarm's request scheduling method, as shown in Figure 10(b). Then, you will see a log like
+the following about the decode throughput:
+```
+************************************************************
+LLaMa70B offline simulation results: Swarm
+Total decode throughput: 81.7 tokens/s
+************************************************************
+```
+
+(3) Run LLaMA 70B in offline setup using Helix's model placement and random request scheduling,
+and observe its decode throughput. This corresponds to Figure 10(a)'s Distributed - Random in the paper.
+```bash
+python setup2_distributed.py random
+```
+After running the simulation, you will first see a log like the following at the end:
+```
+************************************************************
+Congestion analysis: SchedulingMethod.Naive
+RequestLocation.ComputeNode-21: 0.03731661155205453s
+RequestLocation.ComputeNode-18: 0.2610173190834541s
+RequestLocation.ComputeNode-20: 0.24644899878499654s
+RequestLocation.ComputeNode-24: 17.50800780761662s
+RequestLocation.ComputeNode-12: 0.6503202400672451s
+RequestLocation.ComputeNode-22: 0.7808302135408729s
+RequestLocation.ComputeNode-7: 0.20322868913110503s
+RequestLocation.ComputeNode-10: 0.05172704352740775s
+RequestLocation.ComputeNode-15: 6.482867120339014s
+RequestLocation.ComputeNode-5: 0.0725252025756106s
+RequestLocation.ComputeNode-4: 0.06983009459878285s
+RequestLocation.ComputeNode-2: 0.07228054807078026s
+RequestLocation.ComputeNode-3: 0.06768848447426572s
+RequestLocation.ComputeNode-13: 15.116493481300573s
+RequestLocation.ComputeNode-16: 0.2195493719334298s
+RequestLocation.ComputeNode-17: 0.1335675991842193s
+RequestLocation.ComputeNode-23: 0.24360117246674284s
+RequestLocation.ComputeNode-8: 0.22089513731045193s
+RequestLocation.ComputeNode-6: 0.24069865307333366s
+RequestLocation.ComputeNode-9: 0.20313929011251647s
+RequestLocation.ComputeNode-19: 0.220904070127803s
+************************************************************
+
+```
+Notice the high latency on compute node 13, 15 and 24 (`SchedulingMethod.Naive` here is random
+scheduling). This indicates the congestion problem of random request scheduling method, as shown
+in Figure 10(b). Then, you will see a log like the following about the decode throughput:
+```
+************************************************************
+LLaMa70B offline simulation results: Random
+Total decode throughput: 87.4 tokens/s
+************************************************************
+```
+
+(4) Run LLaMA 70B in offline setup using Helix's model placement and shortest queue request
+scheduling, and observe its decode throughput. This corresponds to Figure 10(a)'s Distributed - Shortest Queue (SQ) in the paper.
+```bash
+python setup2_distributed.py shortest_queue
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+Congestion analysis: SchedulingMethod.ShortestQueue
+RequestLocation.ComputeNode-21: 0.040311610792162444s
+RequestLocation.ComputeNode-16: 0.20583538196320073s
+RequestLocation.ComputeNode-17: 0.13331778900517946s
+RequestLocation.ComputeNode-23: 0.2334643636195339s
+RequestLocation.ComputeNode-24: 19.255628614498356s
+RequestLocation.ComputeNode-12: 0.7354160220899202s
+RequestLocation.ComputeNode-22: 0.9397185835397719s
+RequestLocation.ComputeNode-7: 0.20336656540062908s
+RequestLocation.ComputeNode-10: 0.053327423445625584s
+RequestLocation.ComputeNode-15: 7.683681647206574s
+RequestLocation.ComputeNode-5: 0.07468962344948517s
+RequestLocation.ComputeNode-4: 0.07110484214818696s
+RequestLocation.ComputeNode-2: 0.07317778688264566s
+RequestLocation.ComputeNode-3: 0.06784204492750039s
+RequestLocation.ComputeNode-13: 14.240169586787173s
+RequestLocation.ComputeNode-8: 0.20676437891454677s
+RequestLocation.ComputeNode-6: 0.21431887796231158s
+RequestLocation.ComputeNode-9: 0.2256070874191855s
+RequestLocation.ComputeNode-19: 0.2475273211902834s
+RequestLocation.ComputeNode-18: 0.25391846234740756s
+RequestLocation.ComputeNode-20: 0.2537499534902388s
+************************************************************
+```
+Notice the high latency on compute node 13, 15 and 24. This indicates the congestion problem
+of shortest queue request scheduling method, as shown in Figure 10(b). Then, you will see a log like
+the following about the decode throughput:
+```
+************************************************************
+LLaMa70B offline simulation results: ShortestQueue
+Total decode throughput: 83.6 tokens/s
+************************************************************
+```
