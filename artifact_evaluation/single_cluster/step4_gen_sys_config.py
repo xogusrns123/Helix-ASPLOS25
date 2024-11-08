@@ -48,36 +48,35 @@ def main():
     assert model_name in ["llama30b", "llama70b"], f"Invalid model name: {model_name}"
 
     # Generate the real system configuration
-    if model_name == "llama30b":
-        if method == "helix":
-            # sub-cluster of a100
-            generate_real_system_config(
-                model_name=ModelName.LLaMa30B,
-                complete_cluster_file_name="./config/a100.ini",
-                solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
-                simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
-                output_dir="./layout_llama30b/ilp/a100",
-                machine_num_dict={"A100": 4}
-            )
-            # sub-cluster of l4
-            generate_real_system_config(
-                model_name=ModelName.LLaMa30B,
-                complete_cluster_file_name="./config/l4.ini",
-                solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
-                simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
-                output_dir="./layout_llama30b/ilp/l4",
-                machine_num_dict={"L4": 8}
-            )
-            # sub-cluster of t4
-            generate_real_system_config(
-                model_name=ModelName.LLaMa30B,
-                complete_cluster_file_name="./config/t4.ini",
-                solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
-                simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
-                output_dir="./layout_llama30b/ilp/t4",
-                machine_num_dict={"T4": 12}
-            )
-            print("Generated real system configurations for LLaMa30B with Helix")
+    if model_name == "llama30b" and method == "helix":
+        # sub-cluster of a100
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/a100.ini",
+            solution_file_name="./layout_llama30b/ilp/a100/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/a100/simulator_cluster.ini",
+            output_dir="./layout_llama30b/ilp/a100",
+            machine_num_dict={"A100": 4}
+        )
+        # sub-cluster of l4
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/l4.ini",
+            solution_file_name="./layout_llama30b/ilp/l4/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/l4/simulator_cluster.ini",
+            output_dir="./layout_llama30b/ilp/l4",
+            machine_num_dict={"L4": 8}
+        )
+        # sub-cluster of t4
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/t4.ini",
+            solution_file_name="./layout_llama30b/ilp/t4/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/ilp/t4/simulator_cluster.ini",
+            output_dir="./layout_llama30b/ilp/t4",
+            machine_num_dict={"T4": 12}
+        )
+        print("Generated real system configurations for LLaMa30B with Helix")
 
 
 if __name__ == '__main__':
