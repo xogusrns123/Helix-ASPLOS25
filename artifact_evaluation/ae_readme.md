@@ -343,13 +343,129 @@ We also store the raw latency distribution files as pickle files in
 `./simulation_llama70b/separate_online`. You can refer to `analyze_latency` in `step3_simulation.py`
 if you want to parse and check them.
 
-### Step 4: Generate Real System Config Files
+### Step 4: Run Prototype System Experiments
 
-TODO!!
+Now that we have reproduced the results for simulations, we can continue and reproduce the results
+for the prototype system experiments.
 
-### Step 5: Run Prototype System Experiments
+> **Note:** In order to keep the total expense of artifact evaluation within the budget, we reduce
+> the running time for each experiment. For offline experiments, we reduce the running time from 
+> 10 minutes to 5 minutes. For online experiments, we reduce the running time from 30 minutes to
+> 10 minutes.
 
-TODO!!
+#### 1. LLaMA 30B + offline + Helix
+
+Run the following command to generate real system config file:
+```bash
+python step4_gen_sys_config.py helix llama30b
+```
+This will generate the real system config file in each folder in `./layout_llama30b/ilp`. Next,
+we will start running the real system experiments. Since in this setup helix has three sub-clusters,
+we need to run three separate experiments.
+
+On the host and worker machines, run the following command, this tests the A100 sub-cluster:
+```bash
+python step5_start_host.py helix_a100 llama30b offline  # on host machine
+python step6_start_worker.py llama30b maxflow           # on all 24 worker machines
+```
+After running the experiment, the log files are stored in `./real_llama30b/helix_offline/a100`.
+
+> **Note:** You need to run the worker command on all 24 worker machines. After system initialization
+> the unused machines will automatically shut down. Also, you might get a core dumped when the host
+> machine finishes. This is normal and expected, the results will be preserved. This applies to all
+> following experiments.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_a100 llama30b offline
+```
+
+You will see results like this
+```
+./real_llama30b/helix_offline/a100/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000016689s
+72th percentile decode arrival interval: 0.000017405s
+75th percentile decode arrival interval: 0.000018358s
+80th percentile decode arrival interval: 0.000024557s
+85th percentile decode arrival interval: 0.019630194s
+87th percentile decode arrival interval: 0.020752192s
+90th percentile decode arrival interval: 0.022538185s
+92th percentile decode arrival interval: 0.023577452s
+95th percentile decode arrival interval: 0.025068045s
+99th percentile decode arrival interval: 0.037998915s
+Avg prompt latency: 0.358s
+Avg decode latency: 0.169s
+Throughput: 198.9 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+```bash
+python step5_start_host.py helix_l4 llama30b offline  # on host machine
+python step6_start_worker.py llama30b maxflow         # on all 24 worker machines
+```
+After running the experiment, the log files are stored in `./real_llama30b/helix_offline/l4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_l4 llama30b offline
+```
+
+You will see results like this
+```
+./real_llama30b/helix_offline/l4/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000020027s
+60th percentile decode arrival interval: 0.000023365s
+70th percentile decode arrival interval: 0.000052691s
+72th percentile decode arrival interval: 0.000241756s
+75th percentile decode arrival interval: 0.039864779s
+80th percentile decode arrival interval: 0.042426586s
+85th percentile decode arrival interval: 0.043032646s
+87th percentile decode arrival interval: 0.043360472s
+90th percentile decode arrival interval: 0.044373035s
+92th percentile decode arrival interval: 0.044862509s
+95th percentile decode arrival interval: 0.046271801s
+99th percentile decode arrival interval: 0.073158503s
+Avg prompt latency: 1.001s
+Avg decode latency: 0.533s
+Throughput: 64.8 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+```bash
+python step5_start_host.py helix_t4 llama30b offline  # on host machine
+python step6_start_worker.py llama30b maxflow         # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama30b/helix_offline/t4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix_t4 llama30b offline
+```
+
+You will see results like this
+```
+./real_llama30b/helix_offline/t4/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000025034s
+60th percentile decode arrival interval: 0.000030279s
+70th percentile decode arrival interval: 0.026171207s
+72th percentile decode arrival interval: 0.026499033s
+75th percentile decode arrival interval: 0.028123379s
+80th percentile decode arrival interval: 0.028793097s
+85th percentile decode arrival interval: 0.029223204s
+87th percentile decode arrival interval: 0.029447794s
+90th percentile decode arrival interval: 0.029864550s
+92th percentile decode arrival interval: 0.030179739s
+95th percentile decode arrival interval: 0.030982971s
+99th percentile decode arrival interval: 0.060351133s
+Avg prompt latency: 2.405s
+Avg decode latency: 0.697s
+Throughput: 57.5 Tokens/s
+```
+
+The results above sum to 321.2, corresponding to Figure 5(a) Prototype - Helix in the paper.
 
 ## Section 6.4 Geo-Distributed Clusters
 
