@@ -2359,7 +2359,9 @@ python ablation1_pruning.py simulate 42
 After running the simulation, you will see a log like the following at the end. This
 corresponds to Figure 11 (a) - 42-node w/o prune in the paper:
 ```
-TODO
+************************************************************
+Decode throughput for 42-node cluster: 574.2383333333333 (w/o pruning)
+************************************************************
 ```
 
 ### Ablation on Initial Values
