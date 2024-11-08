@@ -244,6 +244,72 @@ def main():
             result_logging_dir="./real_llama30b/swarm_online"
         )
 
+    if model_name == "llama30b" and serving_mode == "offline" and method == "separate_a100":
+        print("Running LLaMa 30B + Offline + Separate (A100)")
+        os.makedirs("./real_llama30b/separate_offline/a100", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/a100/real_sys_config.txt",
+            initial_launch_num=30,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_offline/a100"
+        )
+
+    if model_name == "llama30b" and serving_mode == "offline" and method == "separate_l4":
+        print("Running LLaMa 30B + Offline + Separate (L4)")
+        os.makedirs("./real_llama30b/separate_offline/l4", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/l4/real_sys_config.txt",
+            initial_launch_num=30,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_offline/l4"
+        )
+
+    if model_name == "llama30b" and serving_mode == "offline" and method == "separate_t4":
+        print("Running LLaMa 30B + Offline + Separate (T4)")
+        os.makedirs("./real_llama30b/separate_offline/t4", exist_ok=True)
+        run_heuristic_host_offline(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/t4/real_sys_config.txt",
+            initial_launch_num=30,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_offline/t4"
+        )
+
+    if model_name == "llama30b" and serving_mode == "online" and method == "separate_a100":
+        print("Running LLaMa 30B + Online + Separate (A100)")
+        os.makedirs("./real_llama30b/separate_online/a100", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/a100/real_sys_config.txt",
+            avg_throughput=500,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_online/a100"
+        )
+
+    if model_name == "llama30b" and serving_mode == "online" and method == "separate_l4":
+        print("Running LLaMa 30B + Online + Separate (L4)")
+        os.makedirs("./real_llama30b/separate_online/l4", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/l4/real_sys_config.txt",
+            avg_throughput=150,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_online/l4"
+        )
+
+    if model_name == "llama30b" and serving_mode == "online" and method == "separate_t4":
+        print("Running LLaMa 30B + Online + Separate (T4)")
+        os.makedirs("./real_llama30b/separate_online/t4", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama30b/separate/t4/real_sys_config.txt",
+            avg_throughput=150,
+            duration=300,
+            result_logging_dir="./real_llama30b/separate_online/t4"
+        )
+
 
 
 if __name__ == '__main__':
