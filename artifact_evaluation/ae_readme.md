@@ -925,4 +925,41 @@ We have also copied the config files to `./config_single` and `./config_distribu
 TODO!!
 
 ### Setup 2: LLaMA 70B Distributed Clusters (Simulation)
+(1) Run LLaMA 70B in offline setup using Helix's model placement and observe its decode throughput.
+This corresponds to Figure 9(a)'s Distributed - Helix in the paper.
+```bash
+python setup2_distributed.py helix
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa30B offline simulation results: Swarm
+Total decode throughput: 98.0 tokens/s
+************************************************************
+```
 
+(2) Run LLaMA 70B in offline setup using Swarm's model placement and observe its decode throughput.
+This corresponds to Figure 9(a)'s Distributed - Swarm in the paper.
+```bash
+python setup2_distributed.py swarm
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Swarm
+Total decode throughput: 41.6 tokens/s
+************************************************************
+```
+
+(3) Run LLaMA 70B in offline setup using Petals' model placement and observe its decode throughput.
+This corresponds to Figure 9(a)'s Distributed - Petals in the paper.
+```bash
+python setup2_distributed.py petals
+```
+After running the simulation, you will see a log like the following at the end:
+```
+************************************************************
+LLaMa70B offline simulation results: Petals
+Total decode throughput: 66.6 tokens/s
+************************************************************
+```
