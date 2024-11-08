@@ -1035,9 +1035,9 @@ Avg decode latency: 1.639s
 Throughput: 81.1 Tokens/s
 ```
 
-The decode throughput is xxx, corresponding to Figure 5(d) Prototype - Swarm in the paper.
-The average prompt latency is xxx, corresponding to Figure 5(g) Prototype - Swarm in the paper.
-The average decode latency is xxx, corresponding to Figure 5(h) Prototype - Swarm in the paper.
+The decode throughput is 81.1, corresponding to Figure 5(d) Prototype - Swarm in the paper.
+The average prompt latency is 3.022, corresponding to Figure 5(g) Prototype - Swarm in the paper.
+The average decode latency is 1.639, corresponding to Figure 5(h) Prototype - Swarm in the paper.
 
 
 ## Section 6.4 Geo-Distributed Clusters
