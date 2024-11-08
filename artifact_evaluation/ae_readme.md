@@ -2031,7 +2031,103 @@ copied the config files to `./config_single` and `./config_distributed`.
 
 ### Setup 1: LLaMA 70B Single Cluster (Real System)
 
-TODO!!
+First, let's generate the real system config file:
+```bash
+python setup1_gen_sys_config.py
+```
+Then, we evaluate the performance of different request scheduling methods in the real system.
+
+(1) Helix's Request Scheduling. Run the following command on the host and worker machines to start
+the real system:
+```bash
+python setup1_start_host.py helix             # on the host machine
+python setup1_start_worker.py maxflow         # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/helix`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py helix
+```
+
+You will see a log like the following:
+```
+./real_sys_results/helix/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000000000s
+85th percentile decode arrival interval: 0.000000000s
+87th percentile decode arrival interval: 0.000000000s
+90th percentile decode arrival interval: 0.000032425s
+92th percentile decode arrival interval: 0.000257254s
+95th percentile decode arrival interval: 0.026052713s
+99th percentile decode arrival interval: 0.060481310s
+Avg prompt latency: 3.315s
+Avg decode latency: 1.839s
+Throughput: 214.1 Tokens/s
+```
+This corresponds to Figure 10(a)'s Single - Helix in the paper.
+
+(2) Swarm's Request Scheduling. Run the following command on the host and worker machines to start
+the real system:
+```bash
+python setup1_start_host.py swarm             # on the host machine
+python setup1_start_worker.py swarm           # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/swarm`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py swarm
+```
+
+You will see a log like the following:
+```
+./real_sys_results/swarm/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000008345s
+72th percentile decode arrival interval: 0.000009537s
+75th percentile decode arrival interval: 0.000011921s
+80th percentile decode arrival interval: 0.000021219s
+85th percentile decode arrival interval: 0.000046730s
+87th percentile decode arrival interval: 0.000069141s
+90th percentile decode arrival interval: 0.024200916s
+92th percentile decode arrival interval: 0.025789261s
+95th percentile decode arrival interval: 0.027113914s
+99th percentile decode arrival interval: 0.052825689s
+Avg prompt latency: 2.630s
+Avg decode latency: 1.413s
+Throughput: 169.4 Tokens/s
+```
+
+This corresponds to Figure 10(a)'s Single - Swarm in the paper.
+
+(3) Random Request Scheduling. Run the following command on the host and worker machines to start
+the real system:
+```bash
+python setup1_start_host.py random            # on the host machine
+python setup1_start_worker.py random          # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/random`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py random
+```
+
+You will see a log like the following:
+```
+
+```
+
+This corresponds to Figure 10(a)'s Single - Random in the paper.
 
 ### Setup 2: LLaMA 70B Distributed Clusters (Simulation)
 We will show the decode throughput of different request scheduling methods (correspond to
