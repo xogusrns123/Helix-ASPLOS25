@@ -1,3 +1,4 @@
+import os
 import sys
 from llm_sys.gen_sys_config import gen_sys_config
 from simulator.event_simulator.cluster_simulator import ModelName
@@ -14,10 +15,10 @@ def generate_real_system_config(
     type2ips = {}
     if "A100" in machine_num_dict:
         type2ips["A100"] = ["10.128.0.14", "10.128.0.41", "10.128.0.42", "10.128.0.43"]
-    elif "L4" in machine_num_dict:
+    if "L4" in machine_num_dict:
         type2ips["L4"] = ["10.128.0.16", "10.128.0.20", "10.128.0.21", "10.128.0.22",
                           "10.128.0.23", "10.128.0.24", "10.128.0.25", "10.128.0.30"]
-    elif "T4" in machine_num_dict:
+    if "T4" in machine_num_dict:
         type2ips["T4"] = ["10.128.0.15", "10.128.0.26", "10.128.0.27", "10.128.0.28",
                           "10.128.0.32", "10.128.0.33", "10.128.0.34", "10.128.0.35",
                           "10.128.0.36", "10.128.0.37", "10.128.0.40", "10.128.0.39"]
@@ -49,6 +50,9 @@ def main():
 
     # Generate the real system configuration
     if model_name == "llama30b" and method == "helix":
+        os.makedirs("./layout_llama30b/ilp/a100", exist_ok=True)
+        os.makedirs("./layout_llama30b/ilp/l4", exist_ok=True)
+        os.makedirs("./layout_llama30b/ilp/t4", exist_ok=True)
         # sub-cluster of a100
         generate_real_system_config(
             model_name=ModelName.LLaMa30B,
@@ -77,6 +81,49 @@ def main():
             machine_num_dict={"T4": 12}
         )
         print("Generated real system configurations for LLaMa30B with Helix")
+
+    if model_name == "llama30b" and method == "swarm":
+        os.makedirs("./layout_llama30b/swarm", exist_ok=True)
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/cluster24.ini",
+            solution_file_name="./layout_llama30b/swarm/swarm_sol.ini",
+            simulator_cluster_file_name="./layout_llama30b/swarm/simulator_cluster.ini",
+            output_dir="./layout_llama30b/swarm",
+            machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+        )
+
+    if model_name == "llama30b" and method == "separate":
+        os.makedirs("./layout_llama30b/separate/a100", exist_ok=True)
+        os.makedirs("./layout_llama30b/separate/l4", exist_ok=True)
+        os.makedirs("./layout_llama30b/separate/t4", exist_ok=True)
+        # sub-cluster of a100
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/a100.ini",
+            solution_file_name="./layout_llama30b/separate/a100_solution_file.ini",
+            simulator_cluster_file_name="./layout_llama30b/separate/a100_simulator_cluster.ini",
+            output_dir="./layout_llama30b/separate/a100",
+            machine_num_dict={"A100": 4}
+        )
+        # sub-cluster of l4
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/l4.ini",
+            solution_file_name="./layout_llama30b/separate/l4_solution_file.ini",
+            simulator_cluster_file_name="./layout_llama30b/separate/l4_simulator_cluster.ini",
+            output_dir="./layout_llama30b/separate/l4",
+            machine_num_dict={"L4": 8}
+        )
+        # sub-cluster of t4
+        generate_real_system_config(
+            model_name=ModelName.LLaMa30B,
+            complete_cluster_file_name="./config/t4.ini",
+            solution_file_name="./layout_llama30b/separate/t4_solution_file.ini",
+            simulator_cluster_file_name="./layout_llama30b/separate/t4_simulator_cluster.ini",
+            output_dir="./layout_llama30b/separate/t4",
+            machine_num_dict={"T4": 12}
+        )
 
 
 if __name__ == '__main__':
