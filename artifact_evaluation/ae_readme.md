@@ -1150,6 +1150,112 @@ Throughput: 3.4 Tokens/s
 The total decode throughput is 110.0, corresponding to Figure 5(c) Prototype - Separate Pipelines (SP) in the paper.
 
 
+#### 12. LLaMA 70B + online + Separate Pipelines
+
+The model placement has already been generated in (11). On the host and worker machines, run
+the following command, this tests the A100 sub-cluster:
+```bash
+python step5_start_host.py separate_a100 llama70b online  # on host machine
+python step6_start_worker.py llama70b random 0.9          # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/separate_online/a100`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py separate_a100 llama70b online
+```
+
+You will see results like this
+```
+./real_llama70b/separate_online/a100/events.txt (excluding first 200s as warm up)
+Median decode arrival interval: 0.000011206s
+60th percentile decode arrival interval: 0.034784317s
+70th percentile decode arrival interval: 0.035211086s
+72th percentile decode arrival interval: 0.035501719s
+75th percentile decode arrival interval: 0.035760641s
+80th percentile decode arrival interval: 0.035935879s
+85th percentile decode arrival interval: 0.036245108s
+87th percentile decode arrival interval: 0.036394119s
+90th percentile decode arrival interval: 0.036656857s
+92th percentile decode arrival interval: 0.036857367s
+95th percentile decode arrival interval: 0.037255049s
+99th percentile decode arrival interval: 0.047487974s
+Avg prompt latency: 0.571s
+Avg decode latency: 0.212s
+Throughput: 57.8 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+```bash
+python step5_start_host.py separate_l4 llama70b online  # on host machine
+python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/separate_online/l4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py separate_l4 llama70b online
+```
+
+You will see results like this
+```
+./real_llama70b/separate_online/l4/events.txt (excluding first 200s as warm up)
+Median decode arrival interval: 0.072774410s
+60th percentile decode arrival interval: 0.072939396s
+70th percentile decode arrival interval: 0.073096037s
+72th percentile decode arrival interval: 0.073170424s
+75th percentile decode arrival interval: 0.075470209s
+80th percentile decode arrival interval: 0.075643063s
+85th percentile decode arrival interval: 0.075788260s
+87th percentile decode arrival interval: 0.075847626s
+90th percentile decode arrival interval: 0.075979948s
+92th percentile decode arrival interval: 0.076183319s
+95th percentile decode arrival interval: 0.076648712s
+99th percentile decode arrival interval: 0.258536339s
+Avg prompt latency: 2.282s
+Avg decode latency: 0.915s
+Throughput: 18.9 Tokens/s
+```
+
+On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+```bash
+python step5_start_host.py separate_t4 llama70b online  # on host machine
+python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/separate_online/t4`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py separate_t4 llama70b online
+```
+
+You will see results like this
+```
+./real_llama70b/separate_online/t4/events.txt (excluding first 200s as warm up)
+Median decode arrival interval: 0.249931335s
+60th percentile decode arrival interval: 0.528264523s
+70th percentile decode arrival interval: 0.529386044s
+72th percentile decode arrival interval: 0.529504538s
+75th percentile decode arrival interval: 0.529738665s
+80th percentile decode arrival interval: 0.530241966s
+85th percentile decode arrival interval: 0.530862808s
+87th percentile decode arrival interval: 0.530986786s
+90th percentile decode arrival interval: 0.531407595s
+92th percentile decode arrival interval: 0.531675100s
+95th percentile decode arrival interval: 0.532525539s
+99th percentile decode arrival interval: 0.534957647s
+Avg prompt latency: 3.266s
+Avg decode latency: 0.599s
+Throughput: 3.4 Tokens/s
+```
+
+The total decode throughput is 80.1, corresponding to Figure 5(d) Prototype - Separate Pipelines (SP) in the paper.
+The average prompt latency is 1.119, corresponding to Figure 5(g) Prototype - Separate Pipelines (SP) in the paper.
+The average decode latency is 0.401, corresponding to Figure 5(h) Prototype - Separate Pipelines (SP) in the paper.
+
 ## Section 6.4 Geo-Distributed Clusters
 
 All files related to this group of experiments are located in `artifact_evaluation/distributed_clusters`.

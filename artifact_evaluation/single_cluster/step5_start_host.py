@@ -408,6 +408,39 @@ def main():
             result_logging_dir="./real_llama70b/separate_offline/t4"
         )
 
+    if model_name == "llama70b" and serving_mode == "online" and method == "separate_a100":
+        print("Running LLaMa 70B + Online + Separate (A100)")
+        os.makedirs("./real_llama70b/separate_online/a100", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_a100.txt",
+            avg_throughput=240,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_online/a100"
+        )
+
+    if model_name == "llama70b" and serving_mode == "online" and method == "separate_l4":
+        print("Running LLaMa 70B + Online + Separate (L4)")
+        os.makedirs("./real_llama70b/separate_online/l4", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_l4.txt",
+            avg_throughput=120,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_online/l4"
+        )
+
+    if model_name == "llama70b" and serving_mode == "online" and method == "separate_t4":
+        print("Running LLaMa 70B + Online + Separate (T4)")
+        os.makedirs("./real_llama70b/separate_online/t4", exist_ok=True)
+        run_heuristic_host_online(
+            scheduler_name="random",
+            real_sys_config_file_name="./layout_llama70b/separate/real_sys_config_t4.txt",
+            avg_throughput=10,
+            duration=300,
+            result_logging_dir="./real_llama70b/separate_online/t4"
+        )
+
 
 if __name__ == '__main__':
     main()
