@@ -2124,7 +2124,22 @@ python setup1_parse_results.py random
 
 You will see a log like the following:
 ```
-
+./real_sys_results/random/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000009298s
+85th percentile decode arrival interval: 0.000031233s
+87th percentile decode arrival interval: 0.000057697s
+90th percentile decode arrival interval: 0.024198532s
+92th percentile decode arrival interval: 0.025951147s
+95th percentile decode arrival interval: 0.027436018s
+99th percentile decode arrival interval: 0.054583073s
+Avg prompt latency: 2.667s
+Avg decode latency: 1.402s
+Throughput: 169.5 Tokens/s
 ```
 
 This corresponds to Figure 10(a)'s Single - Random in the paper.
