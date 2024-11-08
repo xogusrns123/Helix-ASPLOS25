@@ -126,7 +126,7 @@ def main():
         )
 
     if model_name == "llama70b" and method == "helix":
-        os.makedirs("./layout_llama70b/ilp/a100", exist_ok=True)
+        os.makedirs("./layout_llama70b/ilp", exist_ok=True)
         generate_real_system_config(
             model_name=ModelName.LLaMa70B,
             complete_cluster_file_name="./config/cluster24.ini",

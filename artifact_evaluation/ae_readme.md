@@ -1858,7 +1858,125 @@ GPU utilization (red indicates high utilization), which verifies our claim in th
 
 #### Decode Throughput
 
-TODO!!
+(1) First, let's see how the model placement of Helix performs. Run the following command
+to generate the real system configuration file on the host machine:
+```bash
+python setup1_gen_sys_config.py helix
+```
+
+Then, on the host and worker machines, run the following command to start the real system:
+```bash
+python setup1_start_host.py helix      # on the host machine
+python setup1_start_worker.py          # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/helix`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py helix
+```
+
+You will see a log like the following:
+```
+./real_sys_results/helix/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000000000s
+85th percentile decode arrival interval: 0.000000000s
+87th percentile decode arrival interval: 0.000000000s
+90th percentile decode arrival interval: 0.000032902s
+92th percentile decode arrival interval: 0.000232458s
+95th percentile decode arrival interval: 0.026082277s
+99th percentile decode arrival interval: 0.054884911s
+Avg prompt latency: 3.143s
+Avg decode latency: 1.701s
+Throughput: 230.8 Tokens/s
+```
+This corresponds to Figure 9(a)'s Single - Helix in the paper.
+
+(2) Next, let's see how the model placement of Swarm performs. Run the following command
+to generate the real system configuration file on the host machine:
+```bash
+python setup1_gen_sys_config.py swarm
+```
+
+Then, on the host and worker machines, run the following command to start the real system:
+```bash
+python setup1_start_host.py swarm      # on the host machine
+python setup1_start_worker.py          # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/swarm`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py swarm
+```
+
+You will see a log like the following:
+```
+./real_sys_results/swarm/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000000000s
+85th percentile decode arrival interval: 0.000047684s
+87th percentile decode arrival interval: 0.000508547s
+90th percentile decode arrival interval: 0.031327248s
+92th percentile decode arrival interval: 0.031858444s
+95th percentile decode arrival interval: 0.034297943s
+99th percentile decode arrival interval: 0.079137802s
+Avg prompt latency: 3.533s
+Avg decode latency: 2.035s
+Throughput: 109.4 Tokens/s
+```
+This corresponds to Figure 9(a)'s Single - Swarm in the paper.
+
+(3) Next, let's see how the model placement of Petals performs. Run the following command
+to generate the real system configuration file on the host machine:
+```bash
+python setup1_gen_sys_config.py petals
+```
+
+Then, on the host and worker machines, run the following command to start the real system:
+```bash
+python setup1_start_host.py petals      # on the host machine
+python setup1_start_worker.py           # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_sys_results/petals`.
+
+Parse the results with the following command on the host machine:
+```bash
+python setup1_parse_results.py petals
+```
+
+You will see a log like the following:
+```
+./real_sys_results/petals/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000026464s
+80th percentile decode arrival interval: 0.000035763s
+85th percentile decode arrival interval: 0.002885103s
+87th percentile decode arrival interval: 0.010337591s
+90th percentile decode arrival interval: 0.018357515s
+92th percentile decode arrival interval: 0.027698994s
+95th percentile decode arrival interval: 0.034121513s
+99th percentile decode arrival interval: 0.059822083s
+Avg prompt latency: 2.105s
+Avg decode latency: 1.062s
+Throughput: 194.5 Tokens/s
+```
+This corresponds to Figure 9(a)'s Single - Petals in the paper.
 
 ### Setup 2: LLaMA 70B Distributed Clusters (Simulation)
 (1) Run LLaMA 70B in offline setup using Helix's model placement and observe its decode throughput.
