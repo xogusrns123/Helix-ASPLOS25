@@ -125,6 +125,17 @@ def main():
             machine_num_dict={"T4": 12}
         )
 
+    if model_name == "llama70b" and method == "helix":
+        os.makedirs("./layout_llama70b/ilp/a100", exist_ok=True)
+        generate_real_system_config(
+            model_name=ModelName.LLaMa70B,
+            complete_cluster_file_name="./config/cluster24.ini",
+            solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
+            output_dir="./layout_llama70b/ilp",
+            machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+        )
+
 
 if __name__ == '__main__':
     main()

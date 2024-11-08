@@ -869,6 +869,90 @@ The total decode throughput is 173.1, corresponding to Figure 5(b) Prototype - S
 The average prompt latency is 0.719, corresponding to Figure 5(e) Prototype - Separate Pipelines (SP) in the paper.
 The average decode latency is 0.209, corresponding to Figure 5(f) Prototype - Separate Pipelines (SP) in the paper.
 
+#### 7. LLaMA 70B + offline + Helix
+
+Generate the real system config file with the following command:
+```bash
+python step4_gen_sys_config.py helix llama70b
+```
+
+This will generate the real system config file in each folder in `./layout_llama70b/ilp`. Next,
+we will start running the real system experiments.
+
+On the host and worker machines, run the following command:
+```bash
+python step5_start_host.py helix llama70b offline       # on host machine
+python step6_start_worker.py llama70b maxflow           # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/helix_offline`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix llama70b offline
+```
+
+You will see results like this
+```
+./real_llama70b/helix_offline/events.txt (excluding first 60s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000000000s
+85th percentile decode arrival interval: 0.000000000s
+87th percentile decode arrival interval: 0.000000000s
+90th percentile decode arrival interval: 0.000033617s
+92th percentile decode arrival interval: 0.000384092s
+95th percentile decode arrival interval: 0.026100159s
+99th percentile decode arrival interval: 0.056120634s
+Avg prompt latency: 3.147s
+Avg decode latency: 1.750s
+Throughput: 223.4 Tokens/s
+```
+
+The total decode throughput is 223.4, corresponding to Figure 5(c) Prototype - Helix in the paper.
+
+#### 8. LLaMA 70B + online + Helix
+
+The model placement has already been generated in (7). On the host and worker machines, run
+the following command:
+```bash
+python step5_start_host.py helix llama70b online        # on host machine
+python step6_start_worker.py llama70b maxflow           # on all 24 worker machines
+```
+
+After running the experiment, the log files are stored in `./real_llama70b/helix_online`.
+
+Parse the results with the following command on the host machine:
+```bash
+python step7_parse_results.py helix llama70b online
+```
+
+You will see results like this
+```
+./real_llama70b/helix_online/events.txt (excluding first 200s as warm up)
+Median decode arrival interval: 0.000000000s
+60th percentile decode arrival interval: 0.000000000s
+70th percentile decode arrival interval: 0.000000000s
+72th percentile decode arrival interval: 0.000000000s
+75th percentile decode arrival interval: 0.000000000s
+80th percentile decode arrival interval: 0.000000000s
+85th percentile decode arrival interval: 0.000000000s
+87th percentile decode arrival interval: 0.000000000s
+90th percentile decode arrival interval: 0.000033379s
+92th percentile decode arrival interval: 0.000321150s
+95th percentile decode arrival interval: 0.025971413s
+99th percentile decode arrival interval: 0.089863539s
+Avg prompt latency: 2.660s
+Avg decode latency: 2.020s
+Throughput: 148.3 Tokens/s
+```
+
+The decode throughput is 148.3, corresponding to Figure 5(d) Prototype - Helix in the paper.
+The average prompt latency is 2.660, corresponding to Figure 5(g) Prototype - Helix in the paper.
+The average decode latency is 2.020, corresponding to Figure 5(h) Prototype - Helix in the paper.
 
 ## Section 6.4 Geo-Distributed Clusters
 

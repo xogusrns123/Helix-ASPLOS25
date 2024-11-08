@@ -310,6 +310,49 @@ def main():
             result_logging_dir="./real_llama30b/separate_online/t4"
         )
 
+    if model_name == "llama70b" and serving_mode == "offline" and method == "helix":
+        print("Running LLaMa 70B + Offline + Helix")
+        os.makedirs("./real_llama70b/helix_offline", exist_ok=True)
+        run_maxflow_host_offline(
+            # model and machine
+            machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
+            model_name=ModelName.LLaMa70B,
+            # cluster
+            complete_cluster_file_name="./config/cluster24.ini",
+            machine_profile_name="./config/machine_profiles.ini",
+            # solution
+            solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
+            real_sys_config_file_name="./layout_llama70b/ilp/real_sys_config.txt",
+            # throughput
+            duration=300,
+            initial_launch_num=20,
+            feeding_hwm=0.8,
+            # result
+            result_logging_dir="./real_llama70b/helix_offline"
+        )
+
+    if model_name == "llama70b" and serving_mode == "online" and method == "helix":
+        print("Running LLaMa 70B + Online + Helix")
+        os.makedirs("./real_llama70b/helix_online", exist_ok=True)
+        run_maxflow_host_online(
+            # model and machine
+            machine_num_dict={"A100": 4, "L4": 8, "T4": 12},
+            model_name=ModelName.LLaMa70B,
+            # cluster
+            complete_cluster_file_name="./config/cluster24.ini",
+            machine_profile_name="./config/machine_profiles.ini",
+            # solution
+            solution_file_name="./layout_llama70b/ilp/ilp_sol.ini",
+            simulator_cluster_file_name="./layout_llama70b/ilp/simulator_cluster.ini",
+            real_sys_config_file_name="./layout_llama70b/ilp/real_sys_config.txt",
+            # throughput
+            duration=300,
+            avg_throughput=1400,  # change this to 700 if you want to run 30 minutes
+            # result
+            result_logging_dir="./real_llama70b/helix_online"
+        )
+
 
 
 if __name__ == '__main__':
