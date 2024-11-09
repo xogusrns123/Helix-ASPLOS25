@@ -7,7 +7,7 @@ from llm_sys.worker import run_worker
 def main():
     # parse arguments
     if len(sys.argv) < 3:
-        print("Usage: python step3_start_worker.py <llama30b/llama70b> <scheduling_method> <max_vram_usage>")
+        print("Usage: python step6_start_worker.py <llama30b/llama70b> <scheduling_method> <max_vram_usage>")
         print("  scheduling_method: maxflow | swarm | random")
         return
     model_name = sys.argv[1]

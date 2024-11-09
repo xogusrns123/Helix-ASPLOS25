@@ -19,6 +19,29 @@ cd ~/helix
 > **Important Note:** For all the commends below, if not otherwise specified, please
 > **run them on the host**.
 
+> **Important Note:** In order to facilitate artifact evaluation, we use ray to launch scripts
+> remotely on the worker machines. We have already set up the ray cluster for you. On the host
+> machine, you can run the following command to check the status of the ray cluster:
+> ```bash
+> ray status
+> ```
+> You will see a log like this (notice that 24 GPUs means that all 24 machines are connected):
+> ```
+> Usage:
+> 0.0/590.0 CPU
+> 0.0/24.0 GPU
+> 0B/1.60TiB memory
+> 0B/705.98GiB object_store_memory
+> ```
+> If the ray cluster is not running, you can manually start it with the following command:
+> ```bash
+> ray start --head --port=8888  # on the host machine
+> ```
+> And run the following command on the worker machines to connect to the ray cluster:
+> ```bash
+> ray start --address='10.128.0.31:8888'  # on all 24 worker machines
+> ```
+
 ## Section 6.3 Single Cluster
 
 All files related to this group of experiments are located in `artifact_evaluation/single_cluster`.
@@ -378,19 +401,15 @@ This will generate the real system config file in each folder in `./layout_llama
 we will start running the real system experiments. Since in this setup helix has three sub-clusters,
 we need to run three separate experiments.
 
-On the host and worker machines, run the following command, this tests the A100 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the A100 sub-cluster:
 ```bash
-python step5_start_host.py helix_a100 llama30b offline  # on host machine
-python step6_start_worker.py llama30b maxflow           # on all 24 worker machines
+python step5_start_host.py helix_a100 llama30b offline          # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machine, terminal 2
 ```
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/a100`.
 
-> **Note:** You need to run the worker command on all 24 worker machines. **After system initialization,**
-> **the unused machines will automatically throw an error an terminate. Also, you might get a core dumped**
-> **when the host machine finishes. This is normal and expected, the results will be preserved.**
-> This applies to all following real machine experiments.
-
-> **Note:** In the case above, the unused machines refer to the 8 L4 machines and 12 T4 machines.
+> **Note:** Host terminal 1 is used to start the host machine, and host terminal 2 is used to
+> start the worker machines remotely.
 
 Parse the results with the following command on the host machine:
 ```bash
@@ -418,10 +437,10 @@ Avg decode latency: 0.169s
 Throughput: 198.9 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py helix_l4 llama30b offline  # on host machine
-python step6_start_worker.py llama30b maxflow         # on all 24 worker machines
+python step5_start_host.py helix_l4 llama30b offline            # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machine, terminal 2
 ```
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/l4`.
 
@@ -451,10 +470,10 @@ Avg decode latency: 0.533s
 Throughput: 64.8 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py helix_t4 llama30b offline  # on host machine
-python step6_start_worker.py llama30b maxflow         # on all 24 worker machines
+python step5_start_host.py helix_t4 llama30b offline            # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on all 24 worker machines
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/t4`.
@@ -489,11 +508,12 @@ The total decode throughput is 321.2, corresponding to Figure 5(a) Prototype - H
 
 #### 2. LLaMA 30B + online + Helix
 
-The real system config has already been generated in (1). On the host and worker machines, run
-the following command, this tests the A100 sub-cluster:
+The real system config has already been generated in (1). 
+On two separate terminals of the host machine, run the following command, this tests the A100
+sub-cluster:
 ```bash
-python step5_start_host.py helix_a100 llama30b online  # on host machine
-python step6_start_worker.py llama30b maxflow          # on all 24 worker machines
+python step5_start_host.py helix_a100 llama30b online           # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/helix_online/a100`.
@@ -524,10 +544,10 @@ Avg decode latency: 0.138s
 Throughput: 136.4 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py helix_l4 llama30b online  # on host machine
-python step6_start_worker.py llama30b maxflow        # on all 24 worker machines
+python step5_start_host.py helix_l4 llama30b online             # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/helix_online/l4`.
@@ -558,10 +578,10 @@ Avg decode latency: 0.415s
 Throughput: 32.2 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py helix_t4 llama30b online  # on host machine
-python step6_start_worker.py llama30b maxflow        # on all 24 worker machines
+python step5_start_host.py helix_t4 llama30b online             # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/helix_online/t4`.
@@ -629,10 +649,10 @@ python step4_gen_sys_config.py swarm llama30b
 ```
 This will generate the real system config file in `./layout_llama30b/swarm`.
 
-On the host and worker machines, run the following command:
+On two separate terminals of the host machine, run the following command:
 ```bash
-python step5_start_host.py swarm llama30b offline  # on host machine
-python step6_start_worker.py llama30b swarm        # on all 24 worker machines
+python step5_start_host.py swarm llama30b offline             # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b swarm"   # on all 24 worker machines
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/swarm_offline`.
@@ -666,11 +686,11 @@ The total decode throughput is 142.9, corresponding to Figure 5(a) Prototype - S
 
 #### 4. LLaMA 30B + online + Swarm
 
-The real system config has already been generated in (3). On the host and worker machines, run
+The real system config has already been generated in (3). On two separate terminals of the host machine, run
 the following command:
 ```bash
-python step5_start_host.py swarm llama30b online  # on host machine
-python step6_start_worker.py llama30b swarm       # on all 24 worker machines
+python step5_start_host.py swarm llama30b online              # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b swarm"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/swarm_online`.
@@ -714,10 +734,10 @@ python step4_gen_sys_config.py separate llama30b
 ```
 This will generate the real system config file in each folder in `./layout_llama30b/separate`.
 
-On the host and worker machines, run the following command, this tests the A100 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the A100 sub-cluster:
 ```bash
-python step5_start_host.py separate_a100 llama30b offline  # on host machine
-python step6_start_worker.py llama30b random               # on all 24 worker machines
+python step5_start_host.py separate_a100 llama30b offline       # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_offline/a100`.
@@ -748,10 +768,10 @@ Avg decode latency: 0.159s
 Throughput: 187.3 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py separate_l4 llama30b offline  # on host machine
-python step6_start_worker.py llama30b random             # on all 24 worker machines
+python step5_start_host.py separate_l4 llama30b offline         # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_offline/l4`.
@@ -782,10 +802,10 @@ Avg decode latency: 0.507s
 Throughput: 58.6 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py separate_t4 llama30b offline  # on host machine
-python step6_start_worker.py llama30b random             # on all 24 worker machines
+python step5_start_host.py separate_t4 llama30b offline         # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_offline/t4`.
@@ -820,11 +840,12 @@ The total decode throughput is 295.1, corresponding to Figure 5(a) Prototype - S
 
 #### 6. LLaMA 30B + online + Separate Pipelines
 
-The real system config has already been generated in (5). On the host and worker machines, run
+The real system config has already been generated in (5). 
+On two separate terminals of the host machine, run
 the following command, this tests the A100 sub-cluster:
 ```bash
-python step5_start_host.py separate_a100 llama30b online  # on host machine
-python step6_start_worker.py llama30b random               # on all 24 worker machines
+python step5_start_host.py separate_a100 llama30b online        # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_online/a100`.
@@ -855,10 +876,10 @@ Avg decode latency: 0.126s
 Throughput: 118.9 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py separate_l4 llama30b online  # on host machine
-python step6_start_worker.py llama30b random             # on all 24 worker machines
+python step5_start_host.py separate_l4 llama30b online          # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_online/l4`.
@@ -889,10 +910,10 @@ Avg decode latency: 0.368s
 Throughput: 27.8 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py separate_t4 llama30b online  # on host machine
-python step6_start_worker.py llama30b random             # on all 24 worker machines
+python step5_start_host.py separate_t4 llama30b online         # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama30b random"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama30b/separate_online/t4`.
@@ -962,10 +983,10 @@ python step4_gen_sys_config.py helix llama70b
 This will generate the real system config file in each folder in `./layout_llama70b/ilp`. Next,
 we will start running the real system experiments.
 
-On the host and worker machines, run the following command:
+On two separate terminals of the host machine, run the following command:
 ```bash
-python step5_start_host.py helix llama70b offline       # on host machine
-python step6_start_worker.py llama70b maxflow           # on all 24 worker machines
+python step5_start_host.py helix llama70b offline               # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b maxflow"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/helix_offline`.
@@ -1000,11 +1021,12 @@ The total decode throughput is 223.4, corresponding to Figure 5(c) Prototype - H
 
 #### 8. LLaMA 70B + online + Helix
 
-The real system config has already been generated in (7). On the host and worker machines, run
+The real system config has already been generated in (7). 
+On two separate terminals of the host machine, run
 the following command:
 ```bash
-python step5_start_host.py helix llama70b online        # on host machine
-python step6_start_worker.py llama70b maxflow           # on all 24 worker machines
+python step5_start_host.py helix llama70b online                # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b maxflow"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/helix_online`.
@@ -1050,10 +1072,10 @@ python step4_gen_sys_config.py swarm llama70b
 This will generate the real system config file in each folder in `./layout_llama70b/swarm`. Next,
 we will start running the real system experiments.
 
-On the host and worker machines, run the following command:
+On two separate terminals of the host machine, run the following command:
 ```bash
-python step5_start_host.py swarm llama70b offline        # on host machine
-python step6_start_worker.py llama70b swarm              # on all 24 worker machines
+python step5_start_host.py swarm llama70b offline             # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b swarm"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/swarm_offline`.
@@ -1088,11 +1110,12 @@ The total decode throughput is 111.7, corresponding to Figure 5(c) Prototype - S
 
 #### 10. LLaMA 70B + online + Swarm
 
-The real system config has already been generated in (9). On the host and worker machines, run
+The real system config has already been generated in (9). 
+On two separate terminals of the host machine, run
 the following command:
 ```bash
-python step5_start_host.py swarm llama70b online         # on host machine
-python step6_start_worker.py llama70b swarm              # on all 24 worker machines
+python step5_start_host.py swarm llama70b online              # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b swarm"   # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/swarm_online`.
@@ -1134,10 +1157,10 @@ We manually generated the real system config file for the separate pipelines met
 files are located in `./layout_llama70b/separate`. Next, we will start running the real system
 experiments.
 
-On the host and worker machines, run the following command, this tests the A100 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the A100 sub-cluster:
 ```bash
-python step5_start_host.py separate_a100 llama70b offline  # on host machine
-python step6_start_worker.py llama70b random 0.9           # on all 24 worker machines
+python step5_start_host.py separate_a100 llama70b offline         # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"  # on host machine, terminal 2
 ```
 We need to set vLLM's max vram usage to 0.9 to avoid out-of-memory errors. This is because the number
 of layers assigned to each GPU is larger than the recommended value, reflecting that the model placement
@@ -1171,10 +1194,10 @@ Avg decode latency: 0.284s
 Throughput: 68.7 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py separate_l4 llama70b offline  # on host machine
-python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+python step5_start_host.py separate_l4 llama70b offline           # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"  # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_offline/l4`.
@@ -1205,10 +1228,10 @@ Avg decode latency: 1.048s
 Throughput: 37.9 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py separate_t4 llama70b offline  # on host machine
-python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+python step5_start_host.py separate_t4 llama70b offline             # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"    # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_offline/t4`.
@@ -1244,11 +1267,12 @@ The total decode throughput is 110.0, corresponding to Figure 5(c) Prototype - S
 
 #### 12. LLaMA 70B + online + Separate Pipelines
 
-The real system config has already been generated in (11). On the host and worker machines, run
+The real system config has already been generated in (11). 
+On two separate terminals of the host machine, run
 the following command, this tests the A100 sub-cluster:
 ```bash
-python step5_start_host.py separate_a100 llama70b online  # on host machine
-python step6_start_worker.py llama70b random 0.9          # on all 24 worker machines
+python step5_start_host.py separate_a100 llama70b online          # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"  # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_online/a100`.
@@ -1279,10 +1303,10 @@ Avg decode latency: 0.212s
 Throughput: 57.8 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the L4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the L4 sub-cluster:
 ```bash
-python step5_start_host.py separate_l4 llama70b online  # on host machine
-python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+python step5_start_host.py separate_l4 llama70b online            # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"  # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_online/l4`.
@@ -1313,10 +1337,10 @@ Avg decode latency: 0.915s
 Throughput: 18.9 Tokens/s
 ```
 
-On the host and worker machines, run the following command, this tests the T4 sub-cluster:
+On two separate terminals of the host machine, run the following command, this tests the T4 sub-cluster:
 ```bash
-python step5_start_host.py separate_t4 llama70b online  # on host machine
-python step6_start_worker.py llama70b random 0.9         # on all 24 worker machines
+python step5_start_host.py separate_t4 llama70b online            # on host machine, terminal 1
+python remote_run.py "step6_start_worker.py llama70b random 0.9"  # on host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_llama70b/separate_online/t4`.
