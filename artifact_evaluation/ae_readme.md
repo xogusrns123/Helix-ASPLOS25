@@ -409,7 +409,8 @@ python remote_run.py "step6_start_worker.py llama30b maxflow"   # on host machin
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/a100`.
 
 > **Note:** Host terminal 1 is used to start the host machine, and host terminal 2 is used to
-> start the worker machines remotely.
+> start the worker machines remotely. After each experiment, host terminal 1 will automatically
+> terminate. However, **you need to manually terminate host terminal 2 after each experiment**.
 
 Parse the results with the following command on the host machine:
 ```bash
