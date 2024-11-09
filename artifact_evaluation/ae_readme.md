@@ -13,10 +13,11 @@ conda activate runtime
 cd ~/helix
 ```
 
-> **Note:** For the experiments below, we provide a copy of the results we get after running
-> them in the exact same path as they are generated. 
+> **Important Note:** For the experiments below, we provide a copy of the results we get after running
+> them **in the exact same path as they are generated**. 
 
-> **Note:** For all the commends below, if not otherwise specified, please run them on the host.
+> **Important Note:** For all the commends below, if not otherwise specified, please
+> **run them on the host**.
 
 ## Section 6.3 Single Cluster
 
@@ -40,12 +41,14 @@ also generate the three sub-cluster config files with each type of machine: `con
 
 The next step is to generate the model placement for the cluster. Run the following commands
 to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
-methods. Notice that before running Helix's MILP-based model placement planner, you need to
-empty the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
-contains the result we get. Otherwise you will get an error from the model placement planner
-saying that the directory is not empty. We suggest moving them to a backup place if you want
-to compare your results with ours. You can restore the two directories after you have finished
-evaluation on Helix's model placement planner.
+methods. 
+
+Notice that before running Helix's MILP-based model placement planner, you need to
+**backup and empty** the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories,
+which currently contains the result we get. If the directories are not empty, you will get
+an error from the model placement planner saying that the directory is not empty. After you
+have finished evaluating Helix's model placement planner, you can restore the two directories
+to facilitate the evaluation of later steps.
 
 Also, for `llama70b`, you need to run `petals` before running Helix's MILP model placement
 planner, as we bootstrap the solver with `petals`' solution.
@@ -92,6 +95,9 @@ After running the commands above, you will get model placement files located in:
 ### Step 3: Run Simulation
 With the model placement files generated, we can run the simulation and reproduce the results in the
 paper.
+
+> **Notes:** Before running simulation, you can restore the `./layout_llama30b/ilp` and
+> `./layout_llama70b/ilp` directories you just backed up.
 
 (1) Run LLaMA 30B in offline setup using Helix and observe its decode throughput. This
 corresponds to Figure 5(a)'s Simulation - Helix in the paper.
@@ -379,9 +385,9 @@ python step6_start_worker.py llama30b maxflow           # on all 24 worker machi
 ```
 After running the experiment, the log files are stored in `./real_llama30b/helix_offline/a100`.
 
-> **Note:** You need to run the worker command on all 24 worker machines. After system initialization
-> the unused machines will automatically throw an error an terminate. Also, you might get a core dumped
-> when the host machine finishes. This is normal and expected, the results will be preserved.
+> **Note:** You need to run the worker command on all 24 worker machines. **After system initialization,**
+> **the unused machines will automatically throw an error an terminate. Also, you might get a core dumped**
+> **when the host machine finishes. This is normal and expected, the results will be preserved.**
 > This applies to all following real machine experiments.
 
 > **Note:** In the case above, the unused machines refer to the 8 L4 machines and 12 T4 machines.
@@ -1395,11 +1401,14 @@ It also creates the config files that represent the sub-clusters formed by each 
 
 The next step is to generate the model placement for the cluster. Run the following commands
 to generate model placements for LLaMA-1 30B and LLaMA-2 70B using different model placement
-methods. Notice that before running Helix's MILP-based model placement planner, you need to
-empty the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories, which currently
-contains the result we get. We suggest moving them to a backup place if you want to compare
-your results with ours. You can restore the two directories after you have finished
-evaluation on Helix's model placement planner.
+methods. 
+
+Notice that before running Helix's MILP-based model placement planner, you need to
+**backup and empty** the `./layout_llama30b/ilp` and `./layout_llama70b/ilp` directories,
+which currently contains the result we get. If the directories are not empty, you will get
+an error from the model placement planner saying that the directory is not empty. After you
+have finished evaluating Helix's model placement planner, you can restore the two directories
+to facilitate the evaluation of later steps.
 
 Also, for `llama70b`, you need to run `swarm` before running
 Helix's MILP model placement planner, as we bootstrap the solver with `swarm`'s solution.
@@ -1446,6 +1455,9 @@ After running the commands above, you will get model placement files located in:
 ### Step 3: Run Simulation
 With the model placement files generated, we can run the simulation and reproduce the results in the
 paper.
+
+> **Notes:** Before running simulation, you can restore the `./layout_llama30b/ilp` and
+> `./layout_llama70b/ilp` directories you just backed up.
 
 (1) Run LLaMA 30B in offline setup using Helix and observe its decode throughput. This
 corresponds to Figure 7(a)'s offline - Helix in the paper.
@@ -1731,11 +1743,14 @@ This will automatically generate the config file that represents a single cluste
 
 The next step is to generate the model placement for the cluster. Different from the previous
 two groups of experiments, we only deploy LLaMA-2 70B in this 42-node cluster. Run the following
-commands to generate model placements using different model placement methods. Notice that before
-running Helix's MILP-based model placement planner, you need to empty the `./layout_llama70b/ilp`
-directory, which currently contains the result we get. We suggest moving them to a backup place
-if you want to compare your results with ours. You can restore the directory after you have finished
-evaluation on Helix's model placement planner.
+commands to generate model placements using different model placement methods.
+
+Notice that before running Helix's MILP-based model placement planner, you need to
+**backup and empty** the `./layout_llama70b/ilp` directory,
+which currently contains the result we get. If the directory is not empty, you will get
+an error from the model placement planner saying that the directory is not empty. After you
+have finished evaluating Helix's model placement planner, you can restore the directory
+to facilitate the evaluation of later steps.
 
 Also, for `llama70b`, you need to run `swarm` before running Helix's MILP model placement
 planner, as we bootstrap the solver with `swarm`'s solution.
@@ -1773,6 +1788,8 @@ After running the commands above, you will get model placement files located in:
 ### Step 3: Run Simulation
 With the model placement files generated, we can run the simulation and reproduce the results in the
 paper.
+
+> **Notes:** Before running simulation, you can restore the `./layout_llama70b/ilp` directory you just backed up.
 
 (1) Run LLaMA 70B in offline setup using Helix and observe its decode throughput. This
 corresponds to Figure 8(a)'s offline - Helix in the paper.
