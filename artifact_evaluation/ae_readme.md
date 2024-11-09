@@ -2422,6 +2422,8 @@ cd artifact_evaluation/ablation
 ```
 We have already placed the cluster config files in `./config`.
 
+> **Note:** Before running the experiments below, please first backup and empty `./layouts`.
+
 ### Ablation on Cluster Pruning
 Previously in reproducing Section 6.4 and 6.5, we have already shown the results when cluster
 pruning is enabled, which corresponds to the `w/ prune` results in Figure 11(a). In the figure,
@@ -2433,8 +2435,6 @@ without cluster pruning, which corresponds to the `w/o prune` results in Figure 
 > **Note:** Because of Gurobi licensing issues, the results you get might be different from
 > ours (especially if you are using limited license). This is an issue with the Gurobi solver
 > instead of our system.
-
-> **Note:** Before running the experiments below, please first backup and empty `./layouts`.
 
 (1) First, let's disable cluster pruning and run Helix's model placement planner for the 24
 node cluster. Run the following command to generate model placement with Helix:
@@ -2508,9 +2508,13 @@ python ablation2_initial.py 24   # no initial values for 24 node cluster
 python ablation2_initial.py 42   # no initial values for 42 node cluster
 ```
 
-When running on our side, the no initial values cases takes slightly longer than the cases with
-initial values (to find the same objective). Matching the results shown in Figure 11(b) in the
-paper.
+The two commands will generate the model placements and save them to `./layouts/raw_24`
+and `./layouts/raw_42`. For the 24-node cluster, on our side it takes around 85 minutes to find
+the model placement with same objective value as the one found in Sec 6.4. For the 42-node
+cluster, on our side it takes around 50 minutes to find the model placement with same objective value
+as the one found in Sec 6.5. Both are longer than the time needed when starting from heuristic
+solutions. This matches our result in the paper. We provide the traces in `./layouts/raw_24/trace.txt`
+and `./layouts/raw_42/trace.txt`. 
 
 > **Note:** Because of the difference of Gurobi license and hardware, the running time you get might
 > be different from ours. This is an issue with the Gurobi solver instead of our system.
