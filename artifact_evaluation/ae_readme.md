@@ -2201,11 +2201,11 @@ python setup1_gen_sys_config.py
 ```
 Then, we evaluate the performance of different request scheduling methods in the real system.
 
-(1) Helix's Request Scheduling. Run the following command on the host and worker machines to start
-the real system:
+(1) Helix's Request Scheduling. Run the following command on two separate terminals of the
+host machine to start the real system:
 ```bash
-python setup1_start_host.py helix             # on the host machine
-python setup1_start_worker.py maxflow         # on all 24 worker machines
+python setup1_start_host.py helix                       # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py maxflow"   # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/helix`.
@@ -2237,11 +2237,11 @@ Throughput: 214.1 Tokens/s
 ```
 This corresponds to Figure 10(a)'s Single - Helix in the paper.
 
-(2) Swarm's Request Scheduling. Run the following command on the host and worker machines to start
-the real system:
+(2) Swarm's Request Scheduling. Run the following command on two separate terminals of the
+host machine to start the real system:
 ```bash
-python setup1_start_host.py swarm             # on the host machine
-python setup1_start_worker.py swarm           # on all 24 worker machines
+python setup1_start_host.py swarm                     # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py swarm"   # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/swarm`.
@@ -2274,11 +2274,11 @@ Throughput: 169.4 Tokens/s
 
 This corresponds to Figure 10(a)'s Single - Swarm in the paper.
 
-(3) Random Request Scheduling. Run the following command on the host and worker machines to start
-the real system:
+(3) Random Request Scheduling. Run the following command on two separate terminals of the
+host machine to start the real system:
 ```bash
-python setup1_start_host.py random            # on the host machine
-python setup1_start_worker.py random          # on all 24 worker machines
+python setup1_start_host.py random                      # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py random"    # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/random`.
