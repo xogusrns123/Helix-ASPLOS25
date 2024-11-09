@@ -2024,10 +2024,11 @@ to generate the real system configuration file on the host machine:
 python setup1_gen_sys_config.py helix
 ```
 
-Then, on the host and worker machines, run the following command to start the real system:
+Then, on two separate terminals of the host machine, run the following command to start
+the real system:
 ```bash
-python setup1_start_host.py helix      # on the host machine
-python setup1_start_worker.py          # on all 24 worker machines
+python setup1_start_host.py helix               # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py"   # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/helix`.
@@ -2065,10 +2066,10 @@ to generate the real system configuration file on the host machine:
 python setup1_gen_sys_config.py swarm
 ```
 
-Then, on the host and worker machines, run the following command to start the real system:
+Then, on two separate terminals of the host machine, run the following command to start the real system:
 ```bash
-python setup1_start_host.py swarm      # on the host machine
-python setup1_start_worker.py          # on all 24 worker machines
+python setup1_start_host.py swarm               # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py"   # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/swarm`.
@@ -2106,10 +2107,10 @@ to generate the real system configuration file on the host machine:
 python setup1_gen_sys_config.py petals
 ```
 
-Then, on the host and worker machines, run the following command to start the real system:
+Then, on two separate terminals of the host machine, run the following command to start the real system:
 ```bash
-python setup1_start_host.py petals      # on the host machine
-python setup1_start_worker.py           # on all 24 worker machines
+python setup1_start_host.py petals                # on the host machine, terminal 1
+python remote_run.py "setup1_start_worker.py"     # on the host machine, terminal 2
 ```
 
 After running the experiment, the log files are stored in `./real_sys_results/petals`.
