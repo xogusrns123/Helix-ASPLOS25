@@ -412,6 +412,11 @@ After running the experiment, the log files are stored in `./real_llama30b/helix
 > start the worker machines remotely. After each experiment, host terminal 1 will automatically
 > terminate. However, **you need to manually terminate host terminal 2 after each experiment**.
 
+> **Note** **When a setup only uses a sub-cluster of the whole cluster, you may see some core**
+> **dumps on terminal 2. This is normal and expected (unused machines are leaving). Also,**
+> **when the host finishes, you will see a core dump on terminal 1. This is normal and does not**
+> **affect the result.**
+
 Parse the results with the following command on the host machine:
 ```bash
 python step7_parse_results.py helix_a100 llama30b offline
