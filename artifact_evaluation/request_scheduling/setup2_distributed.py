@@ -50,7 +50,7 @@ def simulate_maxflow_offline(
     warm_up, duration = 60, 600
     auto_test = OfflineRequestFeeder(initial_query_count=20, start_time=finish_model_loading_time,
                                      duration=warm_up + duration, stop_at_duration=True, feed_hwm=0.8, seed=0)
-    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=200)
 
     # result processing
     analysis_start_time = finish_model_loading_time + warm_up
@@ -124,7 +124,7 @@ def simulate_heuristic_offline(
     warm_up, duration = 60, 600
     auto_test = OfflineRequestFeeder(initial_query_count=initial_feed_num, start_time=finish_model_loading_time,
                                      duration=warm_up + duration, stop_at_duration=True, feed_hwm=0.8, seed=0)
-    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=10)
+    auto_test.auto_simulate(simulator=simulator, watch_items=["all"], watch_interval=200)
 
     # result processing
     analysis_start_time = finish_model_loading_time + warm_up
