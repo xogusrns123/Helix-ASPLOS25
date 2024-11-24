@@ -198,7 +198,8 @@ class QueryManager:
         assert request.phase == RequestPhase.Initialization, "Can only reject initialization phase requests!"
         base_query_uid = request.base_query_uid
         del self.queries_on_the_fly[base_query_uid]
-        print(f"A query is rejected due to low kv-cache in specific routes!")
+        # FIXME: restore the log here
+        # print(f"A query is rejected due to low kv-cache in specific routes!")
 
     def collect_finished_request(self, current_time: float, request: InferenceRequest) -> bool:
         """

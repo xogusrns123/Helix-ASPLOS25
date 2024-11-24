@@ -277,8 +277,9 @@ class SchedulerNode:
         elif self.scheduling_mode == SchedulingMode.Offline:
             # reject the request if no next level nodes can do the inference
             if not any(mask):
-                print(f"[SchedulerNode-{self.node_uid}] Reject scheduler - out_nodes={self.outbound_node_uids}, "
-                      f"reasons={reason}")
+                # FIXME: restore the log here
+                # print(f"[SchedulerNode-{self.node_uid}] Reject scheduler - out_nodes={self.outbound_node_uids}, "
+                #       f"reasons={reason}")
                 return PipelineStage(link_uid=-1, bandwidth_usage=-1, node_uid=-1, layers_to_infer=[])
         else:
             assert False, "Unknown scheduling mode!"
