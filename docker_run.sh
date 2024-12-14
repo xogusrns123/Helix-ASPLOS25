@@ -1,0 +1,1 @@
+docke run --gpus all -it --name helix-container -p 6000:6000 helix:latest
