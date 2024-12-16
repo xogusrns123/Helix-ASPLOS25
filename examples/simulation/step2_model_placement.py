@@ -7,16 +7,16 @@ from simulator.event_simulator.utils import kbps, mbps, gbps, KB, MB, GB, Sec, M
 def petals_layout():
     # heuristic method: petals
     layout_synthesizer = LayoutSynthesizer(
-        complete_cluster_file_name="./config/single24.ini",
+        complete_cluster_file_name="./config/single_mango16.ini",
         machine_profile_name="./config/machine_profile.ini",
         model_name=ModelName.LLaMa70B,
         workspace_path="./layouts/petals",
         layout_method=LayoutMethod.Petals,
-        machine_num_dict={"A100": 4, "L4": 8, "T4": 12}
+        machine_num_dict={"4090": 8, "2080Ti": 2, "3090": 2}
     )
     petals_args = {
         "seed": 0,
-        "max_out_links_per_node": 24,
+        "max_out_links_per_node": 12,
     }
     layout_synthesizer.synthesize(args=petals_args)
 
