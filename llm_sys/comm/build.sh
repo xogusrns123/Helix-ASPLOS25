@@ -14,8 +14,8 @@ cd build
 
 # Run CMake to configure the build environment
 echo "Configuring build with CMake..."
-# cmake -DCMAKE_BUILD_TYPE=Release .. || { echo "CMake configuration failed"; exit 1; }
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc .. || { echo "CMake configuration failed"; exit 1; }
+cmake -DCMAKE_BUILD_TYPE=Release .. || { echo "CMake configuration failed"; exit 1; }
+# cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc .. || { echo "CMake configuration failed"; exit 1; }
 
 # Run Make to build the project with 8 threads
 echo "Building with Make..."
