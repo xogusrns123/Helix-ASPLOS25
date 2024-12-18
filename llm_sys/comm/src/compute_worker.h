@@ -162,7 +162,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
         zmq::message_t input_msg;
         Header header = poll_client.poll_once(input_msg, 100);
         if (header.msg_type == MsgType::Invalid) {
-            log("Receiver", "Received invalid message or timeout.");
+            // log("Receiver", "Received invalid message or timeout.");
             continue;
         }
         Assert(header.msg_type == MsgType::InitComplete || header.msg_type == MsgType::Init,
