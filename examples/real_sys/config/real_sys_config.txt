@@ -15,7 +15,7 @@ end_layer: 11
 machine_id: 2
 ip_address: 143.248.53.45
 in_nodes: 1
-out_nodes: 2
+out_nodes: 0
 start_layer: 11
 end_layer: 16
 
