@@ -10,12 +10,12 @@ ip_address: 143.248.53.25
 in_nodes: 0
 out_nodes: 2
 start_layer: 0
-end_layer: 11
+end_layer: 16
 
 machine_id: 2
 ip_address: 143.248.53.45
 in_nodes: 1
 out_nodes: 0
-start_layer: 11
-end_layer: 16
+start_layer: 16
+end_layer: 32
 
