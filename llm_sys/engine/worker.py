@@ -84,6 +84,14 @@ class LayerwiseWorker(Worker):
         model_config.get_num_layers = lambda _: 1
         self.model_config = model_config
         super().init_cache_engine(cache_config)
+        # Class Worker's function
+        # def init_cache_engine(self, cache_config: CacheConfig) -> None:
+        #     self.cache_config = cache_config
+        #     self.cache_engine = CacheEngine(self.cache_config, self.model_config,
+        #                                     self.parallel_config)
+        #     self.gpu_cache = self.cache_engine.gpu_cache
+        #     self.model_runner.set_block_size(self.cache_engine.block_size)
+        
         self.model_config = backup_model_config
 
         self.gpu_cache = self.cache_engine.gpu_cache[0]

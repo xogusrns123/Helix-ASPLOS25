@@ -174,6 +174,7 @@ class PipelineStageEngine(LLMEngine):
          finished_infos) = self.scheduler.schedule(force_decode=force_decode)
 
         if not scheduler_outputs.is_empty():
+            # model_executor: PipelineStageGpuExecutor
             output = self.model_executor.execute_model(
                 layer_id, seq_group_metadata_list,
                 scheduler_outputs.blocks_to_swap_in,

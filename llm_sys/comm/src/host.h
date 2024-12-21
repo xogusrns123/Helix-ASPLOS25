@@ -450,10 +450,16 @@ void msg_gather_thread(const std::string &host_ip) {
     }
     // loop until all input machines are ready
     while (!input_machines_not_ready.empty()) {
+        // Print the current status of input_machines_not_ready
+        // log("Debug", "Remaining input machines: ");
+        // for (const auto &machine_id : input_machines_not_ready) {
+        //     log("Debug", "Machine ID: " + std::to_string(machine_id));
+        // }
         // receive a message
         zmq::message_t input_msg;
         Header header = poll_client.poll_once(input_msg, 100);
         if (header.msg_type == MsgType::Invalid) {
+            // log("Gather", "Received invalid message or timeout.");
             continue;
         }
         Assert(header.msg_type == MsgType::Init, "Received non-init message!");

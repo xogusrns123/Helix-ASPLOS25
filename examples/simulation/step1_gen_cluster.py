@@ -11,8 +11,11 @@ def generate_single(file_name: str):
     generator = FakeClusterGenerator()
 
     # set the statistics of the cluster
-    generator.set_node_statistics(num_compute_nodes=24, avg_degree=23, source_degree=24, sink_degree=24,
-                                  node_type_percentage={"A100": 4, "T4": 12, "L4": 8})
+    # generator.set_node_statistics(num_compute_nodes=24, avg_degree=23, source_degree=24, sink_degree=24,
+    #                               node_type_percentage={"A100": 4, "T4": 12, "L4": 8})
+    generator.set_node_statistics(num_compute_nodes=16, avg_degree=15, source_degree=16, sink_degree=16,
+                                  node_type_percentage={"4090": 8, "2080Ti": 2, "3090": 2})
+    
     generator.set_link_statistics(avg_bandwidth=1 * gbps, var_bandwidth=0,
                                   avg_latency=1 * MilliSec, var_latency=0,
                                   fill_with_slow_link=True,
@@ -30,9 +33,12 @@ def generate_partitioned(file_name: str):
     generator = PartitionedClusterGenerator()
 
     # set the statistics of the cluster
-    generator.add_partition(nodes_list=["A100"] * 4)
-    generator.add_partition(nodes_list=["L4"] * 2 + ["T4"] * 8)
-    generator.add_partition(nodes_list=["L4"] * 6 + ["T4"] * 4)
+    # generator.add_partition(nodes_list=["A100"] * 4)
+    # generator.add_partition(nodes_list=["L4"] * 2 + ["T4"] * 8)
+    # generator.add_partition(nodes_list=["L4"] * 6 + ["T4"] * 4)
+    generator.add_partition(nodes_list=["4090"] * 4) # mango1
+    generator.add_partition(nodes_list=["4090"] * 2 + ["2080Ti"] * 2) # mango4
+    generator.add_partition(nodes_list=["4090"] * 2 + ["3090"] * 2) # mango2
     generator.set_network_statistics(
         in_partition_avg_bandwidth=1.25 * gbps, in_partition_var_bandwidth=125 * mbps,
         in_partition_avg_latency=1 * MilliSec, in_partition_var_latency=0,
@@ -53,9 +59,10 @@ def main():
     Note: currently, the simulator only supports machines with {"A100", "V100", "L4", "L4x2", "T4", "T4x2",
     "T4x4"} GPUs. You can add more machines by profiling them and add the data to simulator/model_manager.
     """
-    generate_single(file_name="./config/single24.ini")
+    # generate_single(file_name="./config/single24.ini")
+    generate_single(file_name="./config/single_mango16.ini")
     print("Single cluster configuration file is generated to ./config/single24.ini")
-    generate_partitioned(file_name="./config/3cluster24.ini")
+    generate_partitioned(file_name="./config/3cluster_mango16.ini")
     print("Partitioned cluster configuration file is generated to ./config/3cluster24.ini")
 
 

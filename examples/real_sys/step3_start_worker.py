@@ -17,7 +17,7 @@ def main():
     print(f"Starting worker with scheduling method: {scheduling_method}.")
 
     # run worker
-    run_worker(scheduling_method=scheduling_method, model_name="./model")
+    run_worker(scheduling_method=scheduling_method, model_name="./Llama-2-7b-hf")
 
 
 if __name__ == '__main__':
