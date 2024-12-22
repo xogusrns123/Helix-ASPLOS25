@@ -404,7 +404,7 @@ void msg_scatter_thread(const std::string &host_ip) {
         //    For example, maybe machine IDs [1..5] are prefill-only, [6..10] are decode-only.
         //    In reality, you'd parse this from your config or cluster definitions.
         int prefill_id = 1;
-        int decode_id  = 3;
+        int decode_id  = 2;
 
         // run the main loop
         while (true) {

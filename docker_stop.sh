@@ -30,12 +30,12 @@ echo "Docker stop completed on all nodes sequentially."
 
 # Parse IP addresses and remove the Docker container on each node sequentially
 grep "ip_address:" "$NODES_FILE" | awk '{print $2}' | while read -r ip; do
-    echo "[$ip]: Stopping container '$CONTAINER_NAME'..."
+    echo "[$ip]: Removing container '$CONTAINER_NAME'..."
     ssh "$ip" "echo $SUDO_PASSWORD | sudo -S docker rm $CONTAINER_NAME"
     if [ $? -eq 0 ]; then
-        echo "[$ip]: Successfully stopped container '$CONTAINER_NAME'."
+        echo "[$ip]: Successfully remove container '$CONTAINER_NAME'."
     else
-        echo "[$ip]: Failed to stop container '$CONTAINER_NAME'."
+        echo "[$ip]: Failed to remove container '$CONTAINER_NAME'."
     fi
 done
 
