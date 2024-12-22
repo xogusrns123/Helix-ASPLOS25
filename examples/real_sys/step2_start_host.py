@@ -54,7 +54,7 @@ def example_maxflow_online():
 
 def example_heuristic_offline(heuristic: str):
     # check arguments and create result directory
-    assert heuristic in ["swarm", "random"], f"Unsupported heuristic: {heuristic}!"
+    assert heuristic in ["swarm", "random", "disaggregate"], f"Unsupported heuristic: {heuristic}!"
     result_dir = f"./result/{heuristic}_offline_test/"
     os.makedirs(result_dir, exist_ok=True)
 
@@ -101,9 +101,9 @@ def main():
         example_maxflow_offline()
     elif mode == "online" and method == "maxflow":
         example_maxflow_online()
-    elif mode == "offline" and method in ["swarm", "random"]:
+    elif mode == "offline" and method in ["swarm", "random", "disaggregate"]:
         example_heuristic_offline(method)
-    elif mode == "online" and method in ["swarm", "random"]:
+    elif mode == "online" and method in ["swarm", "random", "disaggregate"]:
         example_heuristic_online(method)
     else:
         print(f"Unsupported mode or scheduling method: [{mode}] [{method}]!")

@@ -13,7 +13,7 @@ def main():
     scheduling_method = sys.argv[1]
 
     # check arguments
-    assert scheduling_method in ["maxflow", "swarm", "random"], f"Unsupported scheduling method: {scheduling_method}!"
+    assert scheduling_method in ["maxflow", "swarm", "random", "disaggregate"], f"Unsupported scheduling method: {scheduling_method}!"
     print(f"Starting worker with scheduling method: {scheduling_method}.")
 
     # run worker
