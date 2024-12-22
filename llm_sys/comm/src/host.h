@@ -182,7 +182,7 @@ gather_finished_requests() {
     }
 
     // if the scheduler is swarm or random, we need to save the routing info
-    if (scheduler_type == "swarm" || scheduler_type == "random") {
+    if (scheduler_type == "swarm" || scheduler_type == "random" || scheduler_type == "disaggregate") {
         for (auto &message: new_messages) {
             Header header = std::get<0>(message);
             int request_id = header.request_id;
@@ -201,7 +201,7 @@ gather_finished_requests() {
     // prepare routes and layer_nums
     std::vector<std::vector<int>> routes;
     std::vector<std::vector<int>> layer_nums;
-    if (scheduler_type == "swarm" || scheduler_type == "random") {
+    if (scheduler_type == "swarm" || scheduler_type == "random" || scheduler_type == "disaggregate") {
         for (auto &message: new_messages) {
             Header header = std::get<0>(message);
             std::vector<int> route;
@@ -210,7 +210,7 @@ gather_finished_requests() {
                 route.push_back(header.server_id[i]);
                 layer_num.push_back(header.end_layer_idx[i] - header.start_layer_idx[i]);
             }
-            routes.emplace_back(route);
+            routes.emplace_back( );
             layer_nums.emplace_back(layer_num);
         }
     }
@@ -399,6 +399,42 @@ void msg_scatter_thread(const std::string &host_ip) {
                 }
             }
         }
+    } else if (scheduler_type == "disaggregate") {
+        // 1) Define which machines are for prefill vs. decode
+        //    For example, maybe machine IDs [1..5] are prefill-only, [6..10] are decode-only.
+        //    In reality, you'd parse this from your config or cluster definitions.
+        int prefill_id = 1;
+        int decode_id  = 3;
+
+        // run the main loop
+        while (true) {
+            // get all messages
+            std::vector<MessageData> new_messages = launch_queue.pop_all();
+
+            for (auto &message: new_messages) {
+                if (message.header.msg_type == MsgType::Prompt) {
+                    // for prompt phase, we need to generate a random route
+                    int next_server_id = prefill_id;
+
+                    // set next server id into the header
+                    // We will decide the message's inference layers when it arrives at next node
+                    message.header.add_stage(next_server_id, -1, -1);
+
+                    // send out the message
+                    output_sockets[next_server_id]->send(message.header, message.buffer_msg);
+                } else if (message.header.msg_type == MsgType::Decode) {
+                    // Now route the decode request to a decode cluster machine
+                    int next_server_id = decode_id;
+
+                    // send the request following the route
+                    output_sockets[next_server_id]->send(message.header, message.buffer_msg);
+                } else if (message.header.msg_type == MsgType::Terminate) {
+                    return;
+                } else {
+                    Assert(false, "Bad message type: " + std::to_string((int) message.header.msg_type));
+                }
+            }
+        }
     } else {
         Assert(false, "Bad scheduler type!");
     }
@@ -573,7 +609,7 @@ void msg_gather_thread(const std::string &host_ip) {
                 break;
             }
         }
-    } else if (scheduler_type == "random") {
+    } else if (scheduler_type == "random" || scheduler_type == "disaggregate") {
         while (true) {
             // get the message
             zmq::message_t buffer_msg;
@@ -616,7 +652,7 @@ void host_start_network_threads(const std::string &config_broadcast_addr, const 
     network_initialized = true;
 
     // set scheduler
-    Assert(scheduler == "swarm" || scheduler == "maxflow" || scheduler == "random", "Bad scheduler type");
+    Assert(scheduler == "swarm" || scheduler == "maxflow" || scheduler == "random" || scheduler == "disaggregate", "Bad scheduler type");
     scheduler_type = scheduler;
 
     // creating threads

@@ -374,6 +374,19 @@ class LayerwiseModelRunner(ModelRunner):
             kv_cache: torch.Tensor,
             layer_id: int,
     ) -> Optional[Union[SamplerOutput, PipelineStageOut]]:
+        
+        # 2. If decode but kv_cache is None or has zero elements, build a dummy
+        if not seq_group_metadata_list[0].is_prompt:
+            if (kv_cache is None) or (kv_cache.numel() == 0):
+                # Here we assume a float16 dummy. If your model uses float32 or another dtype, adjust accordingly.
+                # The shape can be an empty shape [0], or you might need [batch, heads, tokens, dim].
+                # We'll show an extremely minimal approach:
+                dummy_options = torch.float16
+                device = torch.device("cuda", 0)
+                # Create an empty tensor that won't break decode logic
+                kv_cache = torch.empty((0,), dtype=dummy_options, device=device)
+                print("[DummyKV] Using dummy KV cache for decode phase.")
+
         is_first_layer = layer_id == 0
         (input_hidden_states, input_positions, attn_metadata, sampling_metadata,
          ) = self.prepare_input_tensors(seq_group_metadata_list, is_first_layer)

@@ -172,7 +172,7 @@ def run_heuristic_host_offline(
     """
     Run host with !!![Swarm/Random + Offline mode]!!!.
     """
-    assert scheduler_name == "swarm" or scheduler_name == "random", "Scheduler must be either swarm or random!"
+    assert scheduler_name == "swarm" or scheduler_name == "random" or scheduler_name == "disaggregate", "Scheduler must be either swarm or random!"
     print(f"Initializing host with {scheduler_name} scheduling!")
 
     # ------------------------------------- Offline Initial ------------------------------------- #
@@ -347,3 +347,4 @@ def run_heuristic_host_offline(
     with open(events_file_name, "w") as f:
         for item in events:
             f.write(f"{item}\n")
+
