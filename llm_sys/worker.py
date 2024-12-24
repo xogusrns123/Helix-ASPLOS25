@@ -98,6 +98,9 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
 
     last_log_time = time.time()
     while True:
+        # whole step
+        # Incoming requests are first updated in the scheduler
+        # and when all requests are updated, inference is performed with run_and_submit()
         # ------------------------------------------------------------------------------------------- #
         # Step 1: fetch new requests to compute on
         # request_ids: List[int]
@@ -159,13 +162,13 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                 if is_token:
                     # first layer: no activations
                     engine.scheduler.update_req_data(start_layer_idx,
-                                                     (f"{request_id}", start_layer_idx),
-                                                     {(request_id, start_layer_idx): None})
+                                                    (f"{request_id}", start_layer_idx),
+                                                    {(request_id, start_layer_idx): None})
                 else:
                     input_tensor = activation_tensor[offset: offset + length].reshape(1, hidden_size)
                     engine.scheduler.update_req_data(start_layer_idx,
-                                                     (f"{request_id}", start_layer_idx),
-                                                     {(request_id, start_layer_idx): input_tensor})
+                                                    (f"{request_id}", start_layer_idx),
+                                                    {(request_id, start_layer_idx): input_tensor})
 
         # step 2.2 & 2.3: run vllm and submit
         parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,

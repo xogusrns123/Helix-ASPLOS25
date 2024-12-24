@@ -86,7 +86,9 @@ class LayerwiseScheduler(Scheduler):
         super().__init__(scheduler_config, cache_config, lora_config)
         self.next_seq_mapping: Dict[SequenceGroup, SequenceGroup] = {}
         self.layer_ids = layer_ids
+        # fetched requests, not running
         self.waitings: Dict[int, Deque[SequenceGroup]] = {i: deque() for i in layer_ids}
+        # running means processed only for some layers
         self.runnings: Dict[int, Deque[SequenceGroup]] = {i: deque() for i in layer_ids}
         self.swappeds: Dict[int, Deque[SequenceGroup]] = {i: deque() for i in layer_ids}
         self.sleeps_cpu: Dict[int, Deque[_SeqGroupIdType]] = {i: deque() for i in layer_ids}
@@ -100,11 +102,13 @@ class LayerwiseScheduler(Scheduler):
 
     def context_switch(self, layer_id: int):
         if self.cur_layer >= 0:
+            # save previous states
             self.runnings[self.cur_layer] = self.running
             self.waitings[self.cur_layer] = self.waiting
             self.swappeds[self.cur_layer] = self.swapped
             self.sleeps_cpu[self.cur_layer] = self.sleep_cpu_ids
             self.sleeps_gpu[self.cur_layer] = self.sleep_gpu_ids
+        # update current states
         self.running = self.runnings[layer_id]
         self.waiting = self.waitings[layer_id]
         self.swapped = self.swappeds[layer_id]
@@ -609,7 +613,33 @@ class LayerwiseScheduler(Scheduler):
                         self.sleep_cpu_ids.remove(seq_group.request_id)
         self.running = deque(filter(lambda sg: not sg.is_finished(), self.running))
 
-    def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):
+    def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):  
+        
+        # FIXME currently, for conevenient experiment for disaggregate design
+        if req_id not in self.seq_groups:
+            sampling_params = SamplingParams()
+            sampling_params.max_tokens = max_tokens - num_tokens
+            sampling_params.ignore_eos = True
+
+            new_seq = PipelineSequence(
+            seq_id=(req_id, layer_id),  # or some unique ID
+            prompt="",
+            prompt_token_ids=[],  # or partial tokens
+            block_size=16,  # from your config
+            input_tensor=None,
+            eos_token_id=2,  # or real EOS
+            lora_request=None
+            )
+
+            new_seq_group = SequenceGroup(
+            request_id=req_id,
+            seqs=[new_seq],
+            sampling_params=sampling_params,
+            arrival_time=time.time()  # or time.time() if you prefer
+            )
+            new_seq_group.request_id = (new_seq_group.request_id, layer_id)
+            self.seq_groups[new_seq_group.request_id] = new_seq_group
+        
         # Move seq group
         if layer_id == self.cur_layer:
             sleep_on_gpus = self.sleep_gpu_ids
@@ -626,6 +656,7 @@ class LayerwiseScheduler(Scheduler):
             req_id = (req_id, layer_id)
         else:
             assert isinstance(req_id, Tuple)
+        
         seq_group = self.seq_groups[req_id]
         if req_id in sleep_on_gpus:
             sleep_on_gpus.remove(req_id)
