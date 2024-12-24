@@ -640,6 +640,12 @@ class LayerwiseScheduler(Scheduler):
             arrival_time=time.time()  # or time.time() if you prefer
             )
             new_seq_group.request_id = (new_seq_group.request_id, layer_id)
+            for seq in list(new_seq_group.seqs_dict.values()):
+                if not isinstance(seq.seq_id, tuple):
+                    assert isinstance(seq.seq_id, int)
+                    new_seq_group.seqs_dict.pop(seq.seq_id)
+                    seq.seq_id = (seq.seq_id, layer_id)
+                    new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
         
         # Move seq group
