@@ -628,8 +628,8 @@ class LayerwiseScheduler(Scheduler):
             prompt="",
             prompt_token_ids=[],  # or partial tokens
             block_size=16,  # from your config
-            input_tensor=None,
-            eos_token_id=2,  # or real EOS
+            input_act=None,
+            eos_token_id=None,  # or real EOS
             lora_request=None
             )
 
