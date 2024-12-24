@@ -16,6 +16,8 @@ from vllm.core.scheduler import (PreemptionMode, ScheduledSequenceGroup,
 
 from llm_sys.engine.common import (InputActivationType, PipelineSequence, PipelineSequenceData,
                                    PipelineSequenceGroupMetadata, PipelineStageOut)
+from vllm import SamplingParams
+
 
 logger = init_logger(__name__)
 

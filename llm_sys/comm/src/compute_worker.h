@@ -180,9 +180,6 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
             log("Receiver", "Input machine id=[" + std::to_string(input_machine_id) + "] is complete!");
             log("Receiver", "Remaining input machines: " + std::to_string(input_machines_not_complete.size()) + "!");
         }
-        // check loop state
-        log("Receiver", "Loop condition check: input_machines_not_complete.empty()=" +
-                    std::to_string(input_machines_not_complete.empty()));
     }
     // mark as ready
     stop_sending_init = true;
