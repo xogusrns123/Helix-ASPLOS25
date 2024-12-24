@@ -620,7 +620,7 @@ class LayerwiseScheduler(Scheduler):
         # FIXME currently, for conevenient experiment for disaggregate design
         if req_id not in self.seq_groups:
             sampling_params = SamplingParams()
-            sampling_params.max_tokens = 300 - num_tokens
+            sampling_params.max_tokens = 300
             sampling_params.ignore_eos = True
 
             new_seq = PipelineSequence(
