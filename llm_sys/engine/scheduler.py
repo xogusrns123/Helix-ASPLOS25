@@ -618,7 +618,7 @@ class LayerwiseScheduler(Scheduler):
     def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):  
         
         # FIXME currently, for conevenient experiment for disaggregate design
-        if req_id not in self.seq_groups:
+        if (req_id, layer_id) not in self.seq_groups:
             sampling_params = SamplingParams()
             sampling_params.max_tokens = 300
             sampling_params.ignore_eos = True
