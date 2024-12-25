@@ -1,5 +1,5 @@
 machine_id: 0
-ip_address: 143.248.53.59
+ip_address: 143.248.53.112
 in_nodes: 4
 out_nodes: 1
 start_layer: -1
@@ -27,7 +27,7 @@ start_layer: 16
 end_layer: 24
 
 machine_id: 4
-ip_address: 143.248.53.112
+ip_address: 143.248.53.59
 in_nodes: 3
 out_nodes: 0
 start_layer: 24
