@@ -285,40 +285,40 @@ def run_heuristic_host_offline(
                 del flying_queries_dict[query_uid]
                 print(f"Query {query_uid}, finished (total_len={py_on_the_fly_query.processed_tokens})")
 
-                # # send a new query to replace the old one
-                # input_length, output_length = length_sampler.sample_length()
+                # send a new query to replace the old one
+                input_length, output_length = length_sampler.sample_length()
 
-                # # get query id
-                # cur_query_id = next_query_id
-                # next_query_id += 1
+                # get query id
+                cur_query_id = next_query_id
+                next_query_id += 1
 
-                # # send it into the cluster
-                # llm_host.launch_request(
-                #     "prompt",  # request_type
-                #     cur_query_id,  # request_id
-                #     input_length,  # num_tokens
-                #     input_length + output_length,  # max_num_tokens
-                #     [i for i in range(input_length)],  # token_ids
-                #     False,  # set_routing
-                #     [],  # server_ids
-                #     [],  # start_layer_ids
-                #     [],  # end_layer_ids
-                # )
+                # send it into the cluster
+                llm_host.launch_request(
+                    "prompt",  # request_type
+                    cur_query_id,  # request_id
+                    input_length,  # num_tokens
+                    input_length + output_length,  # max_num_tokens
+                    [i for i in range(input_length)],  # token_ids
+                    False,  # set_routing
+                    [],  # server_ids
+                    [],  # start_layer_ids
+                    [],  # end_layer_ids
+                )
 
-                # # put into flying queries
-                # flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
-                #                                                 input_length=input_length,
-                #                                                 output_length=output_length,
-                #                                                 compute_node_uids=None,
-                #                                                 start_layers=None,
-                #                                                 end_layers=None,
-                #                                                 pipeline=None)
+                # put into flying queries
+                flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
+                                                                input_length=input_length,
+                                                                output_length=output_length,
+                                                                compute_node_uids=None,
+                                                                start_layers=None,
+                                                                end_layers=None,
+                                                                pipeline=None)
 
-                # # save log
-                # # time - query id - in/out - phase - context_len - this_iter_processed
-                # events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
-                # print(f"Send out new query {cur_query_id}, input len = {input_length}, "
-                #       f"max_len = {input_length + output_length} (decode finish request replacement)")
+                # save log
+                # time - query id - in/out - phase - context_len - this_iter_processed
+                events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
+                print(f"Send out new query {cur_query_id}, input len = {input_length}, "
+                      f"max_len = {input_length + output_length} (decode finish request replacement)")
 
             else:
                 # then we send the query back into the cluster (next decode iter)
