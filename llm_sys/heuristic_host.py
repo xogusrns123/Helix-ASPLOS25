@@ -150,12 +150,14 @@ def run_heuristic_host_online(
     print(f"Queries still flying: {flying_queries_dict.keys()}.")
     query_routes_file_name = os.path.join(result_logging_dir, "query_route.txt")
     events_file_name = os.path.join(result_logging_dir, "events.txt")
+    print("checking1")
     with open(query_routes_file_name, "w") as f:
         for item in query_routes:
             f.write(f"{item}\n")
     with open(events_file_name, "w") as f:
         for item in events:
             f.write(f"{item}\n")
+    print("checking2")
 
 
 def run_heuristic_host_offline(

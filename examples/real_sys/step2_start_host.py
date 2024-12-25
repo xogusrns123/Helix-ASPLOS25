@@ -55,7 +55,7 @@ def example_maxflow_online():
 def example_heuristic_offline(heuristic: str):
     # check arguments and create result directory
     assert heuristic in ["swarm", "random", "disaggregate"], f"Unsupported heuristic: {heuristic}!"
-    result_dir = f"./result/{heuristic}_offline_test/"
+    result_dir = f"./result/{heuristic}_offline/"
     os.makedirs(result_dir, exist_ok=True)
 
     # run heuristic host offline
