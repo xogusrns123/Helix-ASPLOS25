@@ -64,7 +64,7 @@ def example_heuristic_offline(heuristic: str):
         scheduler_name=heuristic,
         real_sys_config_file_name="./config/real_sys_config.txt",
         initial_launch_num=50,
-        duration=30,
+        duration=300,
         result_logging_dir=result_dir
     )
 
