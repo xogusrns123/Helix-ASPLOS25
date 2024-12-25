@@ -1,6 +1,6 @@
 machine_id: 0
 ip_address: 143.248.53.59
-in_nodes: 2
+in_nodes: 1
 out_nodes: 1
 start_layer: -1
 end_layer: -1
