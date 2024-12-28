@@ -616,7 +616,7 @@ class LayerwiseScheduler(Scheduler):
         self.running = deque(filter(lambda sg: not sg.is_finished(), self.running))
 
     def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):  
-        
+        print(req_id)
         # FIXME currently, for conevenient experiment for disaggregate design
         if req_id not in self.seq_groups:
             print(f"decode other instances:req_id{req_id}")
@@ -640,7 +640,11 @@ class LayerwiseScheduler(Scheduler):
             sampling_params=sampling_params,
             arrival_time=time.time()  # or time.time() if you prefer
             )
-            new_seq_group.request_id = (new_seq_group.request_id, layer_id)
+
+            if not isinstance(new_seq_group.request_id, tuple):
+                assert isinstance(new_seq_group.request_id, str)
+                new_seq_group.request_id = (new_seq_group.request_id, layer_id)
+
             for seq in list(new_seq_group.seqs_dict.values()):
                 if not isinstance(seq.seq_id, tuple):
                     assert isinstance(seq.seq_id, int)
