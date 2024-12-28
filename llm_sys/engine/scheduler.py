@@ -618,38 +618,38 @@ class LayerwiseScheduler(Scheduler):
     def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):  
         
         # FIXME currently, for conevenient experiment for disaggregate design
-        if (req_id, layer_id) not in self.seq_groups:
-            print("decode other instances")
-            print(f"{(req_id, layer_id)}")
-            # print(f"{self.seq_groups}")
-            sampling_params = SamplingParams()
-            sampling_params.max_tokens = 300
-            sampling_params.ignore_eos = True
+        # if (req_id, layer_id) not in self.seq_groups:
+        #     print("decode other instances")
+        #     print(f"{(req_id, layer_id)}")
+        #     # print(f"{self.seq_groups}")
+        #     sampling_params = SamplingParams()
+        #     sampling_params.max_tokens = 300
+        #     sampling_params.ignore_eos = True
 
-            new_seq = PipelineSequence(
-            seq_id=(req_id, layer_id),  # or some unique ID
-            prompt="",
-            prompt_token_ids=[],  # or partial tokens
-            block_size=16,  # from your config
-            input_act=None,
-            eos_token_id=None,  # or real EOS
-            lora_request=None
-            )
+        #     new_seq = PipelineSequence(
+        #     seq_id=(req_id, layer_id),  # or some unique ID
+        #     prompt="",
+        #     prompt_token_ids=[],  # or partial tokens
+        #     block_size=16,  # from your config
+        #     input_act=None,
+        #     eos_token_id=None,  # or real EOS
+        #     lora_request=None
+        #     )
 
-            new_seq_group = SequenceGroup(
-            request_id=req_id,
-            seqs=[new_seq],
-            sampling_params=sampling_params,
-            arrival_time=time.time()  # or time.time() if you prefer
-            )
-            new_seq_group.request_id = (new_seq_group.request_id, layer_id)
-            for seq in list(new_seq_group.seqs_dict.values()):
-                if not isinstance(seq.seq_id, tuple):
-                    assert isinstance(seq.seq_id, int)
-                    new_seq_group.seqs_dict.pop(seq.seq_id)
-                    seq.seq_id = (seq.seq_id, layer_id)
-                    new_seq_group.seqs_dict[seq.seq_id] = seq
-            self.seq_groups[new_seq_group.request_id] = new_seq_group
+        #     new_seq_group = SequenceGroup(
+        #     request_id=req_id,
+        #     seqs=[new_seq],
+        #     sampling_params=sampling_params,
+        #     arrival_time=time.time()  # or time.time() if you prefer
+        #     )
+        #     new_seq_group.request_id = (new_seq_group.request_id, layer_id)
+        #     for seq in list(new_seq_group.seqs_dict.values()):
+        #         if not isinstance(seq.seq_id, tuple):
+        #             assert isinstance(seq.seq_id, int)
+        #             new_seq_group.seqs_dict.pop(seq.seq_id)
+        #             seq.seq_id = (seq.seq_id, layer_id)
+        #             new_seq_group.seqs_dict[seq.seq_id] = seq
+        #     self.seq_groups[new_seq_group.request_id] = new_seq_group
         
         # Move seq group
         if layer_id == self.cur_layer:
