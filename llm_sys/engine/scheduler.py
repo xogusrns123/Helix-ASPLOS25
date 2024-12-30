@@ -653,7 +653,7 @@ class LayerwiseScheduler(Scheduler):
                     seq.seq_id = (seq.seq_id, layer_id)
                     new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
-            self.sleeps_gpu[layer_id] = layer_id
+            self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
         
         # Move seq group
         if layer_id == self.cur_layer:
