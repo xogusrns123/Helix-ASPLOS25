@@ -99,6 +99,8 @@ class LayerwiseScheduler(Scheduler):
         self.req_local_layers: Dict[int, Tuple[int, int]] = {}
         self.cur_layer = -1
         self.seq_groups: Dict[_SeqGroupIdType, SequenceGroup] = {}
+        # Requests that have processed all of the corresponding layers, but not all decoding processes have been completed.
+        # So, these are requests that exist in the GPU and will be reused if they come back to this worker later.
         self.sleep_gpu_ids: Deque[_SeqGroupIdType] = _WrappedQueue()
         self.sleep_cpu_ids: Deque[_SeqGroupIdType] = _WrappedQueue()
 
@@ -651,6 +653,7 @@ class LayerwiseScheduler(Scheduler):
                     seq.seq_id = (seq.seq_id, layer_id)
                     new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
+            self.sleeps_gpu[layer_id] = layer_id
         
         # Move seq group
         if layer_id == self.cur_layer:

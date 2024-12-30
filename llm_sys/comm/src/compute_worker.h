@@ -246,7 +246,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
                 Assert(false, "Unknown message type!");
             }
         }
-    } else if (scheduler_type == "random" || scheduler_type == "disaggregate") {
+    } else if (scheduler_type == "random") {
         while (true) {
             // get the message
             zmq::message_t buffer_msg;
@@ -270,6 +270,25 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
                 Assert(header.server_id[header.current_stage] == current_machine_id, "Mis-routed request!");
                 recv_compute_queue.push(MessageData(header, std::move(buffer_msg)));
             } else if (header.msg_type == MsgType::Decode) {
+                // send the header and buffer to compute thread
+                Assert(header.server_id[header.current_stage] == current_machine_id, "Mis-routed request!");
+                recv_compute_queue.push(MessageData(header, std::move(buffer_msg)));
+            } else if (header.msg_type == MsgType::Terminate) {
+                break;
+            } else {
+                Assert(false, "Unknown message type!");
+            }
+        }
+    } else if (scheduler_type == "disaggregate") {
+        while (true) {
+            // get the message
+            zmq::message_t buffer_msg;
+            Header header = poll_client.poll_once(buffer_msg, 10);
+            if (header.msg_type == MsgType::Invalid) {
+                continue;
+            }
+
+            if (header.msg_type == MsgType::Prompt || header.msg_type == MsgType::Decode) {
                 // send the header and buffer to compute thread
                 Assert(header.server_id[header.current_stage] == current_machine_id, "Mis-routed request!");
                 recv_compute_queue.push(MessageData(header, std::move(buffer_msg)));

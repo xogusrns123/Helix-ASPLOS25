@@ -4,6 +4,7 @@ import sys
 
 from llm_sys.maxflow_host import run_maxflow_host_online, run_maxflow_host_offline
 from llm_sys.heuristic_host import run_heuristic_host_online, run_heuristic_host_offline
+from llm_sys.disaggregate_host import run_disaggregate_host_online, run_disaggregate_host_offline
 from simulator.event_simulator.cluster_simulator import ModelName
 
 
@@ -54,7 +55,7 @@ def example_maxflow_online():
 
 def example_heuristic_offline(heuristic: str):
     # check arguments and create result directory
-    assert heuristic in ["swarm", "random", "disaggregate"], f"Unsupported heuristic: {heuristic}!"
+    assert heuristic in ["swarm", "random"], f"Unsupported heuristic: {heuristic}!"
     result_dir = f"./result/{heuristic}_offline/"
     os.makedirs(result_dir, exist_ok=True)
 
@@ -85,13 +86,38 @@ def example_heuristic_online(heuristic: str):
         result_logging_dir=result_dir
     )
 
+def example_disaggregate_online():
+    result_dir = f"./result/disaggregate_online/"
+    os.makedirs(result_dir, exist_ok=True)
+
+    # run disaggregate host online
+    print(f"Running example: disaggregate host + online mode")
+    run_disaggregate_host_online(
+        real_sys_config_file_name="./config/real_sys_config.txt",
+        avg_throughput=150,
+        duration=300,
+        result_logging_dir=result_dir
+    )
+
+def example_disaggregate_offline():
+    result_dir = f"./result/disaggregate_offline/"
+    os.makedirs(result_dir, exist_ok=True)
+
+    # run disaggregate host offline
+    print(f"Running example: disaggregate host + offline mode")
+    run_disaggregate_host_offline(
+        real_sys_config_file_name="./config/real_sys_config.txt",
+        initial_launch_num=50,
+        duration=300,
+        result_logging_dir=result_dir
+    )
 
 def main():
     # parse arguments
     if len(sys.argv) != 3:
         print("Usage: python3 run_host.py <mode> <scheduling_method>")
         print("  mode: online | offline")
-        print("  scheduling_method: maxflow | swarm | random")
+        print("  scheduling_method: maxflow | swarm | random | disaggregate")
         return
     mode = sys.argv[1]
     method = sys.argv[2]
@@ -101,10 +127,14 @@ def main():
         example_maxflow_offline()
     elif mode == "online" and method == "maxflow":
         example_maxflow_online()
-    elif mode == "offline" and method in ["swarm", "random", "disaggregate"]:
+    elif mode == "offline" and method in ["swarm", "random"]:
         example_heuristic_offline(method)
-    elif mode == "online" and method in ["swarm", "random", "disaggregate"]:
+    elif mode == "online" and method in ["swarm", "random"]:
         example_heuristic_online(method)
+    elif mode == "online" and method == "disaggregate":
+        example_disaggregate_online()
+    elif mode == "offline" and method == "disaggregate":
+        example_disaggregate_offline()
     else:
         print(f"Unsupported mode or scheduling method: [{mode}] [{method}]!")
 

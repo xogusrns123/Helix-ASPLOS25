@@ -199,12 +199,14 @@ class PipelineStageEngine(LLMEngine):
         scheduled_seq_groups = scheduler_outputs.scheduled_seq_groups
 
         if isinstance(output, SamplerOutput):
+            # Finish current stages, final layer produced sampled tokens
             self.scheduler.last_layer_post_step(scheduler_outputs)
             return super()._process_model_outputs(output, scheduler_outputs), scheduler_outputs.prompt_run
         elif isinstance(output, list):
             assert len(output) == 0, "Bad output!"
             return None, None, None
         else:
+            # not final layer
             tensors_to_send = self.scheduler.post_step(scheduler_outputs, output)
 
             for scheduled_seq_group in scheduled_seq_groups:

@@ -125,6 +125,12 @@ void launch_request(
         for (size_t i = 0; i < num_stages; ++i) {
             header.add_stage(server_ids[i], start_layer_ids[i], end_layer_ids[i]);
         }
+    } else if (scheduler_type == "disaggregate") {
+        Assert(set_routing, "Must set routing when using maxflow scheduling!");
+        size_t num_stages = server_ids.size();
+        for (size_t i = 0; i < num_stages; ++i) {
+            header.add_stage(server_ids[i], start_layer_ids[i], end_layer_ids[i]);
+        }
     } else {
         Assert(!set_routing, "Can not use externally provided routing in Swarm / Random!");
         // only set routing in decode, as in prompt phase the cluster will decide the routing on the fly
@@ -142,13 +148,22 @@ void launch_request(
     }
 
     // check token id field
-    if (header.msg_type == MsgType::Prompt) {
-        Assert(token_ids.size() == num_tokens, "Token id size mismatch!");
-    } else if (header.msg_type == MsgType::Decode) {
-        Assert(token_ids.size() == 1, "Token id size mismatch!");
-        Assert(token_ids[0] == -1, "Token id should be -1 for decode!");
+    if (scheduler_type == "disaggregate") {
+        // FIXME please consider only first time when decode move to other instances right after end of prompt
+        if (header.msg_type == MsgType::Prompt || header.msg_type == MsgType::Decode) {
+            Assert(token_ids.size() == num_tokens, "Token id size mismatch!");
+        }  else {
+            Assert(false, "Bad message type!");
+        }
     } else {
-        Assert(false, "Bad message type!");
+        if (header.msg_type == MsgType::Prompt) {
+            Assert(token_ids.size() == num_tokens, "Token id size mismatch!");
+        } else if (header.msg_type == MsgType::Decode) {
+            Assert(token_ids.size() == 1, "Token id size mismatch!");
+            Assert(token_ids[0] == -1, "Token id should be -1 for decode!");
+        } else {
+            Assert(false, "Bad message type!");
+        }
     }
 
     // build zmq message
@@ -177,12 +192,12 @@ gather_finished_requests() {
     std::vector<std::tuple<Header, int>> new_messages = finish_queue.pop_all();
 
     for (auto &message: new_messages) {
-        request_ids.push_back(std::get<0>(message).request_id);
-        generated_ids.push_back(std::get<1>(message));
+        request_ids.push_back(std::get<0>(message).request_id); // header.request_id
+        generated_ids.push_back(std::get<1>(message)); // generated ids
     }
 
     // if the scheduler is swarm or random, we need to save the routing info
-    if (scheduler_type == "swarm" || scheduler_type == "random" || scheduler_type == "disaggregate") {
+    if (scheduler_type == "swarm" || scheduler_type == "random") {
         for (auto &message: new_messages) {
             Header header = std::get<0>(message);
             int request_id = header.request_id;
@@ -210,7 +225,7 @@ gather_finished_requests() {
                 route.push_back(header.server_id[i]);
                 layer_num.push_back(header.end_layer_idx[i] - header.start_layer_idx[i]);
             }
-            routes.emplace_back( );
+            routes.emplace_back(route);
             layer_nums.emplace_back(layer_num);
         }
     }
@@ -400,31 +415,16 @@ void msg_scatter_thread(const std::string &host_ip) {
             }
         }
     } else if (scheduler_type == "disaggregate") {
-        // 1) Define which machines are for prefill vs. decode
-        //    For example, maybe machine IDs [1..5] are prefill-only, [6..10] are decode-only.
-        //    In reality, you'd parse this from your config or cluster definitions.
-        int prefill_id = 1;
-        int decode_id  = 2;
-
         // run the main loop
         while (true) {
             // get all messages
             std::vector<MessageData> new_messages = launch_queue.pop_all();
 
             for (auto &message: new_messages) {
-                if (message.header.msg_type == MsgType::Prompt) {
-                    // for prompt phase, we need to generate a random route
-                    int next_server_id = prefill_id;
-
-                    // set next server id into the header
-                    // We will decide the message's inference layers when it arrives at next node
-                    message.header.add_stage(next_server_id, -1, -1);
-
-                    // send out the message
-                    output_sockets[next_server_id]->send(message.header, message.buffer_msg);
-                } else if (message.header.msg_type == MsgType::Decode) {
-                    // Now route the decode request to a decode cluster machine
-                    int next_server_id = decode_id;
+                if (message.header.msg_type == MsgType::Prompt || message.header.msg_type == MsgType::Decode) {
+                    // for prompt and decode, just follow the route
+                    int current_stage = message.header.current_stage;
+                    int next_server_id = message.header.server_id[current_stage];
 
                     // send the request following the route
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
@@ -609,7 +609,7 @@ void msg_gather_thread(const std::string &host_ip) {
                 break;
             }
         }
-    } else if (scheduler_type == "random" || scheduler_type == "disaggregate") {
+    } else if (scheduler_type == "random") {
         while (true) {
             // get the message
             zmq::message_t buffer_msg;
@@ -629,6 +629,26 @@ void msg_gather_thread(const std::string &host_ip) {
                 break;
             } else {
                 Assert(false, "Bad message type: " + std::to_string((int) header.msg_type));
+            }
+        }
+    } else if (scheduler_type == "disaggregate") {
+        while (true) {
+            // get the message
+            zmq::message_t buffer_msg;
+            Header header = poll_client.poll_once(buffer_msg, 10);
+            if (header.msg_type == MsgType::Invalid) {
+                continue;
+            }
+
+            if (header.msg_type == MsgType::Prompt || header.msg_type == MsgType::Decode) {
+                // deserialize the message into a generated token id (int)
+                Assert(buffer_msg.size() == sizeof(int), "Message should contain only one int!");
+                int token_id = *(static_cast<int *>(buffer_msg.data()));
+
+                // send the header and buffer to compute thread
+                finish_queue.push({header, token_id});
+            } else if (header.msg_type == MsgType::Terminate) {
+                break;
             }
         }
     } else {
