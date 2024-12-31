@@ -159,6 +159,7 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
             else:
                 # print(f"[Decode] Request {request_id} arrives (context_len={num_tokens}, max_len={max_tokens}, "
                 #       f"layers=[{start_layer_idx}, {end_layer_idx}))")
+                print(f"request_id:{request_id}")
                 if is_token:
                     # first layer: no activations
                     engine.scheduler.update_req_data(start_layer_idx,

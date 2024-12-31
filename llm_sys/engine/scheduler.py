@@ -659,8 +659,8 @@ class LayerwiseScheduler(Scheduler):
                     seq.seq_id = (seq.seq_id, layer_id)
                     new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
-            # self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
-            running.append(new_seq_group)
+            self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
+        
         # Move seq group
         if layer_id == self.cur_layer:
             sleep_on_gpus = self.sleep_gpu_ids
@@ -676,6 +676,7 @@ class LayerwiseScheduler(Scheduler):
         seq_group = self.seq_groups[req_id]
         if req_id in sleep_on_gpus:
             sleep_on_gpus.remove(req_id)
+            print(f"append:{req_id}")
             running.append(seq_group)
         else:
             assert req_id in sleep_on_cpus
