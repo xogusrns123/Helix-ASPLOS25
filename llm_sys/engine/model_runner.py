@@ -379,7 +379,19 @@ class LayerwiseModelRunner(ModelRunner):
             kv_cache: torch.Tensor,
             layer_id: int,
     ) -> Optional[Union[SamplerOutput, PipelineStageOut]]:
-        
+        print(len(seq_group_metadata_list))
+        print(seq_group_metadata_list)
+        for seq_group_metadata in seq_group_metadata_list:
+            assert not seq_group_metadata.is_prompt
+            assert seq_group_metadata.token_chunk_size == 1
+
+            seq_ids = list(seq_group_metadata.seq_data.keys())
+
+            for seq_id in seq_ids:
+                print(f"seq_id:{seq_id}")
+                seq_data = seq_group_metadata.seq_data[seq_id]
+                print(f"seq_data:{seq_data}")
+                
         # 2. If decode but kv_cache is None or has zero elements, build a dummy
         if not seq_group_metadata_list[0].is_prompt:
             if (kv_cache is None) or (kv_cache.numel() == 0):
