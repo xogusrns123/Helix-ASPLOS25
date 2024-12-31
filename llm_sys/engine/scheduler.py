@@ -377,6 +377,7 @@ class LayerwiseScheduler(Scheduler):
         print(f"num_batched_tokens to be scheduled:{num_batched_tokens}")
         for running_group in self.running:
             print(f"running_group to be scheduled:{running_group.request_id}")
+            print(f"running_group.states:{running_group.status}")
         scheduler_outputs = SchedulerOutputs(
             scheduled_seq_groups=[
                 ScheduledSequenceGroup(seq_group=running_group,
