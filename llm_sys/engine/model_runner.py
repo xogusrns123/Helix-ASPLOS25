@@ -261,12 +261,12 @@ class LayerwiseModelRunner(ModelRunner):
             seq_ids = list(seq_group_metadata.seq_data.keys())
 
             for seq_id in seq_ids:
-                print(seq_id)
+                print(f"seq_id:{seq_id}")
                 seq_data = seq_group_metadata.seq_data[seq_id]
-                print(seq_data)
+                print(f"seq_data:{seq_data}")
                 if is_first_layer:
                     generation_token = seq_data.get_last_token_id()
-                    print(generation_token)
+                    print(f"generation_token:{generation_token}")
                     input_tokens.append(generation_token)
                 else:
                     # FIXME: this is slow. Do it in cpp to avoid torch tensor metadata
@@ -277,12 +277,13 @@ class LayerwiseModelRunner(ModelRunner):
                     input_hidden_states.append(generated_state)
 
                 seq_len = seq_data.get_len()
-                print(seq_len)
+                print(f"seq_len:{seq_len}")
                 position = seq_len - 1
                 input_positions.append(position)
-                print(self.sliding_window)
+                print(f"window:{self.sliding_window}")
                 context_len = seq_len if self.sliding_window is None else min(
                     seq_len, self.sliding_window)
+                print(f"context_len:{context_len}")
                 context_lens.append(context_len)
 
                 block_table = seq_group_metadata.block_tables[seq_id]
