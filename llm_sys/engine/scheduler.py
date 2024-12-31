@@ -626,6 +626,7 @@ class LayerwiseScheduler(Scheduler):
 
         if req_id not in self.seq_groups:
             print(f"decode other instances:req_id{req_id}")
+            print(self.cur_layer)
             sampling_params = SamplingParams()
             sampling_params.max_tokens = max_tokens
             sampling_params.ignore_eos = True
@@ -658,8 +659,8 @@ class LayerwiseScheduler(Scheduler):
                     seq.seq_id = (seq.seq_id, layer_id)
                     new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
-            self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
-        
+            # self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
+            running.append(new_seq_group)
         # Move seq group
         if layer_id == self.cur_layer:
             sleep_on_gpus = self.sleep_gpu_ids
