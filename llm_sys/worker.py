@@ -162,13 +162,15 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                 if is_token:
                     # first layer: no activations
                     engine.scheduler.update_req_data(start_layer_idx,
-                                                    (f"{request_id}", start_layer_idx),
-                                                    {(request_id, start_layer_idx): None})
+                                                    f"{request_id}",
+                                                    {(request_id, start_layer_idx): None},
+                                                    max_tokens - num_tokens)
                 else:
                     input_tensor = activation_tensor[offset: offset + length].reshape(1, hidden_size)
                     engine.scheduler.update_req_data(start_layer_idx,
-                                                    (f"{request_id}", start_layer_idx),
-                                                    {(request_id, start_layer_idx): input_tensor})
+                                                    f"{request_id}",
+                                                    {(request_id, start_layer_idx): input_tensor},
+                                                    max_tokens - num_tokens)
 
         # step 2.2 & 2.3: run vllm and submit
         parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,

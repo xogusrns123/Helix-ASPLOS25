@@ -140,6 +140,7 @@ class PipelineStageEngine(LLMEngine):
                              f"{max_logprobs} logprobs.")
         if arrival_time is None:
             arrival_time = time.time()
+        # return self.tokenizer.encode(prompt) if prompt_token_ids is None else just return prompt_token_ids
         prompt_token_ids = self.encode_request(
             request_id=request_id,
             prompt=prompt,

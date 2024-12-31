@@ -617,12 +617,17 @@ class LayerwiseScheduler(Scheduler):
                         self.sleep_cpu_ids.remove(seq_group.request_id)
         self.running = deque(filter(lambda sg: not sg.is_finished(), self.running))
 
-    def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor]):  
+    def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor], max_tokens: int):  
         # FIXME currently, for conevenient experiment for disaggregate design
-        if req_id not in self.seq_groups:
-            print(f"decode other instances:req_id{req_id}")
+        if isinstance(req_id, str):
+            seq_id = (req_id, layer_id)
+        else:
+            assert isinstance(req_id, Tuple)
+
+        if seq_id not in self.seq_groups:
+            print(f"decode other instances:req_id{seq_id}")
             sampling_params = SamplingParams()
-            sampling_params.max_tokens = 300
+            sampling_params.max_tokens = max_tokens
             sampling_params.ignore_eos = True
 
             new_seq = PipelineSequence(
@@ -666,11 +671,6 @@ class LayerwiseScheduler(Scheduler):
             sleep_on_cpus = self.sleeps_cpu[layer_id]
             running = self.runnings[layer_id]
             swapped = self.swappeds[layer_id]
-
-        if isinstance(req_id, str):
-            req_id = (req_id, layer_id)
-        else:
-            assert isinstance(req_id, Tuple)
         
         seq_group = self.seq_groups[req_id]
         if req_id in sleep_on_gpus:

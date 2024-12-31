@@ -344,7 +344,7 @@ def run_disaggregate_host_offline(
                     query_uid,  # request_id
                     py_on_the_fly_query.processed_tokens,  # num_tokens (context size) == input tokens + generated tokens
                     max_size,  # max_num_tokens
-                    [i for i in range(py_on_the_fly_query.processed_tokens)],  # token_ids
+                    [-1],  # token_ids
                     True,  # set_routing
                     compute_node_uids,  # server_ids
                     start_layers,  # start_layer_ids
