@@ -378,6 +378,7 @@ class LayerwiseScheduler(Scheduler):
         for running_group in self.running:
             print(f"running_group to be scheduled:{running_group.request_id}")
             print(f"running_group.states:{running_group.status}")
+            print(f"seqs_dict.values():{running_group.seqs_dict.values()}")
         scheduler_outputs = SchedulerOutputs(
             scheduled_seq_groups=[
                 ScheduledSequenceGroup(seq_group=running_group,
@@ -664,7 +665,7 @@ class LayerwiseScheduler(Scheduler):
                     new_seq_group.seqs_dict[seq.seq_id] = seq
             self.seq_groups[new_seq_group.request_id] = new_seq_group
             self.sleeps_gpu[layer_id].append(new_seq_group.request_id)
-            new_seq_group.status = SequenceStatus.RUNNING
+            new_seq.status = SequenceStatus.RUNNING
         
         # Move seq group
         if layer_id == self.cur_layer:
