@@ -617,15 +617,15 @@ class LayerwiseScheduler(Scheduler):
                         self.sleep_cpu_ids.remove(seq_group.request_id)
         self.running = deque(filter(lambda sg: not sg.is_finished(), self.running))
 
-    def update_req_data(self, layer_id: int, req_id: str, seq_datas: Dict[int, torch.Tensor], max_tokens: int):  
+    def update_req_data(self, layer_id: int, req_id: tuple, seq_datas: Dict[int, torch.Tensor], max_tokens: int):  
         # FIXME currently, for conevenient experiment for disaggregate design
         if isinstance(req_id, str):
-            seq_id = (req_id, layer_id)
+            req_id = (req_id, layer_id)
         else:
             assert isinstance(req_id, Tuple)
 
-        if seq_id not in self.seq_groups:
-            print(f"decode other instances:req_id{seq_id}")
+        if req_id not in self.seq_groups:
+            print(f"decode other instances:req_id{req_id}")
             sampling_params = SamplingParams()
             sampling_params.max_tokens = max_tokens
             sampling_params.ignore_eos = True
