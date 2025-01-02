@@ -689,7 +689,7 @@ void sender_thread(const std::string &worker_ip) {
                 }
             }
         }
-    } else if (scheduler_type == "random" || scheduler_type == "disaggregate") {
+    } else if (scheduler_type == "random") {
         // get all output ids
         std::vector<int> out_ids;
         for (const auto &id_ip: output_id_ip) {
@@ -734,34 +734,14 @@ void sender_thread(const std::string &worker_ip) {
                 }
             }
         }
-    } else if (scheduler_type == "random" || scheduler_type == "disaggregate") {
-        // get all output ids
-        std::vector<int> out_ids;
-        for (const auto &id_ip: output_id_ip) {
-            out_ids.push_back(id_ip.first);
-        }
-        std::mt19937 gen(0);
-        std::uniform_int_distribution<> distrib(0, (int) out_ids.size() - 1);
-
-        // run the main loop
+    } else if (scheduler_type == "disaggregate") {
         while (true) {
             // get all messages
             std::vector<MessageData> new_messages = compute_send_queue.pop_all();
 
             for (auto &message: new_messages) {
-                if (message.header.msg_type == MsgType::Prompt) {
-                    // for prompt phase, we need to generate a random route
-                    int random_index = distrib(gen);
-                    int next_server_id = out_ids[random_index];
-
-                    // set next server id into the header
-                    // We will decide the message's inference layers when it arrives at next node
-                    message.header.add_stage(next_server_id, -1, -1);
-
-                    // send out the message
-                    output_sockets[next_server_id]->send(message.header, message.buffer_msg);
-                } else if (message.header.msg_type == MsgType::Decode) {
-                    // for decode phase, just follow the route
+                if (message.header.msg_type == MsgType::Prompt || message.header.msg_type == MsgType::Decode) {
+                    // for prompt and decode, just follow the route
                     int current_stage = message.header.current_stage;
                     int next_server_id = message.header.server_id[current_stage];
 

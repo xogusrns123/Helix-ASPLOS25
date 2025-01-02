@@ -190,7 +190,6 @@ gather_finished_requests() {
 
     // get all messages
     std::vector<std::tuple<Header, int>> new_messages = finish_queue.pop_all();
-
     for (auto &message: new_messages) {
         request_ids.push_back(std::get<0>(message).request_id); // header.request_id
         generated_ids.push_back(std::get<1>(message)); // generated ids
