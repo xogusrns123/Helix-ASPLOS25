@@ -16,8 +16,8 @@ def to_real(node_id: int) -> int:
 
 
 # CONFIG_BROADCAST_ADDR = "tcp://10.128.0.31:5000"
-CONFIG_BROADCAST_ADDR = "tcp://143.248.53.59:5000"
-
+# CONFIG_BROADCAST_ADDR = "tcp://143.248.53.59:5000"
+CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:5000"
 
 def warm_up():
     # create a tensor and move it to GPU (Warm up GPU)

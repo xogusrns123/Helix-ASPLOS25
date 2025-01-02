@@ -211,6 +211,11 @@ execution engine.
 > **Tips:** By default, Helix's communication framework use ports starting from 6000 for inter-node
 > communication. If you want to use other ports, you can change the `BASE_PORT` in `src/const.h`
 
+### 3.2 Init environment in docker
+```
+./init_docker.sh
+```
+
 ### 3.3 Running Helix's Prototype System
 With all dependencies and the communication framework installed, we can now start running Helix's
 prototype system. Starting from the root directory of this repository, enter the example directory:

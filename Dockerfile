@@ -58,27 +58,59 @@ RUN conda run -n runtime pip install --upgrade pip setuptools && \
     conda run -n runtime pip install vllm==0.4.0.post1 numpy~=1.26 && \
     conda run -n runtime conda install -c conda-forge libstdcxx-ng -y
 
+# # Copy Helix repository into container
+# COPY llm_sys /home/kth/helix/build/llm_sys
+# COPY simulator /home/kth/helix/build/simulator
+# COPY setup.py /home/kth/helix/build/setup.py
+# COPY readme.md /home/kth/helix/build/readme.md
+
+# # Install Helix's communication framework
+# WORKDIR /home/kth/helix/build
+# RUN conda run -n runtime pip install -e .
+
+# WORKDIR /home/kth/helix/build/llm_sys/comm
+# # RUN ls -la /home/kth/helix/build/llm_sys/comm && sleep 30
+# RUN chmod +x build.sh
+
+# # Build the communication framework
+# RUN ls -la /home/kth/helix/build/llm_sys/comm && \
+#     conda run -n runtime bash -x build.sh
+
+# # Verify installation by running the unit test
+# WORKDIR /home/kth/helix/build/llm_sys/comm/build
+# RUN ./test_msg
+
+# COPY examples /home/kth/helix/examples
+
+# # activate Conda environment
+# RUN conda init bash && \
+#     echo "conda activate runtime" >> ~/.bashrc
+
+# WORKDIR /home/kth/helix/examples/real_sys
+
 # Copy Helix repository into container
-WORKDIR /home/kth/helix
-COPY . .
+COPY llm_sys/comm /home/kth/helix/llm_sys_comm
+COPY docker_init.sh /home/kth/helix/docker_init.sh
 
 # Install Helix's communication framework
-RUN conda run -n runtime pip install -e .
-
-# Build the communication framework
-WORKDIR /home/kth/helix/llm_sys/comm
+WORKDIR /home/kth/helix/llm_sys_comm
+# RUN ls -la /home/kth/helix/llm_sys/comm && sleep 30
 RUN chmod +x build.sh
 
-# Debugging: Check directory structure and run the build script
-RUN ls -la /home/kth/helix/llm_sys/comm && \
+# Build the communication framework
+RUN ls -la /home/kth/helix/llm_sys_comm && \
     conda run -n runtime bash -x build.sh
 
-# Verify installation by running the unit test
-WORKDIR /home/kth/helix/llm_sys/comm/build
-RUN ./test_msg
+COPY examples /home/kth/helix/examples
 
 # activate Conda environment
 RUN conda init bash && \
     echo "conda activate runtime" >> ~/.bashrc
 
-WORKDIR /home/kth/helix/examples/real_sys
+WORKDIR /home/kth/helix
+
+RUN pip install \
+    "numpy~=1.26" \
+    "networkx~=3.2.1" \
+    "matplotlib~=3.8.2" \
+    "gurobipy~=11.0.0"
