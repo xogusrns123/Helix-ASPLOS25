@@ -68,6 +68,17 @@ public:
     int end_layer_idx[MAX_HOP]{};
     // for swarm only (unit is us)
     long swarm_delta[MAX_HOP]{};
+
+    // profile communication overhead
+    // store overhead for each hop in one 64-bit integer:
+    // uint64_t hop_overheads = 0;
+    // store how many hops used so far
+    // uint8_t hop_index = 0;   // up to e.g. 4 or 8
+    
+     // 1) Running accumulation of total communication overhead
+    long acc_time = 0;
+    // 2) The time of the last node
+    long last_time = 0;
 };
 
 Header generate_random_header() {

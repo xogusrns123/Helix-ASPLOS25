@@ -48,6 +48,7 @@ def run_heuristic_host_online(
     query_routes = []
     # time - query id - in/out - phase - context_len - this_iter_processed
     events = []
+
     # ---------------------- #
     while True:
         # get time
@@ -115,11 +116,13 @@ def run_heuristic_host_online(
                     cur_log_start += num_layer
                 query_routes.append((query_uid, py_on_the_fly_query.input_length, py_on_the_fly_query.output_length,
                                      route_list, start_layer_ids, end_layer_ids))
+
             else:
                 # decode phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
                 events.append((now, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
                 py_on_the_fly_query.processed_tokens += 1
+
 
             # then we decide whether to send out new messages (decodes)
             max_size = py_on_the_fly_query.input_length + py_on_the_fly_query.output_length
@@ -150,14 +153,12 @@ def run_heuristic_host_online(
     print(f"Queries still flying: {flying_queries_dict.keys()}.")
     query_routes_file_name = os.path.join(result_logging_dir, "query_route.txt")
     events_file_name = os.path.join(result_logging_dir, "events.txt")
-    print("checking1")
     with open(query_routes_file_name, "w") as f:
         for item in query_routes:
             f.write(f"{item}\n")
     with open(events_file_name, "w") as f:
         for item in events:
             f.write(f"{item}\n")
-    print("checking2")
 
 
 def run_heuristic_host_offline(
@@ -202,6 +203,8 @@ def run_heuristic_host_offline(
     query_routes = []
     # time - query id - in/out - phase - context_len - this_iter_processed
     events = []
+
+    comm_data = []
     # ---------------------- #
     last_log_time = 0
     while True:
@@ -252,8 +255,9 @@ def run_heuristic_host_offline(
 
         # get finished requests
         now = time.time() - ground_zero
-        finished_query_ids, generated_token_ids, routes, num_layers = llm_host.gather_finished_requests()
-        for query_uid, route_list, num_layer_list in zip(finished_query_ids, routes, num_layers):
+        finished_query_ids, generated_token_ids, routes, num_layers, comm_times = llm_host.gather_finished_requests()
+        for query_uid, route_list, num_layer_list, ctime in zip(finished_query_ids, routes, num_layers, comm_times):
+
             # first receive the message
             py_on_the_fly_query = flying_queries_dict[query_uid]
             if py_on_the_fly_query.processed_tokens == 0:
@@ -272,12 +276,15 @@ def run_heuristic_host_offline(
                     cur_log_start += num_layer
                 query_routes.append((query_uid, py_on_the_fly_query.input_length, py_on_the_fly_query.output_length,
                                      route_list, start_layer_ids, end_layer_ids))
-
+                
+                comm_data.append((now, query_uid, "prompt", ctime))
             else:
                 # decode phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
                 events.append((now, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
                 py_on_the_fly_query.processed_tokens += 1
+
+                comm_data.append((now, query_uid, "decode", ctime))
 
             # then we decide whether to send out new messages (decodes)
             max_size = py_on_the_fly_query.input_length + py_on_the_fly_query.output_length
@@ -348,5 +355,10 @@ def run_heuristic_host_offline(
             f.write(f"{item}\n")
     with open(events_file_name, "w") as f:
         for item in events:
+            f.write(f"{item}\n")
+
+    comm_file_name = os.path.join(result_logging_dir, "communications.txt")
+    with open(comm_file_name, "w") as f:
+        for item in comm_data:
             f.write(f"{item}\n")
 

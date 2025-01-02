@@ -230,7 +230,15 @@ gather_finished_requests() {
         }
     }
 
-    return {std::move(request_ids), std::move(generated_ids), std::move(routes), std::move(layer_nums)};
+    // gather profiling times
+    std::vector<long> comm_times;
+    if (scheduler_type == "random") {
+        for (auto &message: new_messages) {
+            Header header = std::get<0>(message);
+            comm_times.push_back(header.acc_time);
+        }
+    }
+    return {std::move(request_ids), std::move(generated_ids), std::move(routes), std::move(layer_nums), std::move(comm_times)};
 }
 
 
@@ -398,12 +406,18 @@ void msg_scatter_thread(const std::string &host_ip) {
                     // We will decide the message's inference layers when it arrives at next node
                     message.header.add_stage(next_server_id, -1, -1);
 
+                    message.header.acc_time = 0;
+                    message.header.last_time = get_time()
+
                     // send out the message
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
                 } else if (message.header.msg_type == MsgType::Decode) {
                     // for decode phase, just follow the route
                     int current_stage = message.header.current_stage;
                     int next_server_id = message.header.server_id[current_stage];
+
+                    message.header.acc_time = 0;
+                    message.header.last_time = get_time()
 
                     // send the request following the route
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);

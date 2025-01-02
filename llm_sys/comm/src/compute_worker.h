@@ -268,6 +268,12 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
 
                 // send the header and buffer to compute thread
                 Assert(header.server_id[header.current_stage] == current_machine_id, "Mis-routed request!");
+
+                long now = get_time();
+                long delta = now - header.last_time;
+                header.acc_time += delta;
+                header.last_time = now;
+
                 recv_compute_queue.push(MessageData(header, std::move(buffer_msg)));
             } else if (header.msg_type == MsgType::Decode) {
                 // send the header and buffer to compute thread
@@ -707,6 +713,11 @@ void sender_thread(const std::string &worker_ip) {
                     // We will decide the message's inference layers when it arrives at next node
                     message.header.add_stage(next_server_id, -1, -1);
 
+                    long now = get_time();
+                    long delta = now - header.last_time;
+                    header.acc_time += delta;
+                    header.last_time = now;
+                    
                     // send out the message
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
                 } else if (message.header.msg_type == MsgType::Decode) {
