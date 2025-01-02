@@ -406,7 +406,6 @@ class LayerwiseScheduler(Scheduler):
         finished_reqs_info = []
         for seq_group in scheduler_outputs.scheduled_seq_groups:
             sg = seq_group.seq_group
-            print(f"in schedule, scheduler_outputs's seq_groups ids:{sg.request_id}")
             sp = sg.sampling_params
             has_termination = False
             term_info = []
@@ -430,7 +429,7 @@ class LayerwiseScheduler(Scheduler):
             seq_data: Dict[int, SequenceData] = {}
             # seq_id -> physical block numbers
             block_tables: Dict[int, List[int]] = {}
-            print(f"final schedued list:{len(seq_group.get_seqs(status=SequenceStatus.RUNNING))}")
+
             for seq in seq_group.get_seqs(status=SequenceStatus.RUNNING):
                 seq_id = seq.seq_id
                 assert isinstance(seq.data, PipelineSequenceData) or self.cur_layer == 0
