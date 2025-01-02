@@ -714,10 +714,10 @@ void sender_thread(const std::string &worker_ip) {
                     message.header.add_stage(next_server_id, -1, -1);
 
                     long now = get_time();
-                    long delta = now - header.last_time;
-                    header.acc_time += delta;
-                    header.last_time = now;
-                    
+                    long delta = now - message.header.last_time;
+                    message.header.acc_time += delta;
+                    message.header.last_time = now;
+
                     // send out the message
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
                 } else if (message.header.msg_type == MsgType::Decode) {

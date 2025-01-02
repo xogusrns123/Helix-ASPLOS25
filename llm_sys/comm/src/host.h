@@ -183,7 +183,7 @@ void launch_request(
 // 4. layer_nums: List[List[int]] - only for swarm and random
 //    - for each request, it is a list of [num_layers_inferred_on_this_node (int)]
 //    - e.g.: [[2, 2, 0], [2, 2, 0]] (last one must be 0, as it stands for host)
-std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+std::tuple<std::vector<int>, std::vector<int>, std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<long>>
 gather_finished_requests() {
     std::vector<int> request_ids;
     std::vector<int> generated_ids;
@@ -407,7 +407,7 @@ void msg_scatter_thread(const std::string &host_ip) {
                     message.header.add_stage(next_server_id, -1, -1);
 
                     message.header.acc_time = 0;
-                    message.header.last_time = get_time()
+                    message.header.last_time = get_time();
 
                     // send out the message
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
@@ -417,7 +417,7 @@ void msg_scatter_thread(const std::string &host_ip) {
                     int next_server_id = message.header.server_id[current_stage];
 
                     message.header.acc_time = 0;
-                    message.header.last_time = get_time()
+                    message.header.last_time = get_time();
 
                     // send the request following the route
                     output_sockets[next_server_id]->send(message.header, message.buffer_msg);
