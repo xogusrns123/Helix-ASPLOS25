@@ -377,7 +377,6 @@ class LayerwiseScheduler(Scheduler):
         print(f"num_batched_tokens to be scheduled:{num_batched_tokens}")
         for running_group in self.running:
             print(f"running_group to be scheduled:{running_group.request_id}")
-            print(f"running_group.states:{running_group.status}")
             print(f"seqs_dict.values():{running_group.seqs_dict.values()}")
         scheduler_outputs = SchedulerOutputs(
             scheduled_seq_groups=[
@@ -682,7 +681,6 @@ class LayerwiseScheduler(Scheduler):
         seq_group = self.seq_groups[req_id]
         if req_id in sleep_on_gpus:
             sleep_on_gpus.remove(req_id)
-            print(f"append:{req_id}")
             running.append(seq_group)
         else:
             assert req_id in sleep_on_cpus
