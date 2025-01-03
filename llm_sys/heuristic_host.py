@@ -257,7 +257,6 @@ def run_heuristic_host_offline(
         now = time.time() - ground_zero
         finished_query_ids, generated_token_ids, routes, num_layers, comm_times = llm_host.gather_finished_requests()
         for query_uid, route_list, num_layer_list, ctime in zip(finished_query_ids, routes, num_layers, comm_times):
-            print(f"finish_query_uid:{query_uid}")
             # first receive the message
             py_on_the_fly_query = flying_queries_dict[query_uid]
             if py_on_the_fly_query.processed_tokens == 0:
