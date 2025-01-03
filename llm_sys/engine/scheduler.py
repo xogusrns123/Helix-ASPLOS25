@@ -375,9 +375,6 @@ class LayerwiseScheduler(Scheduler):
             seq_group.num_seqs(status=SequenceStatus.RUNNING)
             for seq_group in self.running)
         
-        # for running_group in self.running:
-        #     print(f"running_group to be scheduled:{running_group.request_id}")
-        #     print(f"seqs_dict.values():{running_group.seqs_dict.values()}")
         scheduler_outputs = SchedulerOutputs(
             scheduled_seq_groups=[
                 ScheduledSequenceGroup(seq_group=running_group,

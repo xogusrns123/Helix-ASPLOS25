@@ -257,16 +257,11 @@ class LayerwiseModelRunner(ModelRunner):
         for seq_group_metadata in seq_group_metadata_list:
             assert not seq_group_metadata.is_prompt
             assert seq_group_metadata.token_chunk_size == 1
-            # print(seq_group_metadata)
             seq_ids = list(seq_group_metadata.seq_data.keys())
-            # print(seq_ids)
             for seq_id in seq_ids:
-                # print(f"seq_id:{seq_id}")
                 seq_data = seq_group_metadata.seq_data[seq_id]
-                # print(f"seq_data:{seq_data}")
                 if is_first_layer:
                     generation_token = seq_data.get_last_token_id()
-                    # print(f"generation_token:{generation_token}")
                     input_tokens.append(generation_token)
                 else:
                     # FIXME: this is slow. Do it in cpp to avoid torch tensor metadata
