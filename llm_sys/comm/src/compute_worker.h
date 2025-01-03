@@ -271,6 +271,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
 
                 long now = get_time();
                 long delta = now - header.last_time;
+                printf("delta:%d", delta);
                 header.acc_time += delta;
                 header.last_time = now;
 
