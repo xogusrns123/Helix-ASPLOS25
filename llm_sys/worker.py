@@ -104,6 +104,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
         # get time
         iter_start = time.time() - last_log_time
         duration = 300
+        print(f"{iter_start - duration}")
         if iter_start > duration + 30:
             break
         # whole step
