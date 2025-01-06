@@ -33,25 +33,5 @@ void custom_free(void* data, void* hint) {
     // used to avoid zmq copy in message creation
 }
 
-uint64_t pack_overhead(uint64_t hop_overheads, uint8_t hop_index, uint16_t overhead_us) {
-    // each overhead is 16 bits
-    // shift = hop_index * 16
-    int shift_amount = hop_index * 16;
-    uint64_t mask = ((uint64_t)overhead_us & 0xFFFFULL) << shift_amount;
-    return hop_overheads | mask;
-}
-
-std::vector<uint16_t> decode_overheads(uint64_t hop_overheads, uint8_t hop_index) {
-    std::vector<uint16_t> results;
-    results.reserve(hop_index);
-
-    for (int i = 0; i < hop_index; i++) {
-        int shift_amount = i * 16;
-        // mask out the 16 bits
-        uint16_t overhead = (hop_overheads >> shift_amount) & 0xFFFFULL;
-        results.push_back(overhead);
-    }
-    return results;
-}
 
 #endif //ZMQ_COMM_UTILS_H

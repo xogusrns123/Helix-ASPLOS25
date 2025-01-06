@@ -1,0 +1,1 @@
+sudo docker run --gpus all -it --name helix-container --network host helix:latest

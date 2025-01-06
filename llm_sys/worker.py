@@ -17,7 +17,7 @@ from llm_sys.engine.exec_engine import PipelineStageEngine
 import llm_sys.engine.llama
 
 import llm_sys.utils as utils
-
+import os
 
 def init_engine(layer_ids, model_name, vram_usage=0.8):
     engine_args = EngineArgs(model=model_name, block_size=16,
@@ -79,7 +79,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     return parsed_prompt
 
 
-def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
+def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram_usage=0.8):
     # warm up gpu and initialize llm_sys
     utils.warm_up()
     worker_ip: str = utils.get_local_ip()
@@ -97,7 +97,15 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
     hidden_size = engine.model_config.get_hidden_size()
 
     last_log_time = time.time()
+
+    compute_events = []
+
     while True:
+        # get time
+        iter_start = time.time() - last_log_time
+        duration = 300
+        if iter_start > duration + 30:
+            break
         # whole step
         # Incoming requests are first updated in the scheduler
         # and when all requests are updated, inference is performed with run_and_submit()
@@ -156,6 +164,9 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                                        local_layers=(start_layer_idx, end_layer_idx - 1),  # inclusive, thus -1
                                        seq_id=request_id, input_tensor=input_tensor,
                                        prompt_token_ids=[1] * num_tokens)
+                
+                # save log
+                compute_events.append((iter_start, request_id, "out", "prompt", num_tokens, num_tokens + 1))
             else:
                 # print(f"[Decode] Request {request_id} arrives (context_len={num_tokens}, max_len={max_tokens}, "
                 #       f"layers=[{start_layer_idx}, {end_layer_idx}))")
@@ -172,6 +183,9 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                                                     {(request_id, start_layer_idx): input_tensor},
                                                     max_tokens - num_tokens)
 
+                # save log
+                compute_events.append((iter_start, request_id, "out", "decode", num_tokens, num_tokens + 1))
+
         # step 2.2 & 2.3: run vllm and submit
         parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
                                        hidden_size=hidden_size, force_decode=False)
@@ -180,6 +194,14 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                                            is_last_layer=is_last_layer, hidden_size=hidden_size,
                                            force_decode=True)
             assert not parsed_prompt, "Parsed prompt twice!"
+        
+        # save log
+        iter_end = time.time() - last_log_time
+        for request_id, is_prompt, num_tokens in zip(request_ids, is_prompt_list, num_tokens_list):
+            if is_prompt:
+                compute_events.append((iter_end, request_id, "in", "prompt", num_tokens, num_tokens + 1))
+            else:
+                compute_events.append((iter_end, request_id, "in", "decode", num_tokens, num_tokens + 1))
 
         # log kv cache status
         if time.time() > last_log_time + 2:
@@ -200,3 +222,9 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                   f"CPU KV cache usage: {cpu_cache_usage * 100:.1f}%.")
             if cpu_cache_usage > 0.1:
                 print("Warning: CPU KV cache usage is larger than 0.1, considering lower arrival rate!")
+
+    # save log files
+    events_file_name = os.path.join(result_logging_dir, "compute_events.txt")
+    with open(events_file_name, "w") as f:
+        for item in compute_events:
+            f.write(f"{item}\n")
