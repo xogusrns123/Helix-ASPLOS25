@@ -4,7 +4,7 @@ helix.egg-info/
 goguma1_git_token.txt
 llm_sys/build
 llm_sys/comm/build
-examples/real_sys/result/
+# examples/real_sys/result/
 llm_sys/comm/build/build
 llm_sys/comm/llm_sys_comm
 llm_sys/comm/src/LLM_system.egg-info/
