@@ -104,8 +104,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
         # get time
         iter_start = time.time() - ground_zero
         duration = 300
-        print(f"{iter_start - duration}")
-        if iter_start > duration + 40:
+        if iter_start > duration + 30:
             break
         # whole step
         # Incoming requests are first updated in the scheduler
@@ -167,7 +166,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
                                        prompt_token_ids=[1] * num_tokens)
                 
                 # save log
-                compute_events.append((iter_start, request_id, "out", "prompt", num_tokens, num_tokens + 1))
+                compute_events.append((iter_start, request_id, "out", "prompt", 0, num_tokens + 1))
             else:
                 # print(f"[Decode] Request {request_id} arrives (context_len={num_tokens}, max_len={max_tokens}, "
                 #       f"layers=[{start_layer_idx}, {end_layer_idx}))")
@@ -185,7 +184,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
                                                     max_tokens - num_tokens)
 
                 # save log
-                compute_events.append((iter_start, request_id, "out", "decode", num_tokens, num_tokens + 1))
+                compute_events.append((iter_start, request_id, "out", "decode", num_tokens + 1, 1))
 
         # step 2.2 & 2.3: run vllm and submit
         parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,

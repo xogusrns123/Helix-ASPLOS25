@@ -1,5 +1,5 @@
 from typing import Dict, Tuple, List, Optional
-
+import os
 
 def parse_result(file_name: str, warm_up_time: Optional[float], finish_time: Optional[float]):
     # read the logs
@@ -123,35 +123,40 @@ def main():
             Here, node_id, start_layer_id, and end_layer_id are all lists.
     """
     # maxflow + online
-    print("MaxFlow + Online:")
-    parse_result(file_name="./result/maxflow_online/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    # print("MaxFlow + Online:")
+    # parse_result(file_name="./result/maxflow_online/events.txt", warm_up_time=60, finish_time=300)
+    # print()
 
-    # maxflow + offline
-    print("MaxFlow + Offline:")
-    parse_result(file_name="./result/maxflow_offline/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    # # maxflow + offline
+    # print("MaxFlow + Offline:")
+    # parse_result(file_name="./result/maxflow_offline/events.txt", warm_up_time=60, finish_time=300)
+    # print()
 
-    # swarm + online
-    print("Swarm + Online:")
-    parse_result(file_name="./result/swarm_online/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    # # swarm + online
+    # print("Swarm + Online:")
+    # parse_result(file_name="./result/swarm_online/events.txt", warm_up_time=60, finish_time=300)
+    # print()
 
-    # swarm + offline
-    print("Swarm + Offline:")
-    parse_result(file_name="./result/swarm_offline/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    # # swarm + offline
+    # print("Swarm + Offline:")
+    # parse_result(file_name="./result/swarm_offline/events.txt", warm_up_time=60, finish_time=300)
+    # print()
 
-    # random + online
-    print("Random + Online:")
-    parse_result(file_name="./result/random_online/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    # # random + online
+    # print("Random + Online:")
+    # parse_result(file_name="./result/random_online/events.txt", warm_up_time=60, finish_time=300)
+    # print()
 
     # random + offline
-    print("Random + Offline:")
-    parse_result(file_name="./result/random_offline/events.txt", warm_up_time=60, finish_time=300)
-    print()
+    if os.path.exists("./result/random_offline/events.txt"):
+        print("Random + Offline:")
+        parse_result(file_name="./result/random_offline/events.txt", warm_up_time=60, finish_time=300)
+        print()
 
-
+    if os.path.exists("./result/random_offline/compute_events.txt"):
+        print("Random + Offline: WORKER")
+        parse_result(file_name="./result/random_offline/compute_events.txt", warm_up_time=60, finish_time=300)
+        print()
+        
 if __name__ == '__main__':
     main()
