@@ -95,17 +95,17 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
     layer_ids = list(range(start_idx, end_idx))
     engine: PipelineStageEngine = init_engine(layer_ids, model_name, vram_usage=vram_usage)
     hidden_size = engine.model_config.get_hidden_size()
-
+    ground_zero = time.time()
     last_log_time = time.time()
 
     compute_events = []
 
     while True:
         # get time
-        iter_start = time.time() - last_log_time
+        iter_start = time.time() - ground_zero
         duration = 300
         print(f"{iter_start - duration}")
-        if iter_start > duration + 30:
+        if iter_start > duration + 40:
             break
         # whole step
         # Incoming requests are first updated in the scheduler
@@ -197,7 +197,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir, vram
             assert not parsed_prompt, "Parsed prompt twice!"
         
         # save log
-        iter_end = time.time() - last_log_time
+        iter_end = time.time() - ground_zero
         for request_id, is_prompt, num_tokens in zip(request_ids, is_prompt_list, num_tokens_list):
             if is_prompt:
                 compute_events.append((iter_end, request_id, "in", "prompt", num_tokens, num_tokens + 1))
