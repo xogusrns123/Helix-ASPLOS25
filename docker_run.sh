@@ -6,4 +6,5 @@ sudo docker run --gpus all -it --network host \
 -v $(pwd)/examples:/home/kth/helix/examples \
 -v $(pwd)/simulator:/home/kth/helix/simulator \
 -v $(pwd)/artifact_evaluation:/home/kth/helix/artifact_evaluation \
+-v $(pwd)/result:/home/kth/helix/result \
 helix:latest
