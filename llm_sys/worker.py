@@ -18,6 +18,7 @@ import llm_sys.engine.llama
 
 import llm_sys.utils as utils
 
+from llm_sys.profiler.profiler import SlaveProfiler
 
 def init_engine(layer_ids, model_name, vram_usage=0.8):
     engine_args = EngineArgs(model=model_name, block_size=16,
@@ -90,6 +91,11 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
     print(f"[Python] Cluster initialization finished!")
     print(f"[Python] Model layers: [{start_idx}, {end_idx}).")
     print(f"[Python] Does this node output the last layer: {is_last_layer}.")
+    
+    # ------------------------------------- Init Time ------------------------------------ #
+    slave_profiler = SlaveProfiler(ip_address=worker_ip, port=9001)
+    slave_profiler.start_slave_profiling()
+    # ------------------------------------------------------------------------------------ #
 
     # init vllm
     layer_ids = list(range(start_idx, end_idx))

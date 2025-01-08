@@ -7,6 +7,8 @@ import time
 from simulator.trace_generator.trace_generator import TraceGenerator, ArrivalRateSource, Dataset, LengthSampler
 from llm_sys.utils import get_local_ip, CONFIG_BROADCAST_ADDR, FlyingQuery
 
+from llm_sys.profiler.profiler import get_device_ip_configs, MasterProfiler
+from typing import Tuple, List
 
 def run_heuristic_host_online(
         # scheduler
@@ -40,6 +42,13 @@ def run_heuristic_host_online(
     time.sleep(20)
     print("[Python] Cluster initialization finished!")
     # -------------------------------------------------------------------------------------- #
+    
+    # ------------------------------------- Init Time ------------------------------------ #
+    slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
+    master_profiler = MasterProfiler(slave_configs)
+    master_profiler.start_master_profiling()
+    # ------------------------------------------------------------------------------------ #
+    
     ground_zero = time.time()
     next_query_id = 0
     flying_queries_dict = {}
