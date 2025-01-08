@@ -1,4 +1,6 @@
 #!/bin/bash
+export CMAKE_PREFIX_PATH=$(python3 -c "import torch; print(torch.utils.cmake_prefix_path)")
+
 
 # Stop execution if any command fails
 set -e
