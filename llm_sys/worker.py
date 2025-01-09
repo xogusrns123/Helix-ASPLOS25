@@ -76,9 +76,13 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     # start_idx_list: List[int], offset in number of elements
     # length_list: List[int], length in number of elements
     # results_tensor: one large CPU tensor
+    
+    # Added by LJH
+    # events.append((time_stamp, request_id, "out", "decord", num_token, 1))
+    time_stamp = time.time()
     llm_worker.submit_requests(finished_ids, finished_offsets, finished_lengths, output_tensor)
     # ------------------------------------------------------------------------------------------- #
-    return parsed_prompt
+    return parsed_prompt, time_stamp
 
 
 def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, duration: int, vram_usage=0.8):
@@ -148,6 +152,9 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
             max_tokens_list, offsets, lengths, is_token_tensor_list
         ):
             if is_prompt:
+                # Added by LJH
+                events.append((time_stamp, request_id, "in", "prompt", 0, num_tokens))
+                
                 print(f"[Prompt] Request {request_id} arrives (input_len={num_tokens}, max_len={max_tokens}, "
                       f"layers=[{start_layer_idx}, {end_layer_idx}))")
                 # prompt phase requests
@@ -174,6 +181,9 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
                                        seq_id=request_id, input_tensor=input_tensor,
                                        prompt_token_ids=[1] * num_tokens)
             else:
+                # Added by LJH
+                events.append((time_stamp, request_id, "in", "decord", num_tokens, 1))
+                
                 # print(f"[Decode] Request {request_id} arrives (context_len={num_tokens}, max_len={max_tokens}, "
                 #       f"layers=[{start_layer_idx}, {end_layer_idx}))")
                 if is_token:
@@ -188,14 +198,23 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
                                                      {(request_id, start_layer_idx): input_tensor})
 
         # step 2.2 & 2.3: run vllm and submit
-        parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
+        # events.append((time_stamp, request_id, "out", "prompt", 0, num_token))
+        
+        # Modified by LJH
+        parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
                                        hidden_size=hidden_size, force_decode=False)
+        # Added by LJH
+        events.append((time_stamp, request_id, "out", "?", "_", "_"))
         if parsed_prompt:
-            parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx,
+            parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx,
                                            is_last_layer=is_last_layer, hidden_size=hidden_size,
                                            force_decode=True)
+            # Added by LJH
+            events.append((time_stamp, request_id, "out", "decord", "_", "_"))
             assert not parsed_prompt, "Parsed prompt twice!"
-
+        
+        
+    
         # log kv cache status
         if time.time() > last_log_time + 2:
             last_log_time = time.time()
