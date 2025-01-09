@@ -47,6 +47,7 @@ class Profiler:
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
+        self.repetitions = 5
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))
@@ -79,21 +80,26 @@ class MasterProfiler(Profiler):
         Measure RTT between master node and slave node.
         """
         
-        # 1-1. Get rtt start time
-        start_time = time.time()
+        rtts = []
         
-        # 1-2. Send rtt packet
-        self._send_packet(client_socket, "PING")
+        for _ in range(self.repetitions):
+            # 1-1. Get rtt start time
+            start_time = time.time()
+            
+            # 1-2. Send rtt packet
+            self._send_packet(client_socket, "PING")
+            
+            # 1-3. Receive rtt packet
+            response = self._receive_packet(client_socket)
+            
+            # 1-4. Get rtt end time and return rtt
+            end_time = time.time()
+            if response == "PONG":
+                rtts.append(end_time - start_time)
+            else:
+                raise ValueError("[Profiler] Unexpected response from slave.")
         
-        # 1-3. Receive rtt packet
-        response = self._receive_packet(client_socket)
-        
-        # 1-4. Get rtt end time and return rtt
-        end_time = time.time()
-        if response == "PONG":
-            return end_time - start_time
-        else:
-            raise ValueError("[Profiler] Unexpected response from slave.")
+        return sum(rtts) / len(rtts)
         
     def _handle_delta_time_master(self, client_socket, rtt: float) -> float:
         """
@@ -164,14 +170,15 @@ class SlaveProfiler(Profiler):
         Handle incoming RTT requests from the master.
         """
         
-        # 2-1. Wait and receive rtt packet
-        data = self._receive_packet(conn)
-        
-        # 2-2. Check and send rtt packet
-        if data == "PING":
-            self._send_packet(conn, "PONG")  # Respond to RTT measurement
-        else:
-            RuntimeError("[Profiler] Wrong packet")
+        for _ in range(self.repetitions):
+            # 2-1. Wait and receive rtt packet
+            data = self._receive_packet(conn)
+            
+            # 2-2. Check and send rtt packet
+            if data == "PING":
+                self._send_packet(conn, "PONG")  # Respond to RTT measurement
+            else:
+                RuntimeError("[Profiler] Wrong packet")
             
     def _handle_delta_time_slave(self, conn) -> None:
         """
