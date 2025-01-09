@@ -2,6 +2,7 @@
 import time
 import socket
 from typing import List, Tuple, Dict
+import csv
 
 def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str]]:
     """
@@ -43,18 +44,41 @@ class Profiler:
     """
     Base Profiler class for default communication function
     """
-    def __init__(self, node_type: str, ip_address: str, port: int, duration: int):
+    def __init__(self, node_type: str, ip_address: str, port: int, duration: int, file_path: str):
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
-        self.repetitions = 100
-        self.duration = duration
+        self.duration: int = duration
+        
+        # For delta_time measurement
+        self._repetitions: int = 1000
+        # For event recording
+        self._events: List[Tuple] = []
+        # For file path
+        self._file_path: str = file_path
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))
 
     def _receive_packet(self, conn) -> str:
         return conn.recv(1024).decode('utf-8')
+    
+    def record_event(self, time_stamp, request_id, in_out, mode, context_len, this_iter_processed):
+        self._events.append(time_stamp, request_id, in_out, mode, context_len, this_iter_processed)
+        
+    def write_event_to_csv(self):
+        """
+        Write the events stored in `_events` to a CSV file.
+
+        Args:
+            file_path (str): The path to the CSV file where events will be written.
+        """
+        with open(self._file_path, mode='w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            # Optional: Write a header row
+            writer.writerow(["time_stamp", "request_id", "in_out", "mode", "context_len", "this_iter_processed"])
+
+            writer.writerow(self._events)
 
 class MasterProfiler(Profiler):
     """
@@ -66,8 +90,8 @@ class MasterProfiler(Profiler):
         duration (int): executing time of system
     """
     
-    def __init__(self, slaves: List[Tuple[int, str]], duration:int):
-        super().__init__("master", ip_address=None, port=None, duration=duration)
+    def __init__(self, slaves: List[Tuple[int, str]], duration:int, file_path):
+        super().__init__("master", ip_address=None, port=None, duration=duration, file_path=file_path)
         print("[Profiler] MasterProfiler Init!")
         
         # compute_node_index -> delta_time 
@@ -84,7 +108,7 @@ class MasterProfiler(Profiler):
         
         rtts = []
         
-        for _ in range(self.repetitions):
+        for _ in range(self._repetitions):
             # 1-1. Get rtt start time
             start_time = time.time()
             
@@ -162,8 +186,8 @@ class SlaveProfiler(Profiler):
         duration (int): executing time of system
     """
     
-    def __init__(self, duration: int, ip_address: str, port: int = 9001):
-        super().__init__("slave", ip_address=ip_address, port=port, duration=duration)
+    def __init__(self, duration: int, file_path: str, ip_address: str, port: int = 9001):
+        super().__init__("slave", ip_address=ip_address, port=port, duration=duration, file_path=file_path)
         print("[Profiler] SlaveProfiler Init!")
         
         self.delta_time: float = 0.0
@@ -173,7 +197,7 @@ class SlaveProfiler(Profiler):
         Handle incoming RTT requests from the master.
         """
         
-        for _ in range(self.repetitions):
+        for _ in range(self._repetitions):
             # 2-1. Wait and receive rtt packet
             data = self._receive_packet(conn)
             

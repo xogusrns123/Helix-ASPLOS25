@@ -49,10 +49,10 @@ def run_heuristic_host_online(
     # -------------------------------------------------------------------------------------- #
     
     # Added by LJH
-    # ------------------------------------- Init Time ------------------------------------ #
+    # ------------------------------------- Init Profiler ------------------------------------ #
     # (compute_node_index, ip_address) 
     slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
-    master_profiler = MasterProfiler(slave_configs, duration=120)
+    master_profiler = MasterProfiler(slave_configs, duration=120, file_path=result_logging_dir)
     master_profiler.start_master_profiling()
     # ------------------------------------------------------------------------------------ #
     
@@ -109,7 +109,8 @@ def run_heuristic_host_online(
             # This code belongs to the control node, where
             # ('prompt', 'out') signifies the initiation of a query process.
             # 'out' and 'prompt' indicate the request signal to compute nodes for starting a prefill stage.
-            events.append((time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1))
+            # events.append((time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1))
+            master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1)
             print(f"Send out new query {cur_query_id}, input len = {input_length}, "
                   f"max_len = {input_length + output_length}")
 
@@ -128,7 +129,12 @@ def run_heuristic_host_online(
             if py_on_the_fly_query.processed_tokens == 0:
                 # prompt phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((time_stamp, query_uid, "in", "prompt", 0, py_on_the_fly_query.input_length + 1))
+                
+                # Modified by LJH
+            # Original code
+                # events.append((time_stamp, query_uid, "in", "prompt", 0, py_on_the_fly_query.input_length + 1))
+            # Modified code
+                master_profiler.record_event(time_stamp, query_uid, "in", "prompt", 0, py_on_the_fly_query.input_length + 1)
                 py_on_the_fly_query.processed_tokens += py_on_the_fly_query.input_length + 1
 
                 # now we can log the request with its route
@@ -144,7 +150,13 @@ def run_heuristic_host_online(
             else:
                 # decode phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((time_stamp, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
+                
+                # Modified by LJH
+            # Original code
+                # events.append((time_stamp, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
+            # Modified code
+                master_profiler.record_event(time_stamp, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1)
+                
                 py_on_the_fly_query.processed_tokens += 1
 
             # then we decide whether to send out new messages (decodes)
@@ -175,7 +187,12 @@ def run_heuristic_host_online(
                 )
 
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((time_stamp, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1))
+                
+                # Modified by LJH
+            # Original code
+                # events.append((time_stamp, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1))
+            # Modified code
+                master_profiler.record_event(time_stamp, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1)
 
     # save logging files
     print(f"Queries still flying: {flying_queries_dict.keys()}.")
@@ -184,9 +201,13 @@ def run_heuristic_host_online(
     with open(query_routes_file_name, "w") as f:
         for item in query_routes:
             f.write(f"{item}\n")
-    with open(events_file_name, "w") as f:
-        for item in events:
-            f.write(f"{item}\n")
+    # Modified by LJH
+# Original code
+    # with open(events_file_name, "w") as f:
+    #     for item in events:
+    #         f.write(f"{item}\n")
+# Modified code
+    master_profiler.write_event_to_csv()
     print("run_heuristic_host_online has been finished!")
 
 

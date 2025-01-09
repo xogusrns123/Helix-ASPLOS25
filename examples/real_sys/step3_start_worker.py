@@ -26,7 +26,7 @@ def main():
     os.makedirs(result_dir, exist_ok=True)
     
     # run worker
-    run_worker(scheduling_method=scheduling_method, model_name="./Llama-2-7b-hf", result_logging_dir=result_dir, duration=300)
+    run_worker(scheduling_method=scheduling_method, model_name="./Llama-2-7b-hf", result_logging_dir=result_dir)
 
 
 if __name__ == '__main__':
