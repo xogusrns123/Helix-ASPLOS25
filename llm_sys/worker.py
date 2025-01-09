@@ -91,8 +91,9 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
         mode = "prompt"
     else:
         mode = "decode"
-    for i in len(request_ids):
-        slave_profiler.record_event(time_stamp, request_ids[i], "out", mode, "_", "_")
+    for request_id in request_ids:
+        slave_profiler.record_event(time_stamp, request_id, "out", mode, "_", "_")
+        
     # ------------------------------------------------------------------------------------------- #
     return parsed_prompt
 
@@ -218,7 +219,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
         #     events.append((time_stamp, request_id, "out", "decord", "_", 1))
         if parsed_prompt:
             # Case for (prompt, out)
-            parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer, 
+            parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer, 
                                         hidden_size=hidden_size, slave_profiler=slave_profiler, force_decode=True)
             # Added by LJH
             # events.append((time_stamp, request_id, "out", "prompt", 0, "_"))

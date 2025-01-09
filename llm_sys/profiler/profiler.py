@@ -3,6 +3,7 @@ import time
 import socket
 from typing import List, Tuple, Dict
 import csv
+import os
 
 def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str]]:
     """
@@ -55,7 +56,7 @@ class Profiler:
         # For event recording
         self._events: List[Tuple] = []
         # For file path
-        self._file_path: str = file_path
+        self._file_path: str = os.path.join(file_path, "test.csv")
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))
@@ -64,21 +65,26 @@ class Profiler:
         return conn.recv(1024).decode('utf-8')
     
     def record_event(self, time_stamp, request_id, in_out, mode, context_len, this_iter_processed):
-        self._events.append(time_stamp, request_id, in_out, mode, context_len, this_iter_processed)
+        self._events.append((time_stamp, request_id, in_out, mode, context_len, this_iter_processed))
         
-    def write_event_to_csv(self):
+    def write_event_to_csv(self, file_path):
         """
-        Write the events stored in `_events` to a CSV file.
+        Write the events stored in `_events` to a CSV file in the desired format.
 
         Args:
             file_path (str): The path to the CSV file where events will be written.
         """
-        with open(self._file_path, mode='w', newline='', encoding='utf-8') as csvfile:
+        with open(file_path, mode='w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
-            # Optional: Write a header row
+            # Write a header row
             writer.writerow(["time_stamp", "request_id", "in_out", "mode", "context_len", "this_iter_processed"])
 
-            writer.writerow(self._events)
+            # Process and write each event
+            for event in self._events:
+                # Remove outer quotes and split by commas
+                cleaned_event = event.strip('"').strip().split(", ")
+                writer.writerow(cleaned_event)
+
 
 class MasterProfiler(Profiler):
     """
