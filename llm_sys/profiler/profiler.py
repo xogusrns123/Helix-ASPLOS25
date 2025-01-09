@@ -1,3 +1,4 @@
+# 2025.01.09 Lee JiHyuk
 import time
 import socket
 from typing import List, Tuple, Dict
@@ -79,7 +80,7 @@ class MasterProfiler(Profiler):
         """
         
         # 1-1. Get rtt start time
-        start_time = time.perf_counter()
+        start_time = time.time()
         
         # 1-2. Send rtt packet
         self._send_packet(client_socket, "PING")
@@ -88,7 +89,7 @@ class MasterProfiler(Profiler):
         response = self._receive_packet(client_socket)
         
         # 1-4. Get rtt end time and return rtt
-        end_time = time.perf_counter()
+        end_time = time.time()
         if response == "PONG":
             return end_time - start_time
         else:
@@ -101,7 +102,7 @@ class MasterProfiler(Profiler):
         """
         
         # 2-1. Get master_time
-        now = time.perf_counter()
+        now = time.time()
         
         # 2-2. Send master_time&rtt
         self._send_packet(client_socket, f"SYNC, {now}, {rtt}")
@@ -134,8 +135,10 @@ class MasterProfiler(Profiler):
                 
                 # 2. Measure delta_time with slave node
                 delta_time = self._handle_delta_time_master(client_socket, rtt)
-                self.delta_times[0] = (slave_ip, delta_time)
+                self.delta_times[compute_node_idx] = (slave_ip, delta_time)
         
+        # print delta_times
+        print(self.delta_times)
         print("[Profiler] Finished delta_times measuring!")
 
 
@@ -185,7 +188,7 @@ class SlaveProfiler(Profiler):
             master_time = float(master_time)
             rtt = float(rtt)
             
-            self.delta_time = time.perf_counter() - (master_time + rtt/2)
+            self.delta_time = time.time() - (master_time + rtt/2)
             print("[Profiler] delta_time:", self.delta_time)
             
             # 3-3. Send delta_time

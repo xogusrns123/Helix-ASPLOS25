@@ -1,5 +1,10 @@
 # 2024.04.25 Yixuan Mei
 
+# 2024.01.09 Lee JiHyuk
+# The default code contains issues related to logging.
+# The logs for entry and exit events are timestamped identically,
+# making it impossible to distinguish the exact timing of in/out events on the host.
+
 import llm_host
 import os
 import time
@@ -43,7 +48,9 @@ def run_heuristic_host_online(
     print("[Python] Cluster initialization finished!")
     # -------------------------------------------------------------------------------------- #
     
+    # Added by LJH
     # ------------------------------------- Init Time ------------------------------------ #
+    # (compute_node_index, ip_address) 
     slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
     master_profiler = MasterProfiler(slave_configs)
     master_profiler.start_master_profiling()
@@ -87,6 +94,9 @@ def run_heuristic_host_online(
             )
 
             # put into flying queries
+            # Added by LJH
+            # At the case of 'out', 'now' should be captured only BEFORE flying query being sent.
+            time_stamp = time.time() - ground_zero
             flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
                                                             input_length=input_length,
                                                             output_length=output_length,
@@ -98,20 +108,31 @@ def run_heuristic_host_online(
             # save log
             # routing info will be available when we receive the request from cluster
             # time - query id - in/out - phase - context_len - this_iter_processed
-            events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
+            
+            # Added by LJH
+            # This code belongs to the control node, where
+            # ('prompt', 'out') signifies the initiation of a query process.
+            # 'out' and 'prompt' indicate the request signal to compute nodes for starting a prefill stage.
+            events.append((time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1))
             print(f"Send out new query {cur_query_id}, input len = {input_length}, "
                   f"max_len = {input_length + output_length}")
 
         # get finished requests
         now = time.time() - ground_zero
         finished_query_ids, generated_token_ids, routes, num_layers = llm_host.gather_finished_requests()
+        # Added by LJH
+        # 'in' indicate the completion signal from compute nodes for each stage.
+        # At the case of 'in', 'now' should be captured only AFTER all finished requests have been gathered.
+        time_stamp = time.time() - ground_zero
+        
         for query_uid, route_list, num_layer_list in zip(finished_query_ids, routes, num_layers):
             # first receive the message
             py_on_the_fly_query = flying_queries_dict[query_uid]
+            
             if py_on_the_fly_query.processed_tokens == 0:
                 # prompt phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((now, query_uid, "in", "prompt", 0, py_on_the_fly_query.input_length + 1))
+                events.append((time_stamp, query_uid, "in", "prompt", 0, py_on_the_fly_query.input_length + 1))
                 py_on_the_fly_query.processed_tokens += py_on_the_fly_query.input_length + 1
 
                 # now we can log the request with its route
@@ -127,7 +148,7 @@ def run_heuristic_host_online(
             else:
                 # decode phase
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((now, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
+                events.append((time_stamp, query_uid, "in", "decode", py_on_the_fly_query.processed_tokens, 1))
                 py_on_the_fly_query.processed_tokens += 1
 
             # then we decide whether to send out new messages (decodes)
@@ -140,6 +161,11 @@ def run_heuristic_host_online(
 
             else:
                 # then we send the query back into the cluster
+                
+                # Added by LJH
+                # 'out' and 'decode' indicate the request signal to compute nodes for starting a decode stage.
+                # At the case of 'out', 'now' should be captured only BEFORE flying query being sent.
+                time_stamp = time.time() - ground_zero
                 llm_host.launch_request(
                     "decode",  # request_type
                     query_uid,  # request_id
@@ -153,7 +179,7 @@ def run_heuristic_host_online(
                 )
 
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((now, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1))
+                events.append((time_stamp, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1))
 
     # save logging files
     print(f"Queries still flying: {flying_queries_dict.keys()}.")
@@ -165,6 +191,7 @@ def run_heuristic_host_online(
     with open(events_file_name, "w") as f:
         for item in events:
             f.write(f"{item}\n")
+    print("run_heuristic_host_online has been finished!")
 
 
 def run_heuristic_host_offline(

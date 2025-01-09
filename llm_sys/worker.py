@@ -19,6 +19,7 @@ import llm_sys.engine.llama
 import llm_sys.utils as utils
 
 from llm_sys.profiler.profiler import SlaveProfiler
+import os
 
 def init_engine(layer_ids, model_name, vram_usage=0.8):
     engine_args = EngineArgs(model=model_name, block_size=16,
@@ -80,7 +81,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     return parsed_prompt
 
 
-def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
+def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, duration: int, vram_usage=0.8):
     # warm up gpu and initialize llm_sys
     utils.warm_up()
     worker_ip: str = utils.get_local_ip()
@@ -92,6 +93,7 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
     print(f"[Python] Model layers: [{start_idx}, {end_idx}).")
     print(f"[Python] Does this node output the last layer: {is_last_layer}.")
     
+    # Added by LJH
     # ------------------------------------- Init Time ------------------------------------ #
     slave_profiler = SlaveProfiler(ip_address=worker_ip, port=9001)
     slave_profiler.start_slave_profiling()
@@ -103,7 +105,17 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
     hidden_size = engine.model_config.get_hidden_size()
 
     last_log_time = time.time()
+    
+    # Added by LJH
+    ground_zero = time.time()
+    # time - query id - in/out - phase - context_len - this_iter_processed
+    events = []
+    
     while True:
+        now = time.time() - ground_zero
+        if now > duration + 45:
+            break
+        
         # ------------------------------------------------------------------------------------------- #
         # Step 1: fetch new requests to compute on
         # request_ids: List[int]
@@ -126,6 +138,8 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
         request_ids, is_prompt_list, start_layer_idx_list, end_layer_idx_list, num_tokens_list, max_tokens_list, \
             offsets, lengths, is_token_tensor_list, token_tensor, activation_tensor = llm_worker.fetch_new_requests()
         # ------------------------------------------------------------------------------------------- #
+        time_stamp = time.time()
+        
         # Step 2: run vllm
         # Step 2.1: put requests into the queues (register in vllm)
         for (request_id, is_prompt, start_layer_idx, end_layer_idx, num_tokens, max_tokens, offset,
@@ -197,7 +211,16 @@ def run_worker(scheduling_method: str, model_name: str, vram_usage=0.8):
                 num_free_cpu = engine.scheduler.block_manager.get_num_free_cpu_blocks()
                 cpu_cache_usage = 1.0 - (num_free_cpu / num_total_cpu)
 
-            print(f"GPU KV cache usage: {gpu_cache_usage * 100:.1f}% - "
+            print(f"Time: {now} | "
+                  f"GPU KV cache usage: {gpu_cache_usage * 100:.1f}% - "
                   f"CPU KV cache usage: {cpu_cache_usage * 100:.1f}%.")
             if cpu_cache_usage > 0.1:
                 print("Warning: CPU KV cache usage is larger than 0.1, considering lower arrival rate!")
+    
+    print("worker finished!")
+    # Added by LJH
+    # After break, save logging to files.
+    events_file_name = os.path.join(result_logging_dir, "events.txt")
+    with open(events_file_name, "w") as file:
+        for item in events:
+            file.write(item)

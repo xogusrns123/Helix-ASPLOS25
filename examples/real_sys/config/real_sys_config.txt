@@ -13,7 +13,7 @@ start_layer: 0
 end_layer: 16
 
 machine_id: 2
-ip_address: 143.248.53.131
+ip_address: 143.248.53.112
 in_nodes: 1
 out_nodes: 0
 start_layer: 16

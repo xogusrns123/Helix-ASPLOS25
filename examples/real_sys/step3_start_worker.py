@@ -1,8 +1,13 @@
 # 2024.11.02 Yixuan Mei
+
+# 2024.01.09 Lee JiHyuk
+# Adding profiling to worker
+
 import sys
 
 from llm_sys.worker import run_worker
 
+import os
 
 def main():
     # parse arguments
@@ -16,8 +21,12 @@ def main():
     assert scheduling_method in ["maxflow", "swarm", "random"], f"Unsupported scheduling method: {scheduling_method}!"
     print(f"Starting worker with scheduling method: {scheduling_method}.")
 
+    # Added by LJH
+    result_dir = f"./result/worker/"
+    os.makedirs(result_dir, exist_ok=True)
+    
     # run worker
-    run_worker(scheduling_method=scheduling_method, model_name="./Llama-2-7b-hf")
+    run_worker(scheduling_method=scheduling_method, model_name="./Llama-2-7b-hf", result_logging_dir=result_dir, duration=300)
 
 
 if __name__ == '__main__':
