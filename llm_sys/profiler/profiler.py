@@ -47,7 +47,7 @@ class Profiler:
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
-        self.repetitions = 5
+        self.repetitions = 100
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))

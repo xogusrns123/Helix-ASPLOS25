@@ -44,7 +44,8 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     # Step 2.3: Prepare output
     if output == (None, None, None):
         # nothing to schedule, no need to re-enter
-        return False
+        time_stamp = time.time()
+        return False, time_stamp
     if not is_last_layer:
         # output infos: list[((req_id (str), layer_id (int)), begin_idx (int), end_idx (int))]
         # output_tensor: a large tensor
