@@ -67,23 +67,18 @@ class Profiler:
     def record_event(self, time_stamp, request_id, in_out, mode, context_len, this_iter_processed):
         self._events.append((time_stamp, request_id, in_out, mode, context_len, this_iter_processed))
         
-    def write_event_to_csv(self, file_path):
+    def write_event_to_csv(self):
         """
         Write the events stored in `_events` to a CSV file in the desired format.
 
         Args:
             file_path (str): The path to the CSV file where events will be written.
         """
-        with open(file_path, mode='w', newline='', encoding='utf-8') as csvfile:
+        with open(self._file_path, mode='w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             # Write a header row
             writer.writerow(["time_stamp", "request_id", "in_out", "mode", "context_len", "this_iter_processed"])
-
-            # Process and write each event
-            for event in self._events:
-                # Remove outer quotes and split by commas
-                cleaned_event = event.strip('"').strip().split(", ")
-                writer.writerow(cleaned_event)
+            writer.writerows(self._events)
 
 
 class MasterProfiler(Profiler):

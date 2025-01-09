@@ -56,6 +56,8 @@ def run_heuristic_host_online(
     master_profiler.start_master_profiling()
     # ------------------------------------------------------------------------------------ #
     
+    once_check = True
+    
     ground_zero = time.time()
     next_query_id = 0
     flying_queries_dict = {}
@@ -71,16 +73,54 @@ def run_heuristic_host_online(
         if now > master_profiler.duration + 30:
             break
 
-        # send new requests into cluster if needed
-        while not len(trace) == 0 and trace[0][0] <= now:
-            # the request has a time stamp smaller than now, should be sent
+        # # send new requests into cluster if needed
+        # while not len(trace) == 0 and trace[0][0] <= now:
+        #     # the request has a time stamp smaller than now, should be sent
+        #     expected_submit_time, input_length, output_length = trace.pop(0)
+
+        #     # get query id
+        #     cur_query_id = next_query_id
+        #     next_query_id += 1
+
+        #     # send it into the cluster (system will take care of routing)
+        #     llm_host.launch_request(
+        #         "prompt",  # request_type
+        #         cur_query_id,  # request_id
+        #         input_length,  # num_tokens
+        #         input_length + output_length,  # max_num_tokens
+        #         [i for i in range(input_length)],  # token_ids
+        #         False,  # set_routing
+        #         [],  # server_ids
+        #         [],  # start_layer_ids
+        #         [],  # end_layer_ids
+        #     )
+
+        #     # put into flying queries
+        #     # Added by LJH
+        #     # At the case of 'out', 'now' should be captured only BEFORE flying query being sent.
+        #     time_stamp = time.time()
+        #     flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
+        #                                                     input_length=input_length,
+        #                                                     output_length=output_length,
+        #                                                     compute_node_uids=None,
+        #                                                     start_layers=None,
+        #                                                     end_layers=None,
+        #                                                     pipeline=None)
+            
+        #     # Added by LJH
+        #     # This code belongs to the control node, where
+        #     # ('prompt', 'out') signifies the initiation of a query process.
+        #     # 'out' and 'prompt' indicate the request signal to compute nodes for starting a prefill stage.
+        #     # events.append((time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1))
+        #     master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1)
+        #     print(f"Send out new query {cur_query_id}, input len = {input_length}, "
+        #           f"max_len = {input_length + output_length}")
+
+        # For once check
+        if once_check:
             expected_submit_time, input_length, output_length = trace.pop(0)
-
-            # get query id
             cur_query_id = next_query_id
-            next_query_id += 1
-
-            # send it into the cluster (system will take care of routing)
+            
             llm_host.launch_request(
                 "prompt",  # request_type
                 cur_query_id,  # request_id
@@ -92,11 +132,8 @@ def run_heuristic_host_online(
                 [],  # start_layer_ids
                 [],  # end_layer_ids
             )
-
-            # put into flying queries
-            # Added by LJH
-            # At the case of 'out', 'now' should be captured only BEFORE flying query being sent.
-            time_stamp = time.time() - ground_zero
+            
+            time_stamp = time.time()
             flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
                                                             input_length=input_length,
                                                             output_length=output_length,
@@ -113,14 +150,16 @@ def run_heuristic_host_online(
             master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1)
             print(f"Send out new query {cur_query_id}, input len = {input_length}, "
                   f"max_len = {input_length + output_length}")
-
+            
+            once_check = False
+        
         # get finished requests
         now = time.time() - ground_zero
         finished_query_ids, generated_token_ids, routes, num_layers = llm_host.gather_finished_requests()
         # Added by LJH
         # 'in' indicate the completion signal from compute nodes for each stage.
         # At the case of 'in', 'now' should be captured only AFTER all finished requests have been gathered.
-        time_stamp = time.time() - ground_zero
+        time_stamp = time.time()
         
         for query_uid, route_list, num_layer_list in zip(finished_query_ids, routes, num_layers):
             # first receive the message
@@ -173,7 +212,7 @@ def run_heuristic_host_online(
                 # Added by LJH
                 # 'out' and 'decode' indicate the request signal to compute nodes for starting a decode stage.
                 # At the case of 'out', 'now' should be captured only BEFORE flying query being sent.
-                time_stamp = time.time() - ground_zero
+                time_stamp = time.time()
                 llm_host.launch_request(
                     "decode",  # request_type
                     query_uid,  # request_id

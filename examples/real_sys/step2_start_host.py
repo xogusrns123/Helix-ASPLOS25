@@ -81,7 +81,7 @@ def example_heuristic_online(heuristic: str):
         scheduler_name=heuristic,
         real_sys_config_file_name="./config/real_sys_config.txt",
         avg_throughput=150,
-        duration=300,
+        duration=30,
         result_logging_dir=result_dir
     )
 
