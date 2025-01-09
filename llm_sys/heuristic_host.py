@@ -52,7 +52,7 @@ def run_heuristic_host_online(
     # ------------------------------------- Init Time ------------------------------------ #
     # (compute_node_index, ip_address) 
     slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
-    master_profiler = MasterProfiler(slave_configs)
+    master_profiler = MasterProfiler(slave_configs, duration=120)
     master_profiler.start_master_profiling()
     # ------------------------------------------------------------------------------------ #
     
@@ -68,7 +68,7 @@ def run_heuristic_host_online(
     while True:
         # get time
         now = time.time() - ground_zero
-        if now > duration + 30:
+        if now > master_profiler.duration + 30:
             break
 
         # send new requests into cluster if needed
@@ -104,10 +104,6 @@ def run_heuristic_host_online(
                                                             start_layers=None,
                                                             end_layers=None,
                                                             pipeline=None)
-
-            # save log
-            # routing info will be available when we receive the request from cluster
-            # time - query id - in/out - phase - context_len - this_iter_processed
             
             # Added by LJH
             # This code belongs to the control node, where

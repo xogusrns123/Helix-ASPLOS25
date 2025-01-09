@@ -44,8 +44,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     # Step 2.3: Prepare output
     if output == (None, None, None):
         # nothing to schedule, no need to re-enter
-        time_stamp = time.time()
-        return False, time_stamp
+        return False, None
     if not is_last_layer:
         # output infos: list[((req_id (str), layer_id (int)), begin_idx (int), end_idx (int))]
         # output_tensor: a large tensor
@@ -79,7 +78,6 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, force
     # results_tensor: one large CPU tensor
     
     # Added by LJH
-    # events.append((time_stamp, request_id, "out", "decord", num_token, 1))
     time_stamp = time.time()
     llm_worker.submit_requests(finished_ids, finished_offsets, finished_lengths, output_tensor)
     # ------------------------------------------------------------------------------------------- #
@@ -100,7 +98,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     # Added by LJH
     # ------------------------------------- Init Time ------------------------------------ #
-    slave_profiler = SlaveProfiler(ip_address=worker_ip, port=9001)
+    slave_profiler = SlaveProfiler(duration=120, ip_address=worker_ip, port=9001)
     slave_profiler.start_slave_profiling()
     # ------------------------------------------------------------------------------------ #
 
@@ -118,7 +116,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     while True:
         now = time.time() - ground_zero
-        if now > duration + 45:
+        if now > slave_profiler.duration + 45:
             break
         
         # ------------------------------------------------------------------------------------------- #
@@ -199,19 +197,19 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
                                                      {(request_id, start_layer_idx): input_tensor})
 
         # step 2.2 & 2.3: run vllm and submit
-        # events.append((time_stamp, request_id, "out", "prompt", 0, num_token))
-        
         # Modified by LJH
-        parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
+        parsed_prompt, _ = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
                                        hidden_size=hidden_size, force_decode=False)
         # Added by LJH
-        events.append((time_stamp, request_id, "out", "?", "_", "_"))
+        if time_stamp is not None:
+            events.append((time_stamp, request_id, "out", "decord", "_", 1))
         if parsed_prompt:
+            # Case for (prompt, out)
             parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx,
                                            is_last_layer=is_last_layer, hidden_size=hidden_size,
                                            force_decode=True)
             # Added by LJH
-            events.append((time_stamp, request_id, "out", "decord", "_", "_"))
+            events.append((time_stamp, request_id, "out", "prompt", 0, "_"))
             assert not parsed_prompt, "Parsed prompt twice!"
         
         
@@ -243,4 +241,4 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     events_file_name = os.path.join(result_logging_dir, "events.txt")
     with open(events_file_name, "w") as file:
         for item in events:
-            file.write(item)
+            file.write(f"{item}\n")

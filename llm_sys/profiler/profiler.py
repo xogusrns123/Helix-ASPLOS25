@@ -43,11 +43,12 @@ class Profiler:
     """
     Base Profiler class for default communication function
     """
-    def __init__(self, node_type: str, ip_address: str, port: int):
+    def __init__(self, node_type: str, ip_address: str, port: int, duration: int):
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
         self.repetitions = 100
+        self.duration = duration
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))
@@ -61,11 +62,12 @@ class MasterProfiler(Profiler):
     
 
     Args:
-        slaves (List[Tuple[int, str]]): List for the (machine_id, ip_addresss) 
+        slaves (List[Tuple[int, str]]): List for the (machine_id, ip_addresss)
+        duration (int): executing time of system
     """
     
-    def __init__(self, slaves: List[Tuple[int, str]]):
-        super().__init__("master", None, None)
+    def __init__(self, slaves: List[Tuple[int, str]], duration:int):
+        super().__init__("master", ip_address=None, port=None, duration=duration)
         print("[Profiler] MasterProfiler Init!")
         
         # compute_node_index -> delta_time 
@@ -157,10 +159,11 @@ class SlaveProfiler(Profiler):
         ip_address (str): IP address of the machine
         port (int): port of the machine. 
                     Basic default = 9001
+        duration (int): executing time of system
     """
     
-    def __init__(self, ip_address: str, port: int = 9001):
-        super().__init__("slave", ip_address, port)
+    def __init__(self, duration: int, ip_address: str, port: int = 9001):
+        super().__init__("slave", ip_address=ip_address, port=port, duration=duration)
         print("[Profiler] SlaveProfiler Init!")
         
         self.delta_time: float = 0.0
