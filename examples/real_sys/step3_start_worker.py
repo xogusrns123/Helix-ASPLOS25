@@ -22,7 +22,7 @@ def main():
     print(f"Starting worker with scheduling method: {scheduling_method}.")
 
     # Added by LJH
-    result_dir = f"./result/worker"
+    result_dir = f"./profiling/{scheduling_method}_worker/"
     os.makedirs(result_dir, exist_ok=True)
     
     # run worker

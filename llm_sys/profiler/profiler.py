@@ -1,9 +1,11 @@
 # 2025.01.09 Lee JiHyuk
+import os
 import time
 import socket
 from typing import List, Tuple, Dict
 import csv
-import os
+import pandas as pd
+import re
 
 def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str]]:
     """
@@ -45,24 +47,43 @@ class Profiler:
     """
     Base Profiler class for default communication function
     """
-    def __init__(self, node_type: str, ip_address: str, port: int, duration: int, file_path: str):
+    def __init__(self, duration: int, file_directory: str, node_type: str, ip_address: str, port: int):
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
         self.duration: int = duration
         
+        # For basic packet size
+        self._packet_size: int = 1024
         # For delta_time measurement
         self._repetitions: int = 1000
         # For event recording
         self._events: List[Tuple] = []
-        # For file path
-        self._file_path: str = os.path.join(file_path, "test.csv")
+        # For collective file directory
+        self._file_directory: str = file_directory
 
     def _send_packet(self, conn, packet: str):
         conn.sendall(packet.encode('utf-8'))
 
     def _receive_packet(self, conn) -> str:
-        return conn.recv(1024).decode('utf-8')
+        return conn.recv(self._packet_size).decode('utf-8')
+    
+    def _receive_file(self, conn, file_path) -> None:
+        with open(file_path, "wb") as file:
+            while True:
+                data = conn.recv(self._packet_size)
+                if not data:
+                    break
+                file.write(data)
+        
+        print(f"[Profiler] File saved as {file_path}")
+    
+    def _send_file(self, conn, file_path) -> None:
+        with open(file_path, "rb") as file:
+            while (data := file.read(self._packet_size)):
+                conn.sendall(data)
+        
+        print(f"[Profiler] File {file_path} sent successfully!")
     
     def record_event(self, time_stamp, request_id, in_out, mode, context_len, this_iter_processed):
         self._events.append((time_stamp, request_id, in_out, mode, context_len, this_iter_processed))
@@ -74,31 +95,35 @@ class Profiler:
         Args:
             file_path (str): The path to the CSV file where events will be written.
         """
+        assert self._file_path, f"There is no file path for events"
         with open(self._file_path, mode='w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             # Write a header row
             writer.writerow(["time_stamp", "request_id", "in_out", "mode", "context_len", "this_iter_processed"])
             writer.writerows(self._events)
-
-
+            
+            
 class MasterProfiler(Profiler):
     """
     Master Profiler class.
     
-
+    Works as client during communication functions
+    
     Args:
         slaves (List[Tuple[int, str]]): List for the (machine_id, ip_addresss)
         duration (int): executing time of system
     """
     
-    def __init__(self, slaves: List[Tuple[int, str]], duration:int, file_path):
-        super().__init__("master", ip_address=None, port=None, duration=duration, file_path=file_path)
+    def __init__(self, slaves: List[Tuple[int, str]], duration:int, file_directory: str):
+        super().__init__(node_type="master", duration=duration, file_directory=file_directory, ip_address=None, port=None)
         print("[Profiler] MasterProfiler Init!")
         
         # compute_node_index -> delta_time 
-        self.delta_times: Dict[int, float] = {}
+        self.delta_times: Dict[int, Tuple[str, float]] = {}
         # (compute_node_index, ip_address, port)
         self.slaves: List[Tuple[int, str]] = slaves
+        # For master event file path
+        self._file_path: str = os.path.join(self._file_directory, "node_master_events.csv")
         
         time.sleep(1)
 
@@ -168,18 +193,85 @@ class MasterProfiler(Profiler):
                 
                 # 2. Measure delta_time with slave node
                 delta_time = self._handle_delta_time_master(client_socket, rtt)
-                self.delta_times[compute_node_idx] = (slave_ip, delta_time)
+                self.delta_times[compute_node_idx] = (slave_ip, float(delta_time))
         
         # print delta_times
         print(self.delta_times)
         print("[Profiler] Finished delta_times measuring!")
-
+    
+    def _collect_events(self) -> None:
+        for compute_node_idx, slave_ip in self.slaves:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:       
+                # 0. Connect to the slave node
+                slave_port = 9001
+                print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
+                client_socket.connect((slave_ip, slave_port))
+                
+                # 1. Receive events file from the slave node
+                file_name = f"node_{compute_node_idx}_events.csv"
+                event_file_path = os.path.join(self._file_directory, file_name)
+                self._receive_file(conn=client_socket, file_path=event_file_path)
+                
+        print("[Profiler] Every files have been saved successfully.")
+                
+    def _merge_events(self) -> None:
+        # 1. Get event file list
+        file_list = [file for file in os.listdir(self._file_directory) 
+                        if file.endswith("_events.csv") and os.path.isfile(os.path.join(self._file_directory, file))]
+        
+        # 2. Merge event files into a file
+        dataframes = []
+        for file in file_list:
+            # 2-1. Find node name from file
+            match = re.match(r"node_(.*?)_events\.csv", file)
+            if match:
+                node_name = match.group(1)
+            else:
+                print(f"[Profiler] Skipping file: {file} (node_name not found)")
+                continue
+            
+            # 2-2. Read file 
+            file_path = os.path.join(self._file_directory, file)
+            df = pd.read_csv(file_path)
+            
+            # 2-3. Add source info. and apply delta time
+            df['source'] = str(node_name)
+            if node_name != "master":
+                delta_time = self.delta_times[int(node_name)]
+                df['time_stamp'] -= delta_time
+            
+            # 2-4. Concat file
+            dataframes.append(df)
+            
+        # 3. Sort by time_stamp
+        combined_df = pd.concat(dataframes, ignore_index=True)
+        sorted_df = combined_df.sort_values(by='time_stamp').reset_index(drop=True)
+        
+        # 4. Save sorted DataFrame into new csv file
+        output_file = os.path.join(self._file_directory, "merged_sorted.csv")
+        sorted_df.to_csv(output_file, index=False)
+        print(f"[Profiler] Merged and sorted CSV saved to: {output_file}")
+    
+    def _calculate_delays(self) -> None:
+        # Not yet implemented
+        pass
+    
+    def generate_delay_report(self) -> None:
+        # 1. Collect event files from compute nodes
+        self._collect_events()
+        
+        # 2. Merge event files
+        self._merge_events()
+        
+        # 3. Calculate delays from merged file
+        self._calculate_delays()
 
 class SlaveProfiler(Profiler):
     """
     Slave Profiler class.
     
-
+    Works as server during communication funtions
+    
     Args:
         ip_address (str): IP address of the machine
         port (int): port of the machine. 
@@ -187,11 +279,14 @@ class SlaveProfiler(Profiler):
         duration (int): executing time of system
     """
     
-    def __init__(self, duration: int, file_path: str, ip_address: str, port: int = 9001):
-        super().__init__("slave", ip_address=ip_address, port=port, duration=duration, file_path=file_path)
+    def __init__(self, duration: int, file_directory: str, ip_address: str, port: int = 9001):
+        super().__init__(node_type="slave", duration=duration, file_directory=file_directory, ip_address=ip_address, port=port)
         print("[Profiler] SlaveProfiler Init!")
         
+        # For delta time value
         self.delta_time: float = 0.0
+        # For event file path
+        self._file_path: str = os.path.join(self._file_directory, "events.csv")
 
     def _handle_rtt_slave(self, conn) -> None:
         """
@@ -253,6 +348,22 @@ class SlaveProfiler(Profiler):
             # 4. Exit the connection with master
             print("[Profiler] Finished delta_time measuring!")
 
+    def send_delay_report(self) -> None:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+            # 0. Await until master node connects
+            server_socket.bind((self.ip_address, self.port))
+            server_socket.listen()
+            conn, addr = server_socket.accept()
+            
+            # 1. Send events file to the master node
+            with conn:
+                print(f"[Profiler] Connection established with control node({addr})")
+                
+                self._send_file(conn=conn, file_path=self._file_path)
+                
+        print("[Profiler] File sent successfully.")
+    
+    
 # Example Usage
 if __name__ == "__main__":
     # Example to run master or slave

@@ -52,7 +52,7 @@ def run_heuristic_host_online(
     # ------------------------------------- Init Profiler ------------------------------------ #
     # (compute_node_index, ip_address) 
     slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
-    master_profiler = MasterProfiler(slave_configs, duration=120, file_path=result_logging_dir)
+    master_profiler = MasterProfiler(slave_configs, duration=30, file_directory=result_logging_dir)
     master_profiler.start_master_profiling()
     # ------------------------------------------------------------------------------------ #
     

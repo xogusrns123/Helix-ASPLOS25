@@ -112,7 +112,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     # Added by LJH
     # ------------------------------------- Init Time ------------------------------------ #
-    slave_profiler = SlaveProfiler(duration=30, file_path=result_logging_dir, ip_address=worker_ip, port=9001)
+    slave_profiler = SlaveProfiler(duration=30, file_directory=result_logging_dir, ip_address=worker_ip, port=9001)
     slave_profiler.start_slave_profiling()
     # ------------------------------------------------------------------------------------ #
 
