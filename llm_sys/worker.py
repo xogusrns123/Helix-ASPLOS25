@@ -253,4 +253,5 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     #     for item in events:
     #         file.write(f"{item}\n")
     slave_profiler.write_event_to_csv()
+    slave_profiler.send_delay_report()
     print("worker finished!")

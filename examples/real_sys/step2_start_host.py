@@ -72,7 +72,7 @@ def example_heuristic_offline(heuristic: str):
 def example_heuristic_online(heuristic: str):
     # check arguments and create result directory
     assert heuristic in ["swarm", "random"], f"Unsupported heuristic: {heuristic}!"
-    result_dir = f"./result/{heuristic}_online/"
+    result_dir = f"./profiling/{heuristic}_online/"
     os.makedirs(result_dir, exist_ok=True)
 
     # run heuristic host online

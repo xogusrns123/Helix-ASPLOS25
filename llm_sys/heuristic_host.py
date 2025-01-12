@@ -247,6 +247,7 @@ def run_heuristic_host_online(
     #         f.write(f"{item}\n")
 # Modified code
     master_profiler.write_event_to_csv()
+    master_profiler.generate_delay_report()
     print("run_heuristic_host_online has been finished!")
 
 
