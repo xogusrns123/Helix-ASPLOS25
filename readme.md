@@ -211,12 +211,7 @@ execution engine.
 > **Tips:** By default, Helix's communication framework use ports starting from 6000 for inter-node
 > communication. If you want to use other ports, you can change the `BASE_PORT` in `src/const.h`
 
-### 3.2 Init environment in docker
-```
-./init_docker.sh
-```
-
-### 3.3 Running Helix's Prototype System
+### 3.2 Running Helix's Prototype System
 With all dependencies and the communication framework installed, we can now start running Helix's
 prototype system. Starting from the root directory of this repository, enter the example directory:
 ```bash
@@ -310,3 +305,19 @@ three arrays are the compute nodes used, start layer ids, and end layer ids.
   - `./layout/simulator_cluster.ini`
 
 Make sure these files are properly updated before running the system.
+
+### 3.3 Enhanced Profiling in Helix for Network Delays
+In the original Helix system, profiling lacked detailed insights into network delays. 
+To address this, we enhanced the profiling mechanism to include detailed computation 
+and network delay metrics. The system's execution method remains identical to the 
+original Helix. However, the logging format and directory structure have been updated.
+
+Previously, the original Helix system saved logs as `events.txt` in the `result` directory. 
+In the enhanced version, logs are now saved as `events.csv` in the `profiling` directory. 
+Additionally, the new profiler automatically collects all `events.csv` files from every 
+compute node after the simulation. These logs are then used to calculate both 
+computation and network delays.
+
+Currently, delays are computed as averages across all requests. However, future 
+enhancements may provide separate delay metrics for individual request_ids and 
+specific compute nodes.
