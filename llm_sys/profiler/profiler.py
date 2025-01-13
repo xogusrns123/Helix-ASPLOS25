@@ -48,11 +48,10 @@ class Profiler:
     """
     Base Profiler class for default communication function
     """
-    def __init__(self, duration: int, file_directory: str, node_type: str, ip_address: str, port: int):
+    def __init__(self, file_directory: str, node_type: str, ip_address: str, port: int):
         self.node_type: str = node_type
         self.ip_address: str = ip_address
         self.port: int = port
-        self.duration: int = duration
         
         # For basic packet size
         self._packet_size: int = 1024
@@ -144,9 +143,11 @@ class MasterProfiler(Profiler):
     """
     
     def __init__(self, slaves: List[Tuple[int, str]], duration:int, file_directory: str):
-        super().__init__(node_type="master", duration=duration, file_directory=file_directory, ip_address=None, port=None)
+        super().__init__(node_type="master", file_directory=file_directory, ip_address=None, port=None)
         print("[Profiler] MasterProfiler Init!")
         
+        # For duration
+        self.duration = duration
         # compute_node_index -> delta_time 
         self.delta_times: Dict[int, Tuple[str, float]] = {}
         # (compute_node_index, ip_address, port)
@@ -223,6 +224,9 @@ class MasterProfiler(Profiler):
                 # 2. Measure delta_time with slave node
                 delta_time = self._handle_delta_time_master(client_socket, rtt)
                 self.delta_times[compute_node_idx] = (slave_ip, float(delta_time))
+                
+                # 3. Send duration to the slave nodes
+                self._send_packet(client_socket, f"{self.duration}")
         
         # print delta_times
         print(self.delta_times)
@@ -345,18 +349,19 @@ class MasterProfiler(Profiler):
             total_comp_cost[request_id] = average_computation_cost
 
         # 3. Print the results
-        print("\n[Profiler] Profiling final result")
+        print(f"[Profiler] Profiling final result")
         print("Average Costs (per request_id):")
-        print("Request ID | Computation Cost | Communication Cost")
+        print(f"{'Request ID':<15}{'Computation Cost':<20}{'Communication Cost':<20}")
+        print("-" * 55)
 
-        # Combine computation and communication costs
+        # Iterate through all request IDs
         for req_id in sorted(total_comp_cost.keys() | total_comm_cost.keys()):
             # Get computation and communication costs, defaulting to 0
             comp_cost = total_comp_cost.get(req_id, 0)
             comm_cost = total_comm_cost.get(req_id, 0)
 
-            # Print with fixed-width formatting
-            print(f"{req_id:^12} | {comp_cost:^18.6f} | {comm_cost:^18.6f}")
+            # Fixed-width formatting for rows
+            print(f"{req_id:<15}{comp_cost:<20.6f}{comm_cost:<20.6f}")
     
     def generate_delay_report(self) -> None:
         # 1. Collect event files from compute nodes
@@ -381,14 +386,16 @@ class SlaveProfiler(Profiler):
         duration (int): executing time of system
     """
     
-    def __init__(self, duration: int, file_directory: str, ip_address: str, port: int = 9001):
-        super().__init__(node_type="slave", duration=duration, file_directory=file_directory, ip_address=ip_address, port=port)
+    def __init__(self, file_directory: str, ip_address: str, port: int = 9001):
+        super().__init__(node_type="slave", file_directory=file_directory, ip_address=ip_address, port=port)
         print("[Profiler] SlaveProfiler Init!")
         
         # For delta time value
         self.delta_time: float = 0.0
         # For event file path
         self._file_path: str = os.path.join(self._file_directory, "events.csv")
+        # For duration
+        self.duration: int = None
 
     def _handle_rtt_slave(self, conn) -> None:
         """
@@ -446,6 +453,10 @@ class SlaveProfiler(Profiler):
                 
                 # 3. Measure delta_time with master node
                 self._handle_delta_time_slave(conn)   
+                
+                # 4. Receive duration
+                duration = self._receive_packet(conn)
+                self.duration = int(duration)
             
             # 4. Exit the connection with master
             print("[Profiler] Finished delta_time measuring!")
