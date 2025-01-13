@@ -362,6 +362,7 @@ class MasterProfiler(Profiler):
 
             # Fixed-width formatting for rows
             print(f"{req_id:<15}{comp_cost:<20.6f}{comm_cost:<20.6f}")
+        print()
     
     def generate_delay_report(self) -> None:
         # 1. Collect event files from compute nodes
@@ -395,7 +396,7 @@ class SlaveProfiler(Profiler):
         # For event file path
         self._file_path: str = os.path.join(self._file_directory, "events.csv")
         # For duration
-        self.duration: int = None
+        self._duration: int = None
 
     def _handle_rtt_slave(self, conn) -> None:
         """
@@ -432,6 +433,9 @@ class SlaveProfiler(Profiler):
             
             # 3-3. Send delta_time
             self._send_packet(conn, f"SYNC, {self.delta_time}")
+            
+    def get_duration(self) -> int:
+        return self._duration
 
     def start_slave_profiling(self):
         """
@@ -456,7 +460,7 @@ class SlaveProfiler(Profiler):
                 
                 # 4. Receive duration
                 duration = self._receive_packet(conn)
-                self.duration = int(duration)
+                self._duration = int(duration)
             
             # 4. Exit the connection with master
             print("[Profiler] Finished delta_time measuring!")
