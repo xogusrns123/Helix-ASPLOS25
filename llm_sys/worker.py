@@ -130,7 +130,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     while True:
         now = time.time() - ground_zero
-        if now > slave_profiler.duration + 45:
+        if now > slave_profiler.duration + 15:
             break
         
         # ------------------------------------------------------------------------------------------- #

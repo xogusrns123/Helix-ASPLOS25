@@ -6,6 +6,7 @@ from typing import List, Tuple, Dict
 import csv
 import pandas as pd
 import re
+from collections import defaultdict
 
 def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str]]:
     """
@@ -76,7 +77,7 @@ class Profiler:
                     break
                 file.write(data)
         
-        print(f"[Profiler] File saved as {file_path}")
+        # print(f"[Profiler] File saved as {file_path}")
     
     def _send_file(self, conn, file_path) -> None:
         with open(file_path, "rb") as file:
@@ -84,6 +85,34 @@ class Profiler:
                 conn.sendall(data)
         
         print(f"[Profiler] File {file_path} sent successfully!")
+        
+    def connect_with_retry(self, client_socket, slave_ip, slave_port, max_retries=5):
+        """
+        Attempt to connect to a server with retries if the initial connection fails.
+
+        Args:
+            client_socket (socket.socket): The client socket.
+            slave_ip (str): The IP address of the server.
+            slave_port (int): The port of the server.
+            max_retries (int): Maximum number of retries. Defaults to 5.
+
+        Returns:
+            bool: True if connection was successful, False if all retries failed.
+        """
+        retries = 0
+        while retries < max_retries:
+            try:
+                print(f"[Profiler] Attempting to connect to {slave_ip}:{slave_port} (Try {retries + 1}/{max_retries})")
+                client_socket.connect((slave_ip, slave_port))
+                return True
+            except (socket.error, ConnectionRefusedError) as e:
+                retries += 1
+                if retries < max_retries:
+                    print(f"[Profiler] Connection failed: {e} | Retrying in 5 seconds...")
+                    time.sleep(5)
+                else:
+                    print("[Profiler] All retries failed. Exiting.")
+                    return False
     
     def record_event(self, time_stamp, request_id, in_out, mode, context_len, this_iter_processed):
         self._events.append((time_stamp, request_id, in_out, mode, context_len, this_iter_processed))
@@ -186,7 +215,7 @@ class MasterProfiler(Profiler):
                 
                 # 0. Connect to the slave node
                 print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
-                client_socket.connect((slave_ip, slave_port))
+                self.connect_with_retry(client_socket, slave_ip, slave_port, max_retries=100)
                 
                 # 1. Measure RTT between slave node
                 rtt = self._handle_rtt_master(client_socket)
@@ -205,16 +234,14 @@ class MasterProfiler(Profiler):
                 # 0. Connect to the slave node
                 slave_port = 9001
                 print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
-                client_socket.connect((slave_ip, slave_port))
+                self.connect_with_retry(client_socket, slave_ip, slave_port, max_retries=100)
                 
                 # 1. Receive events file from the slave node
                 file_name = f"node_{compute_node_idx}_events.csv"
                 event_file_path = os.path.join(self._file_directory, file_name)
                 self._receive_file(conn=client_socket, file_path=event_file_path)
                 
-        print("[Profiler] Every files have been saved successfully.")
-                
-    def _merge_events(self) -> None:
+    def _merge_events(self) -> str:
         # 1. Get event file list
         file_list = [file for file in os.listdir(self._file_directory) 
                         if file.endswith("_events.csv") and os.path.isfile(os.path.join(self._file_directory, file))]
@@ -236,8 +263,9 @@ class MasterProfiler(Profiler):
             
             # 2-3. Add source info. and apply delta time
             df['source'] = str(node_name)
-            if node_name != "master":
-                delta_time = self.delta_times[int(node_name)]
+            df['time_stamp'] = pd.to_numeric(df['time_stamp'], errors='coerce')
+            if node_name != 'master':
+                delta_time = self.delta_times[int(node_name)][1]
                 df['time_stamp'] -= delta_time
             
             # 2-4. Concat file
@@ -251,20 +279,94 @@ class MasterProfiler(Profiler):
         output_file = os.path.join(self._file_directory, "merged_sorted.csv")
         sorted_df.to_csv(output_file, index=False)
         print(f"[Profiler] Merged and sorted CSV saved to: {output_file}")
+        
+        return output_file
     
-    def _calculate_delays(self) -> None:
-        # Not yet implemented
-        pass
+    def _calculate_delays(self, file_path) -> None:
+        # 1. Read sorted file from decode stage
+        merged_df = pd.read_csv(file_path)
+        
+        # Total computation cost: request_id -> average computation cost
+        total_comp_cost: Dict[int, float] = {}
+        # Total communication cost: request_id -> average communication cost
+        total_comm_cost: Dict[int, float] = {}
+        
+        # 2. Iterate through every request_ids
+        max_request_id = int(max(merged_df['request_id'].unique()))
+        for request_id in range(max_request_id + 1):
+            # 2-1. Initialize data structure
+            # Computation cost: node_index -> List
+            comp_costs: Dict[int, List] = defaultdict(list)
+            # Communication cost: (src, dst) -> List
+            comm_costs: Dict[Tuple[int, int], List] = defaultdict(list)
+            
+            filtered_condition = merged_df["request_id"] == request_id
+            filtered_df = merged_df[filtered_condition]
+        
+            # start_index = first line where the decoding stage begins
+            decode_start_condition = (filtered_df['in_out'] == 'in') & \
+                            (filtered_df['mode'] == 'prompt') & \
+                            (filtered_df['source'] == 'master')
+            decode_start_index = filtered_df.index[decode_start_condition].min()
+
+            if pd.notna(decode_start_index):
+                filtered_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
+            else:
+                print("No rows satisfy the start condition.")
+                continue
+            
+            # 2-2. Iterate through the rows to calculate costs
+            for i in range(1, len(filtered_df)):
+                prev_row = filtered_df.iloc[i - 1]
+                curr_row = filtered_df.iloc[i]
+                
+                # 2-2-1. Calculate time difference
+                time_diff = curr_row['time_stamp'] - prev_row['time_stamp']
+                src_node = prev_row['source']
+                dst_node = curr_row['source']
+                
+                # 2-2-2. Communication cost: specific transitions
+                if (src_node != dst_node):
+                    comm_costs[(src_node, dst_node)].append(time_diff)
+                # 2-2-3. Computation cost: same source
+                elif (src_node == dst_node and src_node != 'master'):
+                    comp_costs[src_node].append(time_diff)
+
+            # 2-3. Calculate averages
+            total_comm_sum = sum(sum(times) for times in comm_costs.values())
+            total_comm_len = sum(len(times) for times in comm_costs.values())
+            total_comp_sum = sum(sum(times) for times in comp_costs.values())
+            total_comp_len = sum(len(times) for times in comp_costs.values())
+                
+            average_communication_cost = total_comm_sum / total_comm_len if comm_costs else 0
+            average_computation_cost = total_comp_sum / total_comp_len if comp_costs else 0
+            
+            total_comm_cost[request_id] = average_communication_cost
+            total_comp_cost[request_id] = average_computation_cost
+
+        # 3. Print the results
+        print("\n[Profiler] Profiling final result")
+        print("Average Costs (per request_id):")
+        print("Request ID | Computation Cost | Communication Cost")
+
+        # Combine computation and communication costs
+        for req_id in sorted(total_comp_cost.keys() | total_comm_cost.keys()):
+            # Get computation and communication costs, defaulting to 0
+            comp_cost = total_comp_cost.get(req_id, 0)
+            comm_cost = total_comm_cost.get(req_id, 0)
+
+            # Print with fixed-width formatting
+            print(f"{req_id:^12} | {comp_cost:^18.6f} | {comm_cost:^18.6f}")
     
     def generate_delay_report(self) -> None:
         # 1. Collect event files from compute nodes
         self._collect_events()
         
         # 2. Merge event files
-        self._merge_events()
+        merged_file_path = self._merge_events()
         
         # 3. Calculate delays from merged file
-        self._calculate_delays()
+        self._calculate_delays(merged_file_path)
 
 class SlaveProfiler(Profiler):
     """
@@ -360,9 +462,6 @@ class SlaveProfiler(Profiler):
                 print(f"[Profiler] Connection established with control node({addr})")
                 
                 self._send_file(conn=conn, file_path=self._file_path)
-                
-        print("[Profiler] File sent successfully.")
-    
     
 # Example Usage
 if __name__ == "__main__":

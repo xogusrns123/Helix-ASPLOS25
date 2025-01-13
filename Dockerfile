@@ -45,7 +45,7 @@ RUN git clone https://github.com/zeromq/cppzmq.git && \
 
 # Install Python dependencies using conda run
 RUN pip install --upgrade pip setuptools && \
-    pip install vllm==0.4.0.post1 numpy~=1.26 networkx~=3.2.1 matplotlib~=3.8.2 gurobipy~=11.0.0 pandas
+    pip install vllm==0.4.0.post1 numpy~=1.26 networkx~=3.2.1 matplotlib~=3.8.2 gurobipy~=11.0.0
     
 # Copy Helix repository into container
 COPY llm_sys/comm /home/kth/helix/llm_sys_comm
@@ -63,6 +63,8 @@ RUN ls -la /home/kth/helix/llm_sys_comm && \
     ./build.sh
 
 WORKDIR /home/kth/helix
+
+RUN pip install pandas
 
 # Default command to run on container start
 CMD pip install -e . && bash
