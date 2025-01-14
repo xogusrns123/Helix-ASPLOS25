@@ -2,6 +2,11 @@
 // Created by meiyixuan on 2024/4/17.
 //
 
+// 
+// Added by Lee Ji Hyuk on 2025/1/14.
+// For port selection
+// 
+
 #ifndef ZMQ_COMM_COMPUTE_WORKER_H
 #define ZMQ_COMM_COMPUTE_WORKER_H
 
@@ -98,23 +103,32 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
         is_last_layer = true;
     }
 
-    // get input machine id and ip pairs
-    std::vector<std::pair<int, std::string>> input_id_ip;
+    // get input machine id, ip and port tuple
+    // machine_id, IP, port
+    std::vector<std::tuple<int, std::string, int>> input_id_ip;
     for (int machine_id: current_machine.in_nodes) {
         for (const auto &machine: machine_configs) {
             if (machine.machine_id == machine_id) {
-                input_id_ip.emplace_back(machine_id, machine.ip_address);
+                int port = machine.ports[current_machine.machine_id];
+                input_id_ip.emplace_back(machine_id, machine.ip_address, port);
             }
         }
     }
     for (const auto &id_ip: input_id_ip) {
-        log("Receiver", "Input machine: id=[" + std::to_string(id_ip.first) + "], ip=[" + id_ip.second + "]");
+        log("Receiver", "Input machine: id=[" + std::to_string(std::get<0>(id_ip)) + 
+                "], address=[" + std::get<1>(id_ip) + ":" + std::to_string(std::get<2>(id_ip)) + "]");
     }
 
     // initialize the polling client
     std::vector<std::string> input_addresses;
     for (const auto &id_ip: input_id_ip) {
-        std::string address = "tcp://" + id_ip.second + ":" + std::to_string(BASE_PORT + current_machine.machine_id);
+
+#ifdef VAST_AI
+        std::string address = "tcp://" + std::get<1>(id_ip) + ":" + std::to_string(std::get<2>(id_ip));
+#else
+        std::string address = "tcp://" + std::get<1>(id_ip) + ":" + std::to_string(BASE_PORT + current_machine.machine_id);
+#endif
+
         input_addresses.emplace_back(address);
     }
     PollingClient poll_client = PollingClient(context, input_addresses);
@@ -123,7 +137,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
     // a set of machines that are not ready
     std::unordered_set<int> input_machines_not_ready;
     for (const auto &id_ip: input_id_ip) {
-        input_machines_not_ready.insert(id_ip.first);
+        input_machines_not_ready.insert(std::get<0>(id_ip));
     }
     // loop until all input machines are ready
     while (!input_machines_not_ready.empty()) {
@@ -154,7 +168,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
     // a set of machines that are not ready
     std::unordered_set<int> input_machines_not_complete;
     for (const auto &id_ip: input_id_ip) {
-        input_machines_not_complete.insert(id_ip.first);
+        input_machines_not_complete.insert(std::get<0>(id_ip));
     }
     // loop until all input machines are complete
     while (!input_machines_not_complete.empty()) {
@@ -534,13 +548,19 @@ void sender_thread(const std::string &worker_ip) {
         }
     }
     for (const auto &id_ip: output_id_ip) {
-        log("Sender", "Output machine: id=[" + std::to_string(id_ip.first) + "], ip=[" + id_ip.second + "]");
+        log("Sender", "Output machine: id=[" + std::to_string(id_ip.first) + 
+                "], address=[" + id_ip.second + ":" + std::to_string(BASE_PORT + id_ip.first) + "]");
     }
 
     // initial the output sockets
     std::unordered_map<int, std::unique_ptr<PollServer>> output_sockets;
     for (const auto &id_ip: output_id_ip) {
+
+#ifdef VAST_AI
+        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(BASE_PORT + id_ip.first);
+#else
         std::string bind_address = "tcp://" + worker_ip + ":" + std::to_string(BASE_PORT + id_ip.first);
+#endif
         output_sockets[id_ip.first] = std::make_unique<PollServer>(context, bind_address);
     }
 

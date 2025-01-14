@@ -1,5 +1,6 @@
 machine_id: 0
 ip_address: 143.248.53.100
+ports: 12345 
 in_nodes: 2
 out_nodes: 1
 start_layer: -1
@@ -7,6 +8,7 @@ end_layer: -1
 
 machine_id: 1
 ip_address: 106.246.35.133
+ports: 12345
 in_nodes: 0
 out_nodes: 2
 start_layer: 0
@@ -14,6 +16,7 @@ end_layer: 16
 
 machine_id: 2
 ip_address: 143.248.53.25
+ports: 12345
 in_nodes: 1
 out_nodes: 0
 start_layer: 16

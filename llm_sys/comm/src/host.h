@@ -2,6 +2,11 @@
 // Created by meiyixuan on 2024/4/19.
 //
 
+// 
+// Added by Lee Ji Hyuk on 2025/1/14.
+// For port selection
+// 
+
 #ifndef ZMQ_COMM_HOST_H
 #define ZMQ_COMM_HOST_H
 
@@ -251,7 +256,11 @@ void msg_scatter_thread(const std::string &host_ip) {
     // initialize the output sockets
     std::unordered_map<int, std::unique_ptr<PollServer>> output_sockets;
     for (const auto &id_ip: output_id_ip) {
+#ifdef VAST_AI
+        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(BASE_PORT + id_ip.first);
+#else
         std::string bind_address = "tcp://" + host_ip + ":" + std::to_string(BASE_PORT + id_ip.first);
+#endif
         output_sockets[id_ip.first] = std::make_unique<PollServer>(context, bind_address);
     }
 
@@ -422,22 +431,28 @@ void msg_gather_thread(const std::string &host_ip) {
     Assert(host_machine.ip_address == host_ip, "Host ip mismatch!");
 
     // get the output ips of host machine
-    std::vector<std::pair<int, std::string>> input_id_ip;
+    std::vector<std::tuple<int, std::string, int>> input_id_ip;
     for (int machine_id: host_machine.in_nodes) {
         for (const auto &machine: machine_configs) {
             if (machine.machine_id == machine_id) {
-                input_id_ip.emplace_back(machine_id, machine.ip_address);
+                int port = machine.ports[host_machine.machine_id];
+                input_id_ip.emplace_back(machine_id, machine.ip_address, port);
             }
         }
     }
     for (const auto &id_ip: input_id_ip) {
-        log("Gather", "Input machine: id=[" + std::to_string(id_ip.first) + "], ip=[" + id_ip.second + "]");
+        log("Gather", "Input machine: id=[" + std::to_string(std::get<0>(id_ip)) + 
+                "], address=[" + std::get<1>(id_ip) + ":" + std::to_string(std::get<2>(id_ip)) + "]");
     }
 
     // initial the input sockets using Poller
     std::vector<std::string> input_addresses;
     for (const auto &id_ip: input_id_ip) {
-        std::string address = "tcp://" + id_ip.second + ":" + std::to_string(BASE_PORT + host_machine.machine_id);
+#ifdef VAST_AI
+        std::string address = "tcp://" + std::get<1>(id_ip) + ":" + std::to_string(std::get<2>(id_ip));
+#else
+        std::string address = "tcp://" + std::get<1>(id_ip) + ":" + std::to_string(BASE_PORT + host_machine.machine_id);
+#endif
         input_addresses.emplace_back(address);
     }
     PollingClient poll_client = PollingClient(context, input_addresses);
@@ -446,7 +461,7 @@ void msg_gather_thread(const std::string &host_ip) {
     // a set of machines that are not ready
     std::unordered_set<int> input_machines_not_ready;
     for (const auto &id_ip: input_id_ip) {
-        input_machines_not_ready.insert(id_ip.first);
+        input_machines_not_ready.insert(std::get<0>(id_ip));
     }
     // loop until all input machines are ready
     while (!input_machines_not_ready.empty()) {
@@ -483,7 +498,7 @@ void msg_gather_thread(const std::string &host_ip) {
     // a set of machines that are not ready
     std::unordered_set<int> input_machines_not_complete;
     for (const auto &id_ip: input_id_ip) {
-        input_machines_not_complete.insert(id_ip.first);
+        input_machines_not_complete.insert(std::get<0>(id_ip));
     }
     // loop until all input machines are complete
     while (!input_machines_not_complete.empty()) {

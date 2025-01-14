@@ -2,6 +2,11 @@
 // Created by meiyixuan on 2024/4/19.
 //
 
+// 
+// Added by Lee Ji Hyuk on 2025/1/14.
+// For port selection
+// 
+
 #ifndef ZMQ_COMM_CONFIG_PARSER_H
 #define ZMQ_COMM_CONFIG_PARSER_H
 
@@ -17,6 +22,7 @@
 struct Machine {
     int machine_id = -1;
     std::string ip_address;
+    std::vector<int> ports;
     std::vector<int> in_nodes;
     std::vector<int> out_nodes;
     int start_layer = -1;
@@ -50,6 +56,8 @@ void print_machine(const Machine &m) {
     for (int in: m.in_nodes) std::cout << in << " ";
     std::cout << std::endl << "Out Nodes: ";
     for (int out: m.out_nodes) std::cout << out << " ";
+    std::cout << std::endl << "Ports: ";
+    for (int port: m.ports) std::cout << port << " ";
     std::cout << std::endl << std::endl;
 }
 
@@ -94,6 +102,13 @@ std::vector<Machine> read_config(const std::string &filename) {
                 machine.out_nodes.push_back(id);
                 if (ss.peek() == ',') ss.ignore();
             }
+        } else if (key.find("ports") != std::string::npos) {
+            std::istringstream ss(val);
+            int id;
+            while (ss >> id) {
+                machine.ports.push_back(id);
+                if (ss.peek() == ',') ss.ignore();
+            }
         } else if (key.find("start_layer") != std::string::npos) {
             machine.start_layer = std::stoi(val);
         } else if (key.find("end_layer") != std::string::npos) {
@@ -134,6 +149,7 @@ std::string serialize_machine(const Machine& machine) {
     // Serialize in_nodes and out_nodes
     serialize_vector(machine.in_nodes);
     serialize_vector(machine.out_nodes);
+    serialize_vector(machine.ports);
 
     return oss.str();
 }
@@ -167,6 +183,7 @@ Machine deserialize_machine(const std::string& data) {
     // Deserialize in_nodes and out_nodes
     deserialize_vector(machine.in_nodes);
     deserialize_vector(machine.out_nodes);
+    deserialize_vector(machine.ports);
 
     return machine;
 }

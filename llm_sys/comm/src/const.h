@@ -2,6 +2,11 @@
 // Created by meiyixuan on 2024/4/17.
 //
 
+// 
+// Added by Lee Ji Hyuk on 2025/1/14.
+// For port selection
+// 
+
 #ifndef ZMQ_COMM_CONST_H
 #define ZMQ_COMM_CONST_H
 
@@ -15,6 +20,9 @@
 
 // flags
 #define DEBUG true
+
+// For Vast AI
+#define VAST_AI true
 
 
 #endif //ZMQ_COMM_CONST_H
