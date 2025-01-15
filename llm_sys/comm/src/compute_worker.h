@@ -739,8 +739,11 @@ void worker_start_network_threads(const std::string &config_broadcast_addr, cons
     // worker_ip format: "10.128.0.53"
     // scheduler is: (1) maxflow, (2) swarm, (3) random
     std::cout << "Config broadcast address: " << config_broadcast_addr << std::endl;
+#ifdef VAST_AI
+    std::cout << "Worker IP address (public): " << worker_ip << std::endl;
+#else
     std::cout << "Worker IP address (local): " << worker_ip << std::endl;
-
+#endif
     // check that network is not initialized
     Assert(!network_initialized, "Network threads have already been initialized!");
     network_initialized = true;

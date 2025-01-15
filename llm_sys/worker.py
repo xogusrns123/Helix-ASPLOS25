@@ -104,7 +104,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     worker_ip: str = utils.get_local_ip()
     print(f'worker_ip:{worker_ip}')
     # assert worker_ip.startswith("10"), "Local IP must start with 10"
-    llm_worker.start_network_threads(utils.CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method)
+    llm_worker.start_network_threads(utils.WORKER_CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method)
     start_idx, end_idx, is_last_layer = llm_worker.get_model_start_end_idx()
     print(f"[Python] Cluster initialization finished!")
     print(f"[Python] Model layers: [{start_idx}, {end_idx}).")

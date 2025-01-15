@@ -428,7 +428,7 @@ void msg_gather_thread(const std::string &host_ip) {
             break;
         }
     }
-    Assert(host_machine.ip_address == host_ip, "Host ip mismatch!");
+    // Assert(host_machine.ip_address == host_ip, "Host ip mismatch!");
 
     // get the output ips of host machine
     std::vector<std::tuple<int, std::string, int>> input_id_ip;
@@ -622,9 +622,13 @@ void host_start_network_threads(const std::string &config_broadcast_addr, const 
     // host_ip format: "10.128.0.53"
     // scheduler is: (1) maxflow, (2) swarm, (3) random
     std::cout << "Config broadcast address: " << config_broadcast_addr << std::endl;
+#ifdef VAST_AI
+    std::cout << "Host IP address (public): " << host_ip << std::endl;
+#else
     std::cout << "Host IP address (local): " << host_ip << std::endl;
+#endif
     std::cout << "Scheduler type: " << scheduler << std::endl;
-    Assert(config_broadcast_addr.find(host_ip) != std::string::npos, "Host IP mismatch!");
+    // Assert(config_broadcast_addr.find(host_ip) != std::string::npos, "Host IP mismatch!");
 
     // check that network is not initialized
     Assert(!network_initialized, "Network threads have already been initialized!");

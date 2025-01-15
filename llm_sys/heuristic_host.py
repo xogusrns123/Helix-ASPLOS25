@@ -10,7 +10,7 @@ import os
 import time
 
 from simulator.trace_generator.trace_generator import TraceGenerator, ArrivalRateSource, Dataset, LengthSampler
-from llm_sys.utils import get_local_ip, CONFIG_BROADCAST_ADDR, FlyingQuery
+from llm_sys.utils import get_local_ip, get_public_ip, FlyingQuery, HOST_CONFIG_BROADCAST_ADDR, VAST_AI
 
 from llm_sys.profiler.profiler import get_device_ip_configs, MasterProfiler
 from typing import Tuple, List
@@ -40,10 +40,14 @@ def run_heuristic_host_online(
     # ------------------------------------------------------------------------------------------- #
 
     # ------------------------------------- Init System ------------------------------------ #
-    host_ip: str = get_local_ip()
+    if VAST_AI:
+        host_ip: str = get_public_ip()
+    else:
+        host_ip: str = get_local_ip()
+    
     print(f'host_ip:{host_ip}')
     # assert host_ip.startswith("10"), "Local IP must be of form 10.xxx.xxx.xxx"
-    llm_host.start_network_threads(CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, scheduler_name)
+    llm_host.start_network_threads(HOST_CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, scheduler_name)
     time.sleep(20)
     print("[Python] Cluster initialization finished!")
     # -------------------------------------------------------------------------------------- #
@@ -281,7 +285,7 @@ def run_heuristic_host_offline(
     host_ip: str = get_local_ip()
     print(f'host_ip:{host_ip}')
     # assert host_ip.startswith("10"), "Local IP must be of form 10.xxx.xxx.xxx"
-    llm_host.start_network_threads(CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, scheduler_name)
+    llm_host.start_network_threads(HOST_CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, scheduler_name)
     time.sleep(20)
     print("[Python] Cluster initialization finished!")
     # -------------------------------------------------------------------------------------- #

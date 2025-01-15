@@ -1,6 +1,7 @@
 # 2024.04.24 Yixuan Mei
 import torch
 import socket
+import requests
 
 # in simulator, the first compute node has idx 2
 # in real sys, the first compute node has idx 1
@@ -17,7 +18,10 @@ def to_real(node_id: int) -> int:
 
 # CONFIG_BROADCAST_ADDR = "tcp://10.128.0.31:5000"
 # CONFIG_BROADCAST_ADDR = "tcp://143.248.53.59:5000"
-CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:5000"
+CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:9000"
+HOST_CONFIG_BROADCAST_ADDR = "tcp://0.0.0.0:44444"
+WORKER_CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:9000"
+VAST_AI = True
 
 def warm_up():
     # create a tensor and move it to GPU (Warm up GPU)
@@ -38,6 +42,11 @@ def get_local_ip():
     except Exception as e:
         return f"Error obtaining local IP: {str(e)}"
 
+def get_public_ip():
+    try:
+        return requests.get("http://ifconfig.me").text.strip()
+    except Exception as e:
+        return f"Error obtaining public IP: {str(e)}"
 
 class FlyingQuery:
     def __init__(self, query_uid, input_length, output_length, compute_node_uids, start_layers, end_layers, pipeline):
