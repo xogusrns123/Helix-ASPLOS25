@@ -79,4 +79,8 @@ RUN pip install pandas
 
 RUN pip install -e .
 
+RUN apt-get install -y \
+    vim \
+    net-tools
+
 CMD ["bash"]

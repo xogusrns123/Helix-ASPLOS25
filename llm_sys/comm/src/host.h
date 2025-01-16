@@ -240,6 +240,9 @@ void msg_scatter_thread(const std::string &host_ip) {
     }
     Assert(host_machine.ip_address == host_ip, "Host ip mismatch!");
 
+    // get host's open port for binding with output machines
+    std::vector<int> open_ports = host_machine.ports;
+
     // get the output ips of host machine
     std::vector<std::pair<int, std::string>> output_id_ip;
     for (int machine_id: host_machine.out_nodes) {
@@ -257,7 +260,8 @@ void msg_scatter_thread(const std::string &host_ip) {
     std::unordered_map<int, std::unique_ptr<PollServer>> output_sockets;
     for (const auto &id_ip: output_id_ip) {
 #ifdef VAST_AI
-        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(BASE_PORT + id_ip.first);
+        int port = open_ports[id_ip.first];
+        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(port);
 #else
         std::string bind_address = "tcp://" + host_ip + ":" + std::to_string(BASE_PORT + id_ip.first);
 #endif

@@ -54,8 +54,8 @@ def run_heuristic_host_online(
     
     # Added by LJH
     # ------------------------------------- Init Profiler ------------------------------------ #
-    # (compute_node_index, ip_address) 
-    slave_configs: List[Tuple[int, str]] = get_device_ip_configs(real_sys_config_file_name)
+    # (compute_node_index, ip_address, open_port) 
+    slave_configs: List[Tuple[int, str, int]] = get_device_ip_configs(real_sys_config_file_name)
     master_profiler = MasterProfiler(slave_configs, duration=30, file_directory=result_logging_dir)
     master_profiler.start_master_profiling()
     # ------------------------------------------------------------------------------------ #
@@ -74,7 +74,7 @@ def run_heuristic_host_online(
     while True:
         # get time
         now = time.time() - ground_zero
-        if now > master_profiler.duration + 30:
+        if now > master_profiler.duration + 150:
             break
 
         # # send new requests into cluster if needed

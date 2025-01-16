@@ -101,7 +101,11 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
 def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, vram_usage=0.8):
     # warm up gpu and initialize llm_sys
     utils.warm_up()
-    worker_ip: str = utils.get_local_ip()
+    if utils.VAST_AI:
+        worker_ip: str = utils.get_public_ip()
+    else:
+        worker_ip: str = utils.get_local_ip()
+    
     print(f'worker_ip:{worker_ip}')
     # assert worker_ip.startswith("10"), "Local IP must start with 10"
     llm_worker.start_network_threads(utils.WORKER_CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method)
@@ -130,7 +134,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     while True:
         now = time.time() - ground_zero
-        if now > slave_profiler.get_duration() + 15:
+        if now > slave_profiler.get_duration() + 120:
             break
         
         # ------------------------------------------------------------------------------------------- #

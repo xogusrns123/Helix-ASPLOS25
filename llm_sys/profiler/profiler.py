@@ -8,7 +8,7 @@ import pandas as pd
 import re
 from collections import defaultdict
 
-def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str]]:
+def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str, int]]:
     """
     Extract machine_id and ip_address from the given config file.
 
@@ -16,7 +16,7 @@ def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str
         config_file (str): Path to the config.txt file.
 
     Returns:
-        List[Tuple[int, str]]: List of (machine_id, ip_address) tuples.
+        List[Tuple[int, str, int]]: List of (machine_id, ip_address, open_port for profiling communication) tuples.
     """
     machine_info = []
 
@@ -25,6 +25,7 @@ def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str
 
     machine_id = None
     ip_address = None
+    open_port = None
 
     for line in lines:
         line = line.strip()
@@ -32,12 +33,16 @@ def get_device_ip_configs(real_sys_config_file_name: str) -> List[Tuple[int, str
             machine_id = int(line.split(":")[1].strip())
         elif line.startswith("ip_address:"):
             ip_address = line.split(":")[1].strip()
+        elif line.startswith("ports:"):
+            ports = line.split(":")[1].strip().split()
+            open_port = int(ports[-1])
         
         # When both machine_id and ip_address are found, add to the list
-        if machine_id is not None and ip_address is not None:
-            machine_info.append((machine_id, ip_address))
+        if machine_id is not None and ip_address is not None and open_port is not None:
+            machine_info.append((machine_id, ip_address, open_port))
             machine_id = None  # Reset for the next block
             ip_address = None
+            open_port = None
     
     # Information about master node
     del machine_info[0]
@@ -56,7 +61,7 @@ class Profiler:
         # For basic packet size
         self._packet_size: int = 1024
         # For delta_time measurement
-        self._repetitions: int = 1000
+        self._repetitions: int = 100
         # For event recording
         self._events: List[Tuple] = []
         # For collective file directory
@@ -151,7 +156,7 @@ class MasterProfiler(Profiler):
         # compute_node_index -> delta_time 
         self.delta_times: Dict[int, Tuple[str, float]] = {}
         # (compute_node_index, ip_address, port)
-        self.slaves: List[Tuple[int, str]] = slaves
+        self.slaves: List[Tuple[int, str, int]] = slaves
         # For master event file path
         self._file_path: str = os.path.join(self._file_directory, "node_master_events.csv")
         
@@ -165,6 +170,9 @@ class MasterProfiler(Profiler):
         rtts = []
         
         for _ in range(self._repetitions):
+            if self._repetitions % 20 == 0:
+                print(f"RTT Handling | {self._repetitions} times done.")
+                
             # 1-1. Get rtt start time
             start_time = time.time()
             
@@ -210,10 +218,8 @@ class MasterProfiler(Profiler):
         Start profiling by measuring RTT and synchronizing time with slaves.
         """
         
-        for compute_node_idx, slave_ip in self.slaves:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:        
-                slave_port = 9001
-                
+        for compute_node_idx, slave_ip, slave_port in self.slaves:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
                 # 0. Connect to the slave node
                 print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
                 self.connect_with_retry(client_socket, slave_ip, slave_port, max_retries=100)
@@ -233,10 +239,9 @@ class MasterProfiler(Profiler):
         print("[Profiler] Finished delta_times measuring!")
     
     def _collect_events(self) -> None:
-        for compute_node_idx, slave_ip in self.slaves:
+        for compute_node_idx, slave_ip, slave_port in self.slaves:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:       
                 # 0. Connect to the slave node
-                slave_port = 9001
                 print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
                 self.connect_with_retry(client_socket, slave_ip, slave_port, max_retries=100)
                 
@@ -388,7 +393,7 @@ class SlaveProfiler(Profiler):
     """
     
     def __init__(self, file_directory: str, ip_address: str, port: int = 9001):
-        super().__init__(node_type="slave", file_directory=file_directory, ip_address=ip_address, port=port)
+        super().__init__(node_type="slave", file_directory=file_directory, ip_address="0.0.0.0", port=port)
         print("[Profiler] SlaveProfiler Init!")
         
         # For delta time value

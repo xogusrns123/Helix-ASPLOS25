@@ -538,6 +538,9 @@ void sender_thread(const std::string &worker_ip) {
     }
     Assert(current_machine.machine_id != -1, "Could not find config for worker!");
 
+    // get worker's port for binding with output machines.
+    std::vector<int> open_ports = current_machine.ports;
+
     // get output machine id and ip pairs
     std::vector<std::pair<int, std::string>> output_id_ip;
     for (int machine_id: current_machine.out_nodes) {
@@ -548,16 +551,15 @@ void sender_thread(const std::string &worker_ip) {
         }
     }
     for (const auto &id_ip: output_id_ip) {
-        log("Sender", "Output machine: id=[" + std::to_string(id_ip.first) + 
-                "], address=[" + id_ip.second + ":" + std::to_string(BASE_PORT + id_ip.first) + "]");
+        log("Sender", "Output machine: id=[" + std::to_string(id_ip.first) + "], ip=[" + id_ip.second + "]");
     }
 
     // initial the output sockets
     std::unordered_map<int, std::unique_ptr<PollServer>> output_sockets;
     for (const auto &id_ip: output_id_ip) {
-
 #ifdef VAST_AI
-        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(BASE_PORT + id_ip.first);
+        int open_port = open_ports[id_ip.first];
+        std::string bind_address = "tcp://0.0.0.0:" + std::to_string(open_port);
 #else
         std::string bind_address = "tcp://" + worker_ip + ":" + std::to_string(BASE_PORT + id_ip.first);
 #endif
