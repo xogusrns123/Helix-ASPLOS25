@@ -10,7 +10,7 @@ import os
 import time
 
 from simulator.trace_generator.trace_generator import TraceGenerator, ArrivalRateSource, Dataset, LengthSampler
-from llm_sys.utils import get_local_ip, get_public_ip, FlyingQuery, HOST_CONFIG_BROADCAST_ADDR, VAST_AI
+from llm_sys.utils import get_local_ip, make_self_config, FlyingQuery, HOST_CONFIG_BROADCAST_ADDR
 
 from llm_sys.profiler.profiler import get_device_ip_configs, MasterProfiler
 from typing import Tuple, List
@@ -20,11 +20,14 @@ def run_heuristic_host_online(
         scheduler_name: str,
         # cluster
         real_sys_config_file_name: str,
+        # host device
+        host_file_path: str, 
         # throughput
         avg_throughput: float,
         duration: int,
         # result
         result_logging_dir: str,
+        device_num: int
 ) -> None:
     """
     Run host with !!![Swarm/Random + Online mode]!!!.
@@ -40,14 +43,16 @@ def run_heuristic_host_online(
     # ------------------------------------------------------------------------------------------- #
 
     # ------------------------------------- Init System ------------------------------------ #
-    if VAST_AI:
-        host_ip: str = get_public_ip()
-    else:
-        host_ip: str = get_local_ip()
-    
+    # make 'device_config.txt' and return worker_ip
+    host_ip, open_port = make_self_config(device_num)
     print(f'host_ip:{host_ip}')
+    
+    global HOST_CONFIG_BROADCAST_ADDR
+    HOST_CONFIG_BROADCAST_ADDR = "tcp://0.0.0.0:" + str(open_port)
+    
     # assert host_ip.startswith("10"), "Local IP must be of form 10.xxx.xxx.xxx"
-    llm_host.start_network_threads(HOST_CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, scheduler_name)
+    llm_host.start_network_threads(HOST_CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, 
+                                   host_file_path, scheduler_name, device_num)
     time.sleep(20)
     print("[Python] Cluster initialization finished!")
     # -------------------------------------------------------------------------------------- #

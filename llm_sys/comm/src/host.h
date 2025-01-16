@@ -14,6 +14,7 @@
 #include <iostream>
 #include <thread>
 #include <random>
+#include <regex>
 
 #include "utils.h"
 #include "config_parser.h"
@@ -27,6 +28,9 @@ std::string scheduler_type = "none";
 // network
 zmq::context_t context(1);
 bool network_initialized = false;
+
+// socket for initialization
+zmq::socket_t init_socket(context, zmq::socket_type::rep);
 
 // machine configs
 bool machine_configs_initialized = false;
@@ -46,38 +50,141 @@ ThreadSafeQueue<std::tuple<Header, int>> finish_queue;
 // routing info (request id -> <server_id, start_layer_idx, end_layer_idx>)
 std::unordered_map<int, std::tuple<std::vector<int>, std::vector<int>, std::vector<int>>> saved_routing_dict;
 
+bool is_valid_ipv4(const std::string& ip_address) {
+    std::regex ipv4_regex(
+        R"(^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
+        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
+        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
+        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$)"
+    );
 
-void config_broadcast(const std::string &config_broadcast_addr, const std::string &config_file_path) {
-    // initialize
-    log("Config Broadcast", "Config broadcast thread has successfully started!");
+    return std::regex_match(ip_address, ipv4_regex);
+}
 
-    // initialize config broadcast socket
-    zmq::socket_t init_socket(context, zmq::socket_type::rep);
-    init_socket.bind(config_broadcast_addr);
-    log("Config Broadcast", "Successfully bind to address " + config_broadcast_addr);
 
+void config_merge(const std::string &config_file_path, const int &device_num) {
+    // Host config is already set
+    int added_worker_config = 1;
+
+    // loop until all worker configs are ready
+    while (added_worker_config < device_num) {
+        // Receive worker config request
+        zmq::message_t worker_config_request;
+        auto rc = init_socket.recv(worker_config_request, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive a worker config message!");
+
+        bool duplicated_found = false;
+
+        // Extract worker config information
+        std::string worker_config_request_str(static_cast<char *>(worker_config_request.data()), worker_config_request.size());
+
+        // Check whether the msg is came from config_gather()
+        if (is_valid_ipv4(worker_config_request_str)) {
+            std::string message = "Wrong Request";
+            zmq::message_t reply_msg(message.data(), message.size());
+            init_socket.send(reply_msg, zmq::send_flags::none);
+            continue;
+        }
+
+        Machine worker_machine_config = deserialize_machine(worker_config_request_str);
+        for (auto &machine: machine_configs) {
+            if (machine.ip_address == worker_machine_config.ip_address) {
+                std::string message = "Duplicated Receive";
+                zmq::message_t reply_msg(message.data(), message.size());
+                init_socket.send(reply_msg, zmq::send_flags::none);
+                
+                duplicated_found = true;
+                break;
+            }
+        }
+
+        // Add received worker config to machine_configs
+        if (!duplicated_found) {
+            worker_machine_config.machine_id = added_worker_config++;
+            machine_configs.emplace_back(worker_machine_config);
+            log("Config Merge", "Received worker config from IP: [" + worker_machine_config.ip_address + "]");
+
+            std::string reply = "First Receive";
+            zmq::message_t reply_msg(reply.data(), reply.size());
+            init_socket.send(reply_msg, zmq::send_flags::none);
+        }
+    }
+
+    // Set in_nodes, out_nodes, start_layer, end_layer
+    if (LLAMA_VER == "7B") {
+        int start_layer = 0;
+        int end_layer = 32;
+        int layer_per_worker = end_layer / (device_num - 1);
+        
+        for (int machine_id = 1; machine_id < device_num; machine_id++) {
+            machine_configs[machine_id].in_nodes.emplace_back(machine_id - 1);
+            machine_configs[machine_id].out_nodes.emplace_back(machine_id + 1);
+            machine_configs[machine_id].start_layer = start_layer;
+            machine_configs[machine_id].end_layer = start_layer + layer_per_worker;
+            start_layer += layer_per_worker;
+        }
+        machine_configs[device_num - 1].out_nodes = {0};
+        machine_configs[device_num - 1].end_layer = end_layer;
+    } else {
+        log("Config Merge", "Selected LLAMA Version Wrong!");
+    }
+
+    write_config(config_file_path, machine_configs);
+}
+
+// Message Check
+// Loop exit condition Check!
+void config_broadcast(const int &device_num) {
     // read the config file and serialize it
-    machine_configs = read_config(config_file_path);
     std::string serialized_config = serialize_vector_of_machines(machine_configs);
     machine_configs_initialized = true;
 
     // main loop
-    while (true) {
+    int broadcast_num = 1;
+
+    while (broadcast_num < device_num) {
         // receive one config request
         zmq::message_t request;
         auto rc = init_socket.recv(request, zmq::recv_flags::none);
         Assert(rc.has_value(), "Failed to receive the initialization message!");
-
-        // print the initialization message
         std::string request_str(static_cast<char *>(request.data()), request.size());
-        log("Config Broadcast", "Received request from ip [" + request_str + "]");
-
-        // reply with some dummy message
-        zmq::message_t reply_msg(serialized_config.data(), serialized_config.size());
-        init_socket.send(reply_msg, zmq::send_flags::none);
+        
+        if (is_valid_ipv4(request_str)) {
+            log("Config Broadcast", "Received worker config from IP: [" + request_str + "]");
+            
+            // reply with machine configs
+            zmq::message_t reply_msg(serialized_config.data(), serialized_config.size());
+            init_socket.send(reply_msg, zmq::send_flags::none);
+            broadcast_num += 1;
+        } else {
+            std::string message = "Wrong Request";
+            zmq::message_t reply_msg(message.data(), message.size());
+            init_socket.send(reply_msg, zmq::send_flags::none);
+        }
     }
 }
 
+void config_allgather(const std::string &host_official_addr, const std::string &host_file_path, 
+                                    const std::string &config_file_path, const int &device_num) {
+    // Initialize
+    log("Config AllGather", "Config broadcast thread has successfully started!");
+    
+    // 0. Read host configs
+    std::vector<Machine> host_machine_config = read_config(host_file_path);
+    machine_configs.emplace_back(host_machine_config[0]); 
+
+    // 1. Initialize host official socket
+    init_socket.bind(host_official_addr);
+    log("Config Allgather", "Successfully bound to address " + host_official_addr);
+    
+    // 2. Merge workers' config
+    config_merge(config_file_path, device_num);
+    log("Config Allgather", "Every worker's config have been merged!");
+    
+    // 3. Broadcast workers' config
+    config_broadcast(device_num);
+    log("Config Allgather", "All workers have been received machine configs!");
+}
 
 // params:
 // 1. request_type: str, "prompt" or "decode"
@@ -620,8 +727,8 @@ void msg_gather_thread(const std::string &host_ip) {
 }
 
 
-void host_start_network_threads(const std::string &config_broadcast_addr, const std::string &host_ip,
-                                const std::string &config_file_path, const std::string &scheduler) {
+void host_start_network_threads(const std::string &config_broadcast_addr, const std::string &host_ip, const std::string &config_file_path,
+                                const std::string &host_file_path, const std::string &scheduler, const int &device_num) {
     // config_broadcast_addr format: "tcp://10.128.0.53:5000"
     // host_ip format: "10.128.0.53"
     // scheduler is: (1) maxflow, (2) swarm, (3) random
@@ -643,7 +750,7 @@ void host_start_network_threads(const std::string &config_broadcast_addr, const 
     scheduler_type = scheduler;
 
     // creating threads
-    std::thread t1(config_broadcast, config_broadcast_addr, config_file_path);
+    std::thread t1(config_allgather, config_broadcast_addr, host_file_path, config_file_path, device_num);
     std::thread t2(msg_scatter_thread, host_ip);
     std::thread t3(msg_gather_thread, host_ip);
 

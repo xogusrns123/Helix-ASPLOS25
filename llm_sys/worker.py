@@ -98,17 +98,15 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     return parsed_prompt
 
 
-def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, vram_usage=0.8):
+def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, worker_config_file_path: str, vram_usage=0.8, device_num=3):
     # warm up gpu and initialize llm_sys
     utils.warm_up()
-    if utils.VAST_AI:
-        worker_ip: str = utils.get_public_ip()
-    else:
-        worker_ip: str = utils.get_local_ip()
+    # make 'device_config.txt' and return worker_ip
+    worker_ip, open_port = utils.make_self_config(device_num)
     
     print(f'worker_ip:{worker_ip}')
     # assert worker_ip.startswith("10"), "Local IP must start with 10"
-    llm_worker.start_network_threads(utils.WORKER_CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method)
+    llm_worker.start_network_threads(utils.WORKER_CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method, worker_config_file_path)
     start_idx, end_idx, is_last_layer = llm_worker.get_model_start_end_idx()
     print(f"[Python] Cluster initialization finished!")
     print(f"[Python] Model layers: [{start_idx}, {end_idx}).")
@@ -116,7 +114,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     # Added by LJH
     # ------------------------------------- Init Time ------------------------------------ #
-    slave_profiler = SlaveProfiler(file_directory=result_logging_dir, ip_address=worker_ip, port=9001)
+    slave_profiler = SlaveProfiler(file_directory=result_logging_dir, ip_address=worker_ip, port=open_port)
     slave_profiler.start_slave_profiling()
     # ------------------------------------------------------------------------------------ #
 

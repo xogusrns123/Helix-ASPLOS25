@@ -81,6 +81,8 @@ RUN pip install -e .
 
 RUN apt-get install -y \
     vim \
-    net-tools
+    net-tools \
+    iputils-ping \
+    iptables
 
 CMD ["bash"]

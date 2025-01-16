@@ -123,6 +123,47 @@ std::vector<Machine> read_config(const std::string &filename) {
     return machines;
 }
 
+void write_config(const std::string &filename, const std::vector<Machine> &machines) {
+    std::ofstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file for writing." << std::endl;
+        return;
+    }
+
+    for (const auto &machine : machines) {
+        file << "machine_id: " << machine.machine_id << "\n";
+        file << "ip_address: " << machine.ip_address << "\n";
+
+        file << "ports: ";
+        for (size_t i = 0; i < machine.ports.size(); ++i) {
+            file << machine.ports[i];
+            if (i < machine.ports.size() - 1) file << ", ";
+        }
+        file << "\n";
+
+        file << "in_nodes: ";
+        for (size_t i = 0; i < machine.in_nodes.size(); ++i) {
+            file << machine.in_nodes[i];
+            if (i < machine.in_nodes.size() - 1) file << ", ";
+        }
+        file << "\n";
+
+        file << "out_nodes: ";
+        for (size_t i = 0; i < machine.out_nodes.size(); ++i) {
+            file << machine.out_nodes[i];
+            if (i < machine.out_nodes.size() - 1) file << ", ";
+        }
+        file << "\n";
+
+        file << "start_layer: " << machine.start_layer << "\n";
+        file << "end_layer: " << machine.end_layer << "\n\n";
+    }
+
+    file.close();
+}
+
+
 // Serialize a Machine object to a binary stream
 std::string serialize_machine(const Machine& machine) {
     std::ostringstream oss(std::ios::binary);

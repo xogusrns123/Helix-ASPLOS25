@@ -16,6 +16,7 @@
 #include <torch/torch.h>
 #include <torch/extension.h>
 #include <random>
+#include <unistd.h>
 
 #include "config_parser.h"
 #include "utils.h"
@@ -38,6 +39,9 @@ bool network_initialized = false;
 ThreadSafeQueue<MessageData> recv_compute_queue;
 ThreadSafeQueue<MessageData> compute_send_queue;
 
+// socker for initialization
+zmq::socket_t init_socket(context, zmq::socket_type::req);
+
 // the requests that are in compute
 std::unordered_map<int, std::shared_ptr<MessageData>> requests_on_the_fly;
 
@@ -59,32 +63,78 @@ int model_start_layer_index = -1;
 int model_end_layer_index = -1;
 bool is_last_layer = false;
 
+void config_reduce(const std::string &worker_config_file_path) {
+    bool correct_msg = false;
+    
+    // Read the worker config file and serialize it
+    std::vector<Machine> worker_machine_config = read_config(worker_config_file_path);
+    Assert(worker_machine_config.size() == 1, "Worker config file has too much values!");
+    std::string serialized_worker_config = serialize_vector_of_machines(worker_machine_config);
 
-// receiver
-void receiver_thread(const std::string &config_broadcast_addr, const std::string &worker_ip) {
-    // initialize
-    log("Receiver", "Receiver thread has successfully started!");
+    while (!correct_msg) {
+        zmq::message_t worker_config_msg(serialized_worker_config.data(), serialized_worker_config.size());
+        init_socket.send(worker_config_msg, zmq::send_flags::none);
+        
+        zmq::message_t worker_config_reply_msg;
+        auto rc = init_socket.recv(worker_config_reply_msg, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive the initialization message!");
 
-    // get configuration from host
-    zmq::socket_t init_socket(context, zmq::socket_type::req);
-    init_socket.connect(config_broadcast_addr);
-    zmq::message_t init_msg(worker_ip.data(), worker_ip.size());
-    zmq::message_t init_reply_msg;
-    init_socket.send(init_msg, zmq::send_flags::none);
-    auto rc = init_socket.recv(init_reply_msg, zmq::recv_flags::none);
-    Assert(rc.has_value(), "Failed to receive the initialization message!");
+        std::string worker_config_reply_str(static_cast<char *>(worker_config_reply_msg.data()), worker_config_reply_msg.size());
+        
+        if (worker_config_reply_str == "First Receive") {
+            log("Receiver", "Correct worker config has been forwarded!");
+            correct_msg = true;
+        } else {
+            log("Receiver", "Wrong worker config has been forwarded!");
+        }
+    }
+}
 
-    // deserialize the initialization message
-    std::string init_reply_str(static_cast<char *>(init_reply_msg.data()), init_reply_msg.size());
-    machine_configs = deserialize_vector_of_machines(init_reply_str);
-    machine_configs_initialized = true;
+void config_gather(const std::string &worker_ip) {
+    bool correct_msg = false; 
+
+    while (!correct_msg) {
+        // 1. Send init msg
+        zmq::message_t init_msg(worker_ip.data(), worker_ip.size());
+        init_socket.send(init_msg, zmq::send_flags::none);
+        
+        // 2. Receive reply
+        zmq::message_t worker_config_reply_msg;
+        auto rc = init_socket.recv(worker_config_reply_msg, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive the initialization message!");
+
+        // 5. deserialize the initialization message
+        std::string worker_config_reply_str(static_cast<char *>(worker_config_reply_msg.data()), worker_config_reply_msg.size());
+
+        if (worker_config_reply_str != "Wrong Request") {
+            machine_configs = deserialize_vector_of_machines(worker_config_reply_str);
+            machine_configs_initialized = true;
+            correct_msg = true;
+
+            // Sleep 1 second
+            sleep(1);
+        }
+    }
+
     log("Receiver", "Received machine configs from host!");
     for (const auto &machine: machine_configs) {
         print_machine(machine);
     }
     log("Receiver", "Above is the whole table of received configs!");
+}
 
-    // get the machine config for the current worker
+// receiver
+void receiver_thread(const std::string &config_broadcast_addr, const std::string &worker_ip, const std::string &worker_config_file_path) {
+    // initialize
+    log("Receiver", "Receiver thread has successfully started!");
+
+    init_socket.connect(config_broadcast_addr);
+
+    // 2. Send the worker config to master node
+    config_reduce(worker_config_file_path);
+
+
+    // 6. get the machine config for the current worker
     Machine current_machine;
     for (const auto &machine: machine_configs) {
         if (machine.ip_address == worker_ip) {
@@ -736,7 +786,7 @@ void sender_thread(const std::string &worker_ip) {
 
 
 void worker_start_network_threads(const std::string &config_broadcast_addr, const std::string &worker_ip,
-                                  const std::string &scheduler) {
+                                  const std::string &scheduler, const std::string &worker_config_file_path) {
     // config_broadcast_addr format: "tcp://10.128.0.53:5000"
     // worker_ip format: "10.128.0.53"
     // scheduler is: (1) maxflow, (2) swarm, (3) random
@@ -755,7 +805,7 @@ void worker_start_network_threads(const std::string &config_broadcast_addr, cons
     scheduler_type = scheduler;
 
     // creating threads
-    std::thread t1(receiver_thread, config_broadcast_addr, worker_ip);
+    std::thread t1(receiver_thread, config_broadcast_addr, worker_ip, worker_config_file_path);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     std::thread t2(sender_thread, worker_ip);
     std::this_thread::sleep_for(std::chrono::milliseconds(10));

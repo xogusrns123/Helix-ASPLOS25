@@ -69,7 +69,7 @@ def example_heuristic_offline(heuristic: str):
     )
 
 
-def example_heuristic_online(heuristic: str):
+def example_heuristic_online(heuristic: str, num_node: str):
     # check arguments and create result directory
     assert heuristic in ["swarm", "random"], f"Unsupported heuristic: {heuristic}!"
     result_dir = f"./profiling/{heuristic}_online/"
@@ -80,21 +80,25 @@ def example_heuristic_online(heuristic: str):
     run_heuristic_host_online(
         scheduler_name=heuristic,
         real_sys_config_file_name="./config/real_sys_config.txt",
+        host_file_path="./config/device_config",
         avg_throughput=150,
         duration=30,
-        result_logging_dir=result_dir
+        result_logging_dir=result_dir,
+        device_num=num_node
     )
 
 
 def main():
     # parse arguments
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print("Usage: python3 run_host.py <mode> <scheduling_method>")
         print("  mode: online | offline")
         print("  scheduling_method: maxflow | swarm | random")
+        print("  num_nodes: int")
         return
     mode = sys.argv[1]
     method = sys.argv[2]
+    num_nodes = int(sys.argv[3])
 
     # run the corresponding example
     if mode == "offline" and method == "maxflow":
@@ -104,7 +108,7 @@ def main():
     elif mode == "offline" and method in ["swarm", "random"]:
         example_heuristic_offline(method)
     elif mode == "online" and method in ["swarm", "random"]:
-        example_heuristic_online(method)
+        example_heuristic_online(method, num_nodes)
     else:
         print(f"Unsupported mode or scheduling method: [{mode}] [{method}]!")
 
