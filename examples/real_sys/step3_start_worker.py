@@ -34,7 +34,7 @@ def main():
                model_name="./Llama-2-7b-hf", 
                result_logging_dir=result_dir, 
                worker_config_file_path=worker_config_file_path, 
-               device_num=num_nodes)
+               device_num=int(num_nodes))
 
 
 if __name__ == '__main__':

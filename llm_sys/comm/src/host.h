@@ -78,6 +78,8 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         // Extract worker config information
         std::string worker_config_request_str(static_cast<char *>(worker_config_request.data()), worker_config_request.size());
 
+        std::cout << "DEBUG | worker_config_request_str: " << worker_config_request_str << std::endl;
+        
         // Check whether the msg is came from config_gather()
         if (is_valid_ipv4(worker_config_request_str)) {
             std::string message = "Wrong Request";
@@ -125,6 +127,11 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         }
         machine_configs[device_num - 1].out_nodes = {0};
         machine_configs[device_num - 1].end_layer = end_layer;
+
+        machine_configs[0].start_layer = -1;
+        machine_configs[0].end_layer = -1;
+        machine_configs[0].in_nodes = {device_num - 1};
+        machine_configs[0].out_nodes = {1};
     } else {
         log("Config Merge", "Selected LLAMA Version Wrong!");
     }
@@ -172,6 +179,10 @@ void config_allgather(const std::string &host_official_addr, const std::string &
     // 0. Read host configs
     std::vector<Machine> host_machine_config = read_config(host_file_path);
     machine_configs.emplace_back(host_machine_config[0]); 
+    // Make and read host device setting
+    // 
+    // Implement
+    // 
 
     // 1. Initialize host official socket
     init_socket.bind(host_official_addr);

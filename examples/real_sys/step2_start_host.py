@@ -80,11 +80,11 @@ def example_heuristic_online(heuristic: str, num_node: str):
     run_heuristic_host_online(
         scheduler_name=heuristic,
         real_sys_config_file_name="./config/real_sys_config.txt",
-        host_file_path="./config/device_config",
+        host_file_path="./config/host_config.txt",
         avg_throughput=150,
         duration=30,
         result_logging_dir=result_dir,
-        device_num=num_node
+        device_num=int(num_node)
     )
 
 
