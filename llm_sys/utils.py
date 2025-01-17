@@ -22,7 +22,7 @@ def to_real(node_id: int) -> int:
 # CONFIG_BROADCAST_ADDR = "tcp://10.128.0.31:5000"
 # CONFIG_BROADCAST_ADDR = "tcp://143.248.53.59:5000"
 CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:9000"
-HOST_CONFIG_BROADCAST_ADDR = "tcp://0.0.0.0:44444"
+HOST_CONFIG_BROADCAST_ADDR = "dummy"
 WORKER_CONFIG_BROADCAST_ADDR = "tcp://143.248.53.100:6003"
 VAST_AI = False
 
@@ -72,7 +72,7 @@ def make_self_config(device_num) -> tuple[str, int]:
         else:
             ports += f"{port} "
     
-    output_path = './config/device_config.txt'
+    output_path = './profiling/device_config.txt'
     
     with open(output_path, "w") as file:
         file.write("ip_address: " + ip_address + "\n")

@@ -293,6 +293,54 @@ class MasterProfiler(Profiler):
         
         return output_file
     
+    def _filter_and_calculate_costs(self, merged_df, request_id):
+        """
+        Process a single request_id to calculate filtered_df, comm_costs, and comp_costs.
+        
+        :param merged_df: The full merged DataFrame
+        :param request_id: The request ID to process
+        :return: Tuple of (filtered_df, comm_costs, comp_costs)
+        """
+        # 2-1. Initialize data structure
+        # Computation cost: node_index -> List
+        comp_costs: Dict[int, List] = defaultdict(list)
+        # Communication cost: (src, dst) -> List
+        comm_costs: Dict[Tuple[int, int], List] = defaultdict(list)
+        
+        filtered_condition = merged_df["request_id"] == request_id
+        filtered_df = merged_df[filtered_condition].reset_index(drop=True)
+    
+        # start_index = first line where the decoding stage begins
+        decode_start_condition = (filtered_df['in_out'] == 'in') & \
+                        (filtered_df['mode'] == 'prompt') & \
+                        (filtered_df['source'] == 'master')
+        decode_start_index = filtered_df.index[decode_start_condition].min()
+
+        if pd.notna(decode_start_index):
+            filtered_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
+        else:
+            print(f"No rows satisfy the start condition for request_id {request_id}.")
+            return None, None, None
+
+        # 2-2. Iterate through the rows to calculate costs
+        for i in range(1, len(filtered_df)):
+            prev_row = filtered_df.iloc[i - 1]
+            curr_row = filtered_df.iloc[i]
+            
+            # 2-2-1. Calculate time difference
+            time_diff = curr_row['time_stamp'] - prev_row['time_stamp']
+            src_node = prev_row['source']
+            dst_node = curr_row['source']
+            
+            # 2-2-2. Communication cost: specific transitions
+            if (src_node != dst_node):
+                comm_costs[(src_node, dst_node)].append(time_diff)
+            # 2-2-3. Computation cost: same source
+            elif (src_node == dst_node and src_node != 'master'):
+                comp_costs[src_node].append(time_diff)
+
+        return filtered_df, comm_costs, comp_costs
+    
     def _calculate_delays(self, file_path) -> None:
         # 1. Read sorted file from decode stage
         merged_df = pd.read_csv(file_path)
@@ -303,45 +351,13 @@ class MasterProfiler(Profiler):
         total_comm_cost: Dict[int, float] = {}
         
         # 2. Iterate through every request_ids
-        max_request_id = int(max(merged_df['request_id'].unique()))
-        for request_id in range(max_request_id + 1):
-            # 2-1. Initialize data structure
-            # Computation cost: node_index -> List
-            comp_costs: Dict[int, List] = defaultdict(list)
-            # Communication cost: (src, dst) -> List
-            comm_costs: Dict[Tuple[int, int], List] = defaultdict(list)
+        request_id_list = merged_df['request_id'].unique().tolist()
+        for request_id in request_id_list:
+            filtered_df, comm_costs, comp_costs = self._filter_and_calculate_costs(merged_df, request_id)
             
-            filtered_condition = merged_df["request_id"] == request_id
-            filtered_df = merged_df[filtered_condition]
-        
-            # start_index = first line where the decoding stage begins
-            decode_start_condition = (filtered_df['in_out'] == 'in') & \
-                            (filtered_df['mode'] == 'prompt') & \
-                            (filtered_df['source'] == 'master')
-            decode_start_index = filtered_df.index[decode_start_condition].min()
-
-            if pd.notna(decode_start_index):
-                filtered_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
-            else:
-                print("No rows satisfy the start condition.")
+            if filtered_df is None:
+                print(f"Request ID {request_id} has no filtered DataFrame")
                 continue
-            
-            # 2-2. Iterate through the rows to calculate costs
-            for i in range(1, len(filtered_df)):
-                prev_row = filtered_df.iloc[i - 1]
-                curr_row = filtered_df.iloc[i]
-                
-                # 2-2-1. Calculate time difference
-                time_diff = curr_row['time_stamp'] - prev_row['time_stamp']
-                src_node = prev_row['source']
-                dst_node = curr_row['source']
-                
-                # 2-2-2. Communication cost: specific transitions
-                if (src_node != dst_node):
-                    comm_costs[(src_node, dst_node)].append(time_diff)
-                # 2-2-3. Computation cost: same source
-                elif (src_node == dst_node and src_node != 'master'):
-                    comp_costs[src_node].append(time_diff)
 
             # 2-3. Calculate averages
             total_comm_sum = sum(sum(times) for times in comm_costs.values())

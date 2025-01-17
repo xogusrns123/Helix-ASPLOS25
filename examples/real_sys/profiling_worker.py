@@ -3,20 +3,19 @@
 # 2024.01.09 Lee JiHyuk
 # Adding profiling to worker
 
-import sys
+import argparse
 
 from llm_sys.worker import run_worker
 
 import os
 
 def main():
-    # parse arguments
-    if len(sys.argv) != 3:
-        print("Usage: python step3_start_worker.py <scheduling_method>")
-        print("  num_nodes: int")
-        return
-    num_nodes = sys.argv[1]
+    parser = argparse.ArgumentParser(description="Run heuristic profiling.")
+    parser.add_argument("--batch_size", type=int, required=True, help="Number of requests to process at once")
+    parser.add_argument("--num_nodes", type=int, required=True, help="Total number of nodes to use in the cluster")
 
+    args = parser.parse_args()
+    
     scheduling_method = "random"
     print(f"Starting worker with scheduling method: {scheduling_method}.")
 
@@ -27,11 +26,13 @@ def main():
     worker_config_file_path = f"./config/device_config.txt"
     
     # run worker
-    run_worker(scheduling_method=scheduling_method, 
-               model_name="./Llama-2-7b-hf", 
-               result_logging_dir=result_dir, 
-               worker_config_file_path=worker_config_file_path, 
-               device_num=int(num_nodes))
+    run_worker(
+        scheduling_method=scheduling_method, 
+        model_name="./Llama-2-7b-hf", 
+        result_logging_dir=result_dir, 
+        worker_config_file_path=worker_config_file_path, 
+        device_num=args.num_nodes
+    )
 
 
 if __name__ == '__main__':

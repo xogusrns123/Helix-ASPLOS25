@@ -1,6 +1,7 @@
-# 2024.11.02 Yixuan Mei
-import os
+# 2025.1.18 Lee JiHyuk
+
 import sys
+import argparse
 
 from llm_sys.heuristic_host import run_heuristic_host_profiling
 from simulator.event_simulator.cluster_simulator import ModelName
@@ -18,19 +19,23 @@ def heuristic_profiling(duration:int, batch_size:int, seq_len:int, output_len:in
     )
 
 def main():
-    # parse arguments
-    if len(sys.argv) != 4:
-        print("Usage: python3 profiling_host.py <batch_size> <num_nodes> <duration>")
-        print("  batch_size: Number of requests to be processed at once")
-        print("  num_nodes: Total number of nodes to use in the cluster")
-        print("  duration: Time to run profiling")
-        return
+    # Parse arguments using argparse
+    parser = argparse.ArgumentParser(description="Run heuristic profiling.")
+    parser.add_argument("--batch_size", type=int, required=True, help="Number of requests to process at once")
+    parser.add_argument("--num_nodes", type=int, required=True, help="Total number of nodes to use in the cluster")
+    parser.add_argument("--duration", type=int, required=True, help="Time to run profiling (seconds)")
+    parser.add_argument("--seq_len", type=int, default=0, help="Sequence length")
+    parser.add_argument("--output_len", type=int, default=0, help="Output length")
     
-    batch_size = int(sys.argv[1])
-    num_nodes = int(sys.argv[2])
-    duration = int(sys.argv[3])
+    args = parser.parse_args()
     
-    heuristic_profiling(batch_size=batch_size, seq_len=0, output_len=0, num_node=num_nodes, duration=duration)
+    heuristic_profiling(
+        batch_size=args.batch_size, 
+        seq_len=args.seq_len, 
+        output_len=args.output_len, 
+        num_node=args.num_nodes, 
+        duration=args.duration
+    )
 
 
 if __name__ == '__main__':

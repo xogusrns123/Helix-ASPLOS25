@@ -440,14 +440,14 @@ def run_heuristic_host_profiling(
     # cluster config file path
     real_sys_config_file_name: str = f"{result_logging_dir}/real_sys_config.txt"
     # host device config file path
-    host_file_path: str = f"{result_logging_dir}/device_config.txt"
+    host_file_path: str = f"./profiling/device_config.txt"
     
     print(f"Initializing host with {scheduler_name} scheduling!")
     # ------------------------------------- Offline Initial ------------------------------------- #
     length_sampler = LengthSampler(dataset=Dataset.AzureConversation, seed=0)
     initial_requests = []
     for i in range(initial_launch_num):
-        request_time = 0.1 + i * 0.1
+        request_time = 0.1 + i * 0.5
         input_length, output_length = length_sampler.sample_length()
         initial_requests.append((request_time, input_length, output_length))
     # ------------------------------------------------------------------------------------------- #
@@ -494,7 +494,7 @@ def run_heuristic_host_profiling(
         if now > duration + 30:
             break
 
-        if now - last_log_time > 1:
+        if now - last_log_time > 5:
             print(f"[t={now}]")
             last_log_time = now
 
@@ -609,7 +609,7 @@ def run_heuristic_host_profiling(
                 # save log
                 # time - query id - in/out - phase - context_len - this_iter_processed
                 events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
-                master_profiler.record_event(time_stamp, query_uid, "out", "decode", py_on_the_fly_query.processed_tokens, 1)
+                master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", py_on_the_fly_query.processed_tokens, 1)
                 print(f"Send out new query {cur_query_id}, input len = {input_length}, "
                       f"max_len = {input_length + output_length} (decode finish request replacement)")
 
