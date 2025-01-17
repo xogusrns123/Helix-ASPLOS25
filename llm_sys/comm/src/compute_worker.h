@@ -64,6 +64,7 @@ int model_end_layer_index = -1;
 bool is_last_layer = false;
 
 void config_reduce(const std::string &worker_config_file_path) {
+    log("Config Reduce", "Start config sending");
     bool correct_msg = false;
     
     // Read the worker config file and serialize it
@@ -91,7 +92,7 @@ void config_reduce(const std::string &worker_config_file_path) {
 }
 
 void config_gather(const std::string &worker_ip) {
-    log("Config Gather", "Start config gathering");
+    log("Config Gather", "Start config receiving");
     bool correct_msg = false; 
 
     while (!correct_msg) {
@@ -106,7 +107,6 @@ void config_gather(const std::string &worker_ip) {
 
         // 3. deserialize the initialization message
         std::string worker_config_reply_str(static_cast<char *>(worker_config_reply_msg.data()), worker_config_reply_msg.size());
-        std::cout << "DEBUG | worker_config_reply_str: " << worker_config_reply_str << std::endl;
 
         // 
         if (worker_config_reply_str != "Wrong Request") {

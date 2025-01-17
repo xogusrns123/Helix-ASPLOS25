@@ -50,21 +50,30 @@ ThreadSafeQueue<std::tuple<Header, int>> finish_queue;
 // routing info (request id -> <server_id, start_layer_idx, end_layer_idx>)
 std::unordered_map<int, std::tuple<std::vector<int>, std::vector<int>, std::vector<int>>> saved_routing_dict;
 
+std::string trim(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    size_t last = str.find_last_not_of(" \t\r\n");
+    return (first == std::string::npos || last == std::string::npos) ? "" : str.substr(first, last - first + 1);
+}
+
 bool is_valid_ipv4(const std::string& ip_address) {
+    std::string trimmed_ip = trim(ip_address);
+
     std::regex ipv4_regex(
-        R"(^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
-        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
-        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\."
-        R"(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$)"
+        "^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\."
+        "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\."
+        "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\."
+        "(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
     );
 
-    return std::regex_match(ip_address, ipv4_regex);
+    return std::regex_match(trimmed_ip, ipv4_regex);
 }
 
 
 void config_merge(const std::string &config_file_path, const int &device_num) {
     // Host config is already set
     int added_worker_config = 1;
+    std::string message;
 
     // loop until all worker configs are ready
     while (added_worker_config < device_num) {
@@ -78,22 +87,21 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         // Extract worker config information
         std::string worker_config_request_str(static_cast<char *>(worker_config_request.data()), worker_config_request.size());
 
-        // std::cout << "DEBUG | worker_config_request_str: " << worker_config_request_str << std::endl;
-        
-        // Check whether the msg is came from config_gather()
+         // Check whether the msg is came from config_gather()
         if (is_valid_ipv4(worker_config_request_str)) {
-            std::string message = "Wrong Request";
+            std::cout << "DEBUG | Case of the is_valid_ipv4 is True" << std::endl;
+            message = "Wrong Request"; 
             zmq::message_t reply_msg(message.data(), message.size());
             init_socket.send(reply_msg, zmq::send_flags::none);
             continue;
         }
-
+        
         std::vector<Machine> worker_machine_config_vector = deserialize_vector_of_machines(worker_config_request_str);
         Machine worker_machine_config = worker_machine_config_vector[0];
-
+        
         for (auto &machine: machine_configs) {
             if (machine.ip_address == worker_machine_config.ip_address) {
-                std::string message = "Duplicated Receive";
+                message = "Duplicated Receive";
                 zmq::message_t reply_msg(message.data(), message.size());
                 init_socket.send(reply_msg, zmq::send_flags::none);
                 

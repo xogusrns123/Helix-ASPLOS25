@@ -168,10 +168,10 @@ class MasterProfiler(Profiler):
         """
         
         rtts = []
-        
+        rtt_cnt = 0
         for _ in range(self._repetitions):
-            if self._repetitions % 20 == 0:
-                print(f"RTT Handling | {self._repetitions} times done.")
+            if rtt_cnt % 20 == 0:
+                print(f"RTT Handling | {rtt_cnt} times done.")
                 
             # 1-1. Get rtt start time
             start_time = time.time()
@@ -188,6 +188,8 @@ class MasterProfiler(Profiler):
                 rtts.append(end_time - start_time)
             else:
                 raise ValueError("[Profiler] Unexpected response from slave.")
+            
+            rtt_cnt += 1
         
         return sum(rtts) / len(rtts)
         
