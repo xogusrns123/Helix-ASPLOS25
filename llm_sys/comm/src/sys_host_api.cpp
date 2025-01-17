@@ -14,6 +14,8 @@ PYBIND11_MODULE(llm_host, m) {
     // Host functions
     // Step 0: start network threads
     m.def("start_network_threads", &host_start_network_threads, "Host: start network threads.");
+    // Step 0-1: signal when cluster init done
+    m.def("signal_cluster_start", &host_signal_cluster_start, "Host: signal cluster init done.");    
     // Step 1: launch requests
     m.def("launch_request", &launch_request, "Host: launch request");
     // Step 2: gather finished requests

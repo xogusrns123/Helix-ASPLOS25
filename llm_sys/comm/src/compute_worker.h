@@ -139,7 +139,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
     // 3. Receive the total config from master node
     config_gather(worker_ip);
 
-    // 6. get the machine config for the current worker
+    // 4. get the machine config for the current worker
     Machine current_machine;
     for (const auto &machine: machine_configs) {
         if (machine.ip_address == worker_ip) {
@@ -789,6 +789,32 @@ void sender_thread(const std::string &worker_ip) {
     }
 }
 
+void worker_check_cluster_start() {
+    bool exit_condition = false;
+
+    log("Check Cluster Start", "Wait until cluster initialization done!");
+
+    while (!exit_condition) {
+        // 1. Send init msg
+        std::string cluster_init_check_str("Cluster_Init");
+        zmq::message_t cluster_init_check_msg(cluster_init_check_str.data(), cluster_init_check_str.size());
+        init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
+        
+        // 2. Receive reply
+        zmq::message_t cluster_init_reply_msg;
+        auto rc = init_socket.recv(cluster_init_reply_msg, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive the cluster initialization check message!");
+        std::string cluster_init_reply_str(static_cast<char *>(cluster_init_reply_msg.data()), cluster_init_reply_msg.size());
+        
+        // 3. Check whether exit or not 
+        if (cluster_init_reply_str == "Cluster_start") {
+            log("Check Cluster Start", "Cluster initialization done!");
+            exit_condition = true;
+        }
+        // Sleep 1 second
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+}
 
 void worker_start_network_threads(const std::string &config_broadcast_addr, const std::string &worker_ip,
                                   const std::string &scheduler, const std::string &worker_config_file_path) {

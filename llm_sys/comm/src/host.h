@@ -746,6 +746,36 @@ void msg_gather_thread(const std::string &host_ip) {
     }
 }
 
+void host_signal_cluster_start(const int &device_num) {
+    int left_device = device_num - 1;
+
+    while (left_device) {
+        // 1. Receive request msg
+        zmq::message_t cluster_init_request_msg;
+        auto rc = init_socket.recv(cluster_init_request_msg, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive the cluster initialization check message!");
+        std::string cluster_init_request_str(static_cast<char *>(cluster_init_request_msg.data()), cluster_init_request_msg.size());
+        
+        // 2. Check and Send answer msg
+        if (cluster_init_request_str == "Cluster_Init") {
+            std::string cluster_init_reply_str = "Cluster_start";
+            zmq::message_t cluster_init_check_msg(cluster_init_reply_str.data(), cluster_init_reply_str.size());
+            init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
+
+            log("Request Cluster Start", "Receive request from worker node");
+            left_device -= 1;
+        } else {
+            std::string cluster_init_reply_str = "Cluster_wait";
+            zmq::message_t cluster_init_check_msg(cluster_init_reply_str.data(), cluster_init_reply_str.size());
+            init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
+        }
+        // Sleep 1 second
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+
+    log("Request Cluster Start", "All worker node start!");
+}
+
 
 void host_start_network_threads(const std::string &config_broadcast_addr, const std::string &host_ip, const std::string &config_file_path,
                                 const std::string &host_file_path, const std::string &scheduler, const int &device_num) {

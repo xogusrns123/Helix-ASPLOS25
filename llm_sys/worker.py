@@ -123,6 +123,9 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     engine: PipelineStageEngine = init_engine(layer_ids, model_name, vram_usage=vram_usage)
     hidden_size = engine.model_config.get_hidden_size()
 
+    # Wait until every worker init completion
+    # Impl
+    
     last_log_time = time.time()
     
     # Added by LJH
