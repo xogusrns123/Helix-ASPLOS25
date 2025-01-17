@@ -78,7 +78,7 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         // Extract worker config information
         std::string worker_config_request_str(static_cast<char *>(worker_config_request.data()), worker_config_request.size());
 
-        std::cout << "DEBUG | worker_config_request_str: " << worker_config_request_str << std::endl;
+        // std::cout << "DEBUG | worker_config_request_str: " << worker_config_request_str << std::endl;
         
         // Check whether the msg is came from config_gather()
         if (is_valid_ipv4(worker_config_request_str)) {
@@ -88,7 +88,9 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
             continue;
         }
 
-        Machine worker_machine_config = deserialize_machine(worker_config_request_str);
+        std::vector<Machine> worker_machine_config_vector = deserialize_vector_of_machines(worker_config_request_str);
+        Machine worker_machine_config = worker_machine_config_vector[0];
+
         for (auto &machine: machine_configs) {
             if (machine.ip_address == worker_machine_config.ip_address) {
                 std::string message = "Duplicated Receive";
@@ -128,6 +130,7 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         machine_configs[device_num - 1].out_nodes = {0};
         machine_configs[device_num - 1].end_layer = end_layer;
 
+        machine_configs[0].machine_id = 0;
         machine_configs[0].start_layer = -1;
         machine_configs[0].end_layer = -1;
         machine_configs[0].in_nodes = {device_num - 1};
@@ -137,14 +140,15 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
     }
 
     write_config(config_file_path, machine_configs);
+    machine_configs_initialized = true;
 }
 
 // Message Check
 // Loop exit condition Check!
 void config_broadcast(const int &device_num) {
     // read the config file and serialize it
+    log("Config Broadcast", "Start broadcasting");
     std::string serialized_config = serialize_vector_of_machines(machine_configs);
-    machine_configs_initialized = true;
 
     // main loop
     int broadcast_num = 1;
@@ -169,6 +173,7 @@ void config_broadcast(const int &device_num) {
             init_socket.send(reply_msg, zmq::send_flags::none);
         }
     }
+    log("Config Broadcast", "Finish broadcasting");
 }
 
 void config_allgather(const std::string &host_official_addr, const std::string &host_file_path, 
@@ -179,10 +184,6 @@ void config_allgather(const std::string &host_official_addr, const std::string &
     // 0. Read host configs
     std::vector<Machine> host_machine_config = read_config(host_file_path);
     machine_configs.emplace_back(host_machine_config[0]); 
-    // Make and read host device setting
-    // 
-    // Implement
-    // 
 
     // 1. Initialize host official socket
     init_socket.bind(host_official_addr);
@@ -194,7 +195,7 @@ void config_allgather(const std::string &host_official_addr, const std::string &
     
     // 3. Broadcast workers' config
     config_broadcast(device_num);
-    log("Config Allgather", "All workers have been received machine configs!");
+    log("Config Allgather", "Integrated machine config is sent to all workers!");
 }
 
 // params:

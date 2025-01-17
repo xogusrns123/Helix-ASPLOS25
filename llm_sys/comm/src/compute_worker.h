@@ -82,10 +82,10 @@ void config_reduce(const std::string &worker_config_file_path) {
         std::string worker_config_reply_str(static_cast<char *>(worker_config_reply_msg.data()), worker_config_reply_msg.size());
         
         if (worker_config_reply_str == "First Receive") {
-            log("Receiver", "Correct worker config has been forwarded!");
+            log("Config Reduce", "Correct worker config has been forwarded!");
             correct_msg = true;
         } else {
-            log("Receiver", "Wrong worker config has been forwarded!");
+            log("Config Reduce", "Wrong worker config has been forwarded!");
         }
     }
 }
@@ -116,11 +116,11 @@ void config_gather(const std::string &worker_ip) {
         }
     }
 
-    log("Receiver", "Received machine configs from host!");
+    log("Config Gather", "Received machine configs from host!");
     for (const auto &machine: machine_configs) {
         print_machine(machine);
     }
-    log("Receiver", "Above is the whole table of received configs!");
+    log("Config Gather", "Above is the whole table of received configs!");
 }
 
 // receiver
@@ -132,7 +132,7 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
 
     // 2. Send the worker config to master node
     config_reduce(worker_config_file_path);
-
+    config_gather(worker_ip);
 
     // 6. get the machine config for the current worker
     Machine current_machine;
