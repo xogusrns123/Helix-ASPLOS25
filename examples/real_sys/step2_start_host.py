@@ -82,7 +82,7 @@ def example_heuristic_online(heuristic: str, num_node: str):
         real_sys_config_file_name="./config/real_sys_config.txt",
         host_file_path="./config/device_config.txt",
         avg_throughput=150,
-        duration=30,
+        duration=120,
         result_logging_dir=result_dir,
         device_num=int(num_node)
     )

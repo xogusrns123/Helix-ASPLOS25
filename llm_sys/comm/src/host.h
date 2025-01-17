@@ -89,7 +89,7 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
 
          // Check whether the msg is came from config_gather()
         if (is_valid_ipv4(worker_config_request_str)) {
-            std::cout << "DEBUG | Case of the is_valid_ipv4 is True" << std::endl;
+            // std::cout << "DEBUG | Case of the is_valid_ipv4 is True" << std::endl;
             message = "Wrong Request"; 
             zmq::message_t reply_msg(message.data(), message.size());
             init_socket.send(reply_msg, zmq::send_flags::none);
@@ -184,6 +184,11 @@ void config_broadcast(const int &device_num) {
     log("Config Broadcast", "Finish broadcasting");
 }
 
+// params:
+// 1. host_official_addr: str, official address(IP:Port) of the host
+// 2. host_file_path: str, file path where the host's IP and port config file would be save as a txt file.
+// 3. config_file_path: str, file path where the merged file would be save as a txt file.
+// 4. device_num: int, total number of the nodes  
 void config_allgather(const std::string &host_official_addr, const std::string &host_file_path, 
                                     const std::string &config_file_path, const int &device_num) {
     // Initialize
@@ -783,7 +788,7 @@ void host_signal_cluster_start(const int &device_num) {
         // 2. Check request_ip from received IPs
         auto it = std::find(ip_table.begin(), ip_table.end(), request_ip_str);
         if (it != ip_table.end()) {
-            log("Request Cluster Start", "Receive request from worker node");
+            log("Request Cluster Start", "Send start signal to worker node");
 
             // 3. Erase the IP from the table
             ip_table.erase(std::remove(ip_table.begin(), ip_table.end(), request_ip_str), ip_table.end());
