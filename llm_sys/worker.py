@@ -124,7 +124,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     hidden_size = engine.model_config.get_hidden_size()
 
     # Wait until every worker init completion
-    # Impl
+    llm_worker.check_cluster_start()
     
     last_log_time = time.time()
     

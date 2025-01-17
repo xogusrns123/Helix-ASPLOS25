@@ -789,15 +789,14 @@ void sender_thread(const std::string &worker_ip) {
     }
 }
 
-void worker_check_cluster_start() {
+void worker_check_cluster_start(const std::string &worker_ip) {
     bool exit_condition = false;
 
     log("Check Cluster Start", "Wait until cluster initialization done!");
 
     while (!exit_condition) {
-        // 1. Send init msg
-        std::string cluster_init_check_str("Cluster_Init");
-        zmq::message_t cluster_init_check_msg(cluster_init_check_str.data(), cluster_init_check_str.size());
+        // 1. Send worker ip
+        zmq::message_t cluster_init_check_msg(worker_ip.data(), worker_ip.size());
         init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
         
         // 2. Receive reply

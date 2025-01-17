@@ -66,6 +66,7 @@ def run_heuristic_host_online(
     # ------------------------------------------------------------------------------------ #
     
     once_check = True
+    llm_host.signal_cluster_start(device_num)
     
     ground_zero = time.time()
     next_query_id = 0

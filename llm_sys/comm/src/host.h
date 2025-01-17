@@ -747,30 +747,57 @@ void msg_gather_thread(const std::string &host_ip) {
 }
 
 void host_signal_cluster_start(const int &device_num) {
-    int left_device = device_num - 1;
+    int worker_device_num = device_num - 1;
 
-    while (left_device) {
+    std::vector<std::string> ip_table;
+
+    // 1. Get IP address and push to the vector
+    while (ip_table.size() != worker_device_num) {
         // 1. Receive request msg
-        zmq::message_t cluster_init_request_msg;
-        auto rc = init_socket.recv(cluster_init_request_msg, zmq::recv_flags::none);
+        zmq::message_t request_ip_msg;
+        auto rc = init_socket.recv(request_ip_msg, zmq::recv_flags::none);
         Assert(rc.has_value(), "Failed to receive the cluster initialization check message!");
-        std::string cluster_init_request_str(static_cast<char *>(cluster_init_request_msg.data()), cluster_init_request_msg.size());
-        
-        // 2. Check and Send answer msg
-        if (cluster_init_request_str == "Cluster_Init") {
+
+        std::string request_ip_str(static_cast<char *>(request_ip_msg.data()), request_ip_msg.size());
+
+        // 2. Check request_ip from received IPs
+        if (std::find(ip_table.begin(), ip_table.end(), request_ip_str) == ip_table.end()) {
+            log("Request Cluster Start", "Receive request from worker node");
+            ip_table.emplace_back(request_ip_str);
+        }
+
+        // 3. Send answer msg
+        std::string cluster_init_reply_str = "Cluster_wait";
+        zmq::message_t cluster_init_check_msg(cluster_init_reply_str.data(), cluster_init_reply_str.size());
+        init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
+    }
+
+    while (!ip_table.empty()) {
+        // 1. Receive request msg
+        zmq::message_t request_ip_msg;
+        auto rc = init_socket.recv(request_ip_msg, zmq::recv_flags::none);
+        Assert(rc.has_value(), "Failed to receive the cluster initialization check message!");
+
+        std::string request_ip_str(static_cast<char *>(request_ip_msg.data()), request_ip_msg.size());
+
+        // 2. Check request_ip from received IPs
+        auto it = std::find(ip_table.begin(), ip_table.end(), request_ip_str);
+        if (it != ip_table.end()) {
+            log("Request Cluster Start", "Receive request from worker node");
+
+            // 3. Erase the IP from the table
+            ip_table.erase(std::remove(ip_table.begin(), ip_table.end(), request_ip_str), ip_table.end());
+
+            // 4. Send answer msg
             std::string cluster_init_reply_str = "Cluster_start";
             zmq::message_t cluster_init_check_msg(cluster_init_reply_str.data(), cluster_init_reply_str.size());
             init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
-
-            log("Request Cluster Start", "Receive request from worker node");
-            left_device -= 1;
         } else {
+            // 3. Send answer msg
             std::string cluster_init_reply_str = "Cluster_wait";
             zmq::message_t cluster_init_check_msg(cluster_init_reply_str.data(), cluster_init_reply_str.size());
             init_socket.send(cluster_init_check_msg, zmq::send_flags::none);
         }
-        // Sleep 1 second
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
     log("Request Cluster Start", "All worker node start!");
