@@ -91,7 +91,7 @@ void config_reduce(const std::string &worker_config_file_path) {
 }
 
 void config_gather(const std::string &worker_ip) {
-    log("Config Gather", "Start config gathering")
+    log("Config Gather", "Start config gathering");
     bool correct_msg = false; 
 
     while (!correct_msg) {
@@ -110,7 +110,7 @@ void config_gather(const std::string &worker_ip) {
 
         // 
         if (worker_config_reply_str != "Wrong Request") {
-            log("Config gather", "Receive total configs")
+            log("Config gather", "Receive total configs");
             machine_configs = deserialize_vector_of_machines(worker_config_reply_str);
             machine_configs_initialized = true;
             correct_msg = true;
