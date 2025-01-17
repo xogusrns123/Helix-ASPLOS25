@@ -86,6 +86,10 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     time_stamp = time.time()
     llm_worker.submit_requests(finished_ids, finished_offsets, finished_lengths, output_tensor)
     
+    if len(request_ids) != len(num_tokens_list):
+        print(f"DEBUG: Mismatch in lengths: request_ids={len(request_ids)}, num_tokens_list={len(num_tokens_list)}")
+        print(f"request_ids={request_ids}, num_tokens_list={num_tokens_list}")
+    
     # Added by LJH
     if parsed_prompt:
         mode = "prompt"

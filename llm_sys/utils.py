@@ -72,7 +72,7 @@ def make_self_config(device_num) -> tuple[str, int]:
         else:
             ports += f"{port} "
     
-    output_path = './profiling/device_config.txt'
+    output_path = './config/device_config.txt'
     
     with open(output_path, "w") as file:
         file.write("ip_address: " + ip_address + "\n")

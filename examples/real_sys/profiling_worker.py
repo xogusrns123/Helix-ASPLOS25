@@ -11,7 +11,6 @@ import os
 
 def main():
     parser = argparse.ArgumentParser(description="Run heuristic profiling.")
-    parser.add_argument("--batch_size", type=int, required=True, help="Number of requests to process at once")
     parser.add_argument("--num_nodes", type=int, required=True, help="Total number of nodes to use in the cluster")
 
     args = parser.parse_args()

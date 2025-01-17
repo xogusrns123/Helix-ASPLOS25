@@ -447,7 +447,7 @@ def run_heuristic_host_profiling(
     length_sampler = LengthSampler(dataset=Dataset.AzureConversation, seed=0)
     initial_requests = []
     for i in range(initial_launch_num):
-        request_time = 0.1 + i * 0.5
+        request_time = 0.1 + i * 0.01
         input_length, output_length = length_sampler.sample_length()
         initial_requests.append((request_time, input_length, output_length))
     # ------------------------------------------------------------------------------------------- #
