@@ -86,9 +86,9 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     time_stamp = time.time()
     llm_worker.submit_requests(finished_ids, finished_offsets, finished_lengths, output_tensor)
     
-    if len(request_ids) != len(num_tokens_list):
-        print(f"DEBUG: Mismatch in lengths: request_ids={len(request_ids)}, num_tokens_list={len(num_tokens_list)}")
-        print(f"request_ids={request_ids}, num_tokens_list={num_tokens_list}")
+    # if len(request_ids) != len(num_tokens_list):
+    #     print(f"DEBUG: Mismatch in lengths: request_ids={len(request_ids)}, num_tokens_list={len(num_tokens_list)}")
+    #     print(f"request_ids={request_ids}, num_tokens_list={num_tokens_list}")
     
     # Added by LJH
     if parsed_prompt:
@@ -96,7 +96,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     else:
         mode = "decode"
     for i in range(len(request_ids)):
-        slave_profiler.record_event(time_stamp, request_ids[i], "out", mode, num_tokens_list[i], "_")
+        slave_profiler.record_event(time_stamp, request_ids[i], "out", mode, finished_lengths[i], "_")
         
     # ------------------------------------------------------------------------------------------- #
     return parsed_prompt
