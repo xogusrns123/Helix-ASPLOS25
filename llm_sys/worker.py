@@ -124,7 +124,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     hidden_size = engine.model_config.get_hidden_size()
 
     # Wait until every worker init completion
-    llm_worker.check_cluster_start()
+    llm_worker.check_cluster_start(worker_ip)
     
     last_log_time = time.time()
     
@@ -135,7 +135,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     while True:
         now = time.time() - ground_zero
-        if now > slave_profiler.get_duration() + 120:
+        if now > slave_profiler.get_duration() + 15:
             break
         
         # ------------------------------------------------------------------------------------------- #

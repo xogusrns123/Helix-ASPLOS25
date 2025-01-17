@@ -80,7 +80,7 @@ def run_heuristic_host_online(
     while True:
         # get time
         now = time.time() - ground_zero
-        if now > master_profiler.duration + 150:
+        if now > master_profiler.duration + 30:
             break
 
         # # send new requests into cluster if needed
