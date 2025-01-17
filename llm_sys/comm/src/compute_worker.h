@@ -91,6 +91,7 @@ void config_reduce(const std::string &worker_config_file_path) {
 }
 
 void config_gather(const std::string &worker_ip) {
+    log("Config Gather", "Start config gathering")
     bool correct_msg = false; 
 
     while (!correct_msg) {
@@ -103,17 +104,19 @@ void config_gather(const std::string &worker_ip) {
         auto rc = init_socket.recv(worker_config_reply_msg, zmq::recv_flags::none);
         Assert(rc.has_value(), "Failed to receive the initialization message!");
 
-        // 5. deserialize the initialization message
+        // 3. deserialize the initialization message
         std::string worker_config_reply_str(static_cast<char *>(worker_config_reply_msg.data()), worker_config_reply_msg.size());
+        std::cout << "DEBUG | worker_config_reply_str: " << worker_config_reply_str << std::endl;
 
+        // 
         if (worker_config_reply_str != "Wrong Request") {
+            log("Config gather", "Receive total configs")
             machine_configs = deserialize_vector_of_machines(worker_config_reply_str);
             machine_configs_initialized = true;
             correct_msg = true;
-
-            // Sleep 1 second
-            sleep(1);
         }
+        // Sleep 1 second
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     log("Config Gather", "Received machine configs from host!");
@@ -132,6 +135,8 @@ void receiver_thread(const std::string &config_broadcast_addr, const std::string
 
     // 2. Send the worker config to master node
     config_reduce(worker_config_file_path);
+
+    // 3. Receive the total config from master node
     config_gather(worker_ip);
 
     // 6. get the machine config for the current worker
