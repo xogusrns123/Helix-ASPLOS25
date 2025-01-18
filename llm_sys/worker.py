@@ -44,7 +44,7 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     # Step 2.3: Prepare output
     if output == (None, None, None):
         # nothing to schedule, no need to re-enter
-        return False
+        return False, None
     
     # Added by LJH
     request_ids = []
@@ -222,8 +222,9 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
             for i in range(len(request_ids)):
                 slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i])
         else:
-            for i in range(len(request_ids)):
-                slave_profiler.record_event(time_stamp, request_ids[i], "out", "decode", num_tokens_list[i], 1)
+            if time_stamp is not None:
+                for i in range(len(request_ids)):
+                    slave_profiler.record_event(time_stamp, request_ids[i], "out", "decode", num_tokens_list[i], 1)
             
         
     
