@@ -43,8 +43,10 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     
     # Step 2.3: Prepare output
     if output == (None, None, None):
+        # Just prompt understanding
         # nothing to schedule, no need to re-enter
-        return False, None
+        time_stamp = time.time()
+        return False, time_stamp
     
     # Added by LJH
     request_ids = []
@@ -163,7 +165,7 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
         ):
             if is_prompt:
                 # Added by LJH
-                slave_profiler.record_event(time_stamp, request_id, "in", "prompt", 0, num_tokens)
+                slave_profiler.record_event(time_stamp, request_id, "in", "prompt", 0, num_tokens + 1)
                 
                 print(f"[Prompt] Request {request_id} arrives (input_len={num_tokens}, max_len={max_tokens}, "
                       f"layers=[{start_layer_idx}, {end_layer_idx}))")
@@ -213,15 +215,13 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
                                        hidden_size=hidden_size, slave_profiler=slave_profiler, num_tokens_list=num_tokens_list, force_decode=False)
         # Added by LJH
         if parsed_prompt:
-            # Case for (prompt, out)
+            # As soon as understanding prompt, immediately create a token
             parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer, 
                                         hidden_size=hidden_size, slave_profiler=slave_profiler, num_tokens_list=num_tokens_list, force_decode=True)
-            # Added by LJH
-            # events.append((time_stamp, request_id, "out", "prompt", 0, "_"))
+
             assert not parsed_prompt, "Parsed prompt twice!"
-            if time_stamp is not None:
-                for i in range(len(request_ids)):
-                    slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i])
+            for i in range(len(request_ids)):
+                slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i] + 1)
         else:
             if time_stamp is not None:
                 for i in range(len(request_ids)):

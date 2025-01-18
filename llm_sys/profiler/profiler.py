@@ -157,8 +157,13 @@ class MasterProfiler(Profiler):
         self.delta_times: Dict[int, Tuple[str, float]] = {}
         # (compute_node_index, ip_address, port)
         self.slaves: List[Tuple[int, str, int]] = slaves
+        # For profiling the cluster's execution flow
+        # (SRC, DST)
+        self._node_path: List[Tuple[int, int]] = None
+        # Worker nodes of the cluster
+        self._worker_node: List[int] = []
         # For master event file path
-        self._file_path: str = os.path.join(self._file_directory, "node_master_events.csv")
+        self._file_path: str = os.path.join(self._file_directory, "node_0_events.csv")
         
         time.sleep(1)
 
@@ -242,6 +247,8 @@ class MasterProfiler(Profiler):
     
     def _collect_events(self) -> None:
         for compute_node_idx, slave_ip, slave_port in self.slaves:
+            self._worker_node.append(compute_node_idx)
+            
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:       
                 # 0. Connect to the slave node
                 print(f"[Profiler] Master connecting to compute node {compute_node_idx}({slave_ip}:{slave_port})")
@@ -275,7 +282,7 @@ class MasterProfiler(Profiler):
             # 2-3. Add source info. and apply delta time
             df['source'] = str(node_name)
             df['time_stamp'] = pd.to_numeric(df['time_stamp'], errors='coerce')
-            if node_name != 'master':
+            if node_name != '0':
                 delta_time = self.delta_times[int(node_name)][1]
                 df['time_stamp'] -= delta_time
             
@@ -293,32 +300,28 @@ class MasterProfiler(Profiler):
         
         return output_file
     
-    def _calculate_decode_costs(self, filtered_df):
+    def _calculate_prefill_costs(self, filtered_df):
         """
         Process a single request_id to calculate filtered_df, decode_comm_costs, and decode_comp_costs.
         
-        :param merged_df: The full merged DataFrame
-        :param request_id: The request ID to process
+        :param filtered_df: The filtered DataFrame by request_id
         :return: Tuple of (filtered_df, decode_comm_costs, decode_comp_costs)
+        """
+        pass
+        
+    def _calculate_decode_costs(self, decode_df):
+        """
+        Process a single request_id to calculate filtered_df, decode_comm_costs, and decode_comp_costs.
+        
+        :param filtered_df: The filtered DataFrame by request_id
+        :return: Tuple of (decode_comm_costs, decode_comp_costs)
         """
         # 2-1. Initialize data structure
         # Computation cost: node_index -> List
-        decode_comp_costs: Dict[int, List] = defaultdict(list)
+        decode_comp_costs: Dict[Tuple[int, int], List[float]] = defaultdict(list)
         # Communication cost: (src, dst) -> List
-        decode_comm_costs: Dict[Tuple[int, int], List] = defaultdict(list)
+        decode_comm_costs: Dict[int, List[float]] = defaultdict(list)
     
-        # start_index = first line where the decoding stage begins
-        decode_start_condition = (filtered_df['in_out'] == 'in') & \
-                        (filtered_df['mode'] == 'prompt') & \
-                        (filtered_df['source'] == 'master')
-        decode_start_index = filtered_df.index[decode_start_condition].min()
-
-        if pd.notna(decode_start_index):
-            decode_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
-        else:
-            print(f"No rows satisfy the start condition for request_id {filtered_df.iloc[3]['request_id']}.")
-            return None, None, None
-
         # 2-2. Iterate through the rows to calculate costs
         for i in range(1, len(decode_df)):
             prev_row = decode_df.iloc[i - 1]
@@ -333,7 +336,7 @@ class MasterProfiler(Profiler):
             if (src_node != dst_node):
                 decode_comm_costs[(src_node, dst_node)].append(time_diff)
             # 2-2-3. Computation cost: same source
-            elif (src_node == dst_node and src_node != 'master'):
+            elif (src_node == dst_node and src_node != '0'):
                 decode_comp_costs[src_node].append(time_diff)
 
         return decode_comm_costs, decode_comp_costs
@@ -342,22 +345,38 @@ class MasterProfiler(Profiler):
         # 1. Read sorted file from decode stage
         merged_df = pd.read_csv(file_path)
         
-        # Total computation cost: request_id -> average computation cost
-        total_comp_cost: Dict[int, float] = {}
-        # Total communication cost: request_id -> average communication cost
-        total_comm_cost: Dict[int, float] = {}
+        # When the later moment come, node_path should be integrated within total codes
+        # At now, node_path is not ours interests  
+        self._node_path = [(0, 1), (1, 2), (2, 0)]
         
         # 2. Iterate through every request_ids
         request_id_list = merged_df['request_id'].unique().tolist()
         for request_id in request_id_list:
+            # 2-1. Filter merged_df by request_id
             filtered_condition = merged_df["request_id"] == request_id
             filtered_df = merged_df[filtered_condition].reset_index(drop=True)
             
             if filtered_df is None:
                 print(f"Request ID {request_id} has no filtered DataFrame")
                 continue
-    
-            decode_comm_costs, decode_comp_costs = self._calculate_decode_costs(filtered_df)
+            
+            # 2-2. Find criterion line
+            decode_start_condition = (filtered_df['in_out'] == 'in') & \
+                            (filtered_df['mode'] == 'prompt') & \
+                            (filtered_df['source'] == '0')
+            decode_start_index = filtered_df.index[decode_start_condition].min()
+
+            # 2-3. Devide Dataframe by prefill and decode
+            if pd.notna(decode_start_index):
+                prefill_df = filtered_df.iloc[:decode_start_index].reset_index(drop=True)
+                decode_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
+            else:
+                print(f"No rows satisfy the start condition for request_id {request_id}.")
+                return None, None, None
+            
+            
+            prefill_comm_costs, prefill_comp_costs = self._calculate_prefill_costs(filtered_df=filtered_df)
+            decode_comm_costs, decode_comp_costs = self._calculate_decode_costs(filtered_df=filtered_df)
             
             # 2-3. Calculate averages
             total_comm_sum = sum(sum(times) for times in decode_comm_costs.values())

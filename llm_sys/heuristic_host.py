@@ -609,7 +609,7 @@ def run_heuristic_host_profiling(
                 # save log
                 # time - query id - in/out - phase - context_len - this_iter_processed
                 events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
-                master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length + 1)
+                master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length)
                 print(f"Send out new query {cur_query_id}, input len = {input_length}, "
                       f"max_len = {input_length + output_length} (decode finish request replacement)")
 
