@@ -440,7 +440,7 @@ def run_heuristic_host_profiling(
     # cluster config file path
     real_sys_config_file_name: str = f"{result_logging_dir}/real_sys_config.txt"
     # host device config file path
-    host_file_path: str = f"./profiling/device_config.txt"
+    host_file_path: str = f"./config/device_config.txt"
     
     print(f"Initializing host with {scheduler_name} scheduling!")
     # ------------------------------------- Offline Initial ------------------------------------- #

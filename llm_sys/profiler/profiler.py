@@ -61,7 +61,7 @@ class Profiler:
         # For basic packet size
         self._packet_size: int = 1024
         # For delta_time measurement
-        self._repetitions: int = 100
+        self._rtt_repeat: int = 1000
         # For event recording
         self._events: List[Tuple] = []
         # For collective file directory
@@ -174,7 +174,7 @@ class MasterProfiler(Profiler):
         
         rtts = []
         rtt_cnt = 0
-        for _ in range(self._repetitions):
+        for _ in range(self._rtt_repeat):
             if rtt_cnt % 20 == 0:
                 print(f"RTT Handling | {rtt_cnt} times done.")
                 
@@ -300,44 +300,80 @@ class MasterProfiler(Profiler):
         
         return output_file
     
-    def _calculate_prefill_costs(self, filtered_df):
+    def _calculate_prefill_costs(self, prefill_df):
         """
         Process a single request_id to calculate filtered_df, decode_comm_costs, and decode_comp_costs.
         
-        :param filtered_df: The filtered DataFrame by request_id
-        :return: Tuple of (filtered_df, decode_comm_costs, decode_comp_costs)
+        :param prefill_df: The prefill DataFrame by request_id
+        :return: Tuple of (decode_comm_costs, decode_comp_costs)
         """
-        pass
+        
+        # Communication cost: (src, dst) -> List
+        prefill_comm_costs: Dict[Tuple[int, int], float] = defaultdict(float)
+        # Computation cost: node_index -> List
+        prefill_comp_costs: Dict[int, float] = defaultdict(float)
+        
+        for src, dst in self._node_path:
+            src_cond = (prefill_df['in_out'] == 'out') & (prefill_df['source'] == src)
+            dst_cond = (prefill_df['in_out'] == 'in') & (prefill_df['source'] == dst)
+
+            src_row = prefill_df[src_cond]
+            dst_row = prefill_df[dst_cond]
+
+            if not src_row.empty and not dst_row.empty:
+                prefill_comm_costs[(src, dst)] = dst_row.iloc[0]['time_stamp'] - src_row.iloc[0]['time_stamp']
+        
+        for node in self._worker_node:
+            in_cond = (prefill_df['in_out'] == 'in') & (prefill_df['source'] == node)
+            out_cond = (prefill_df['in_out'] == 'out') & (prefill_df['source'] == node)
+
+            in_row = prefill_df[in_cond]
+            out_row = prefill_df[out_cond]
+
+            if not in_row.empty and not out_row.empty:
+                prefill_comp_costs[node] = out_row.iloc[0]['time_stamp'] - in_row.iloc[0]['time_stamp']
+            
+        return prefill_comm_costs, prefill_comp_costs
         
     def _calculate_decode_costs(self, decode_df):
         """
         Process a single request_id to calculate filtered_df, decode_comm_costs, and decode_comp_costs.
         
-        :param filtered_df: The filtered DataFrame by request_id
+        :param decode_df: The decode DataFrame by request_id
         :return: Tuple of (decode_comm_costs, decode_comp_costs)
         """
-        # 2-1. Initialize data structure
-        # Computation cost: node_index -> List
-        decode_comp_costs: Dict[Tuple[int, int], List[float]] = defaultdict(list)
+        
         # Communication cost: (src, dst) -> List
-        decode_comm_costs: Dict[int, List[float]] = defaultdict(list)
-    
-        # 2-2. Iterate through the rows to calculate costs
-        for i in range(1, len(decode_df)):
-            prev_row = decode_df.iloc[i - 1]
-            curr_row = decode_df.iloc[i]
-            
-            # 2-2-1. Calculate time difference
-            time_diff = curr_row['time_stamp'] - prev_row['time_stamp']
-            src_node = prev_row['source']
-            dst_node = curr_row['source']
-            
-            # 2-2-2. Communication cost: specific transitions
-            if (src_node != dst_node):
-                decode_comm_costs[(src_node, dst_node)].append(time_diff)
-            # 2-2-3. Computation cost: same source
-            elif (src_node == dst_node and src_node != '0'):
-                decode_comp_costs[src_node].append(time_diff)
+        decode_comm_costs: Dict[Tuple[int, int], List[float]] = defaultdict(list)
+        # Computation cost: node_index -> List
+        decode_comp_costs: Dict[int, List[float]] = defaultdict(list)
+        
+        for src, dst in self._node_path:
+            src_cond = (decode_df['in_out'] == 'out') & (decode_df['source'] == src)
+            dst_cond = (decode_df['in_out'] == 'in') & (decode_df['source'] == dst)
+
+            src_rows = decode_df[src_cond].reset_index(drop=True)
+            dst_rows = decode_df[dst_cond].reset_index(drop=True)
+
+            min_len = min(len(src_rows), len(dst_rows))
+            for i in range(min_len):
+                src_time = src_rows.loc[i, 'time_stamp']
+                dst_time = dst_rows.loc[i, 'time_stamp']
+                decode_comm_costs[(src, dst)].append(dst_time - src_time)
+        
+        for node in self._worker_node:
+            in_cond = (decode_df['in_out'] == 'in') & (decode_df['source'] == node)
+            out_cond = (decode_df['in_out'] == 'out') & (decode_df['source'] == node)
+
+            in_rows = decode_df[in_cond].reset_index(drop=True)
+            out_rows = decode_df[out_cond].reset_index(drop=True)
+
+            # Ensure in_rows and out_rows have the same length for 1:1 mapping
+            min_len = min(len(in_rows), len(out_rows))
+            for i in range(min_len):
+                in_time = in_rows.loc[i, 'time_stamp']
+                out_time = out_rows.loc[i, 'time_stamp']
+                decode_comp_costs[node].append(out_time - in_time)
 
         return decode_comm_costs, decode_comp_costs
     
@@ -349,61 +385,99 @@ class MasterProfiler(Profiler):
         # At now, node_path is not ours interests  
         self._node_path = [(0, 1), (1, 2), (2, 0)]
         
+        # comm: (src, dst) -> List[comm_delay]
+        # comp: node -> List[comp_delay]
+        prefill_comm_costs : Dict[Tuple[int, int], List[float]] = defaultdict(list)
+        prefill_comp_costs : Dict[int, List[float]] = defaultdict(list)
+        decode_comm_costs : Dict[Tuple[int, int], List[float]] = defaultdict(list)
+        decode_comp_costs : Dict[int, List[float]] = defaultdict(list)
+        
         # 2. Iterate through every request_ids
         request_id_list = merged_df['request_id'].unique().tolist()
         for request_id in request_id_list:
             # 2-1. Filter merged_df by request_id
-            filtered_condition = merged_df["request_id"] == request_id
-            filtered_df = merged_df[filtered_condition].reset_index(drop=True)
+            request_condition = merged_df["request_id"] == request_id
+            request_df = merged_df[request_condition].reset_index(drop=True)
             
-            if filtered_df is None:
+            if request_df is None:
                 print(f"Request ID {request_id} has no filtered DataFrame")
                 continue
             
             # 2-2. Find criterion line
-            decode_start_condition = (filtered_df['in_out'] == 'in') & \
-                            (filtered_df['mode'] == 'prompt') & \
-                            (filtered_df['source'] == '0')
-            decode_start_index = filtered_df.index[decode_start_condition].min()
+            decode_start_condition = (request_df['in_out'] == 'out') & \
+                                    (request_df['mode'] == 'decode') & \
+                                    (request_df['source'] == 0)
+            decode_start_index = request_df.index[decode_start_condition].min()
 
             # 2-3. Devide Dataframe by prefill and decode
             if pd.notna(decode_start_index):
-                prefill_df = filtered_df.iloc[:decode_start_index].reset_index(drop=True)
-                decode_df = filtered_df.iloc[decode_start_index:].reset_index(drop=True)
+                prefill_df = request_df.iloc[:decode_start_index].reset_index(drop=True)
+                decode_df = request_df.iloc[decode_start_index:].reset_index(drop=True)
             else:
                 print(f"No rows satisfy the start condition for request_id {request_id}.")
                 return None, None, None
             
+            # 2-4. Calculate prefill and decode delay
+            req_prefill_comm_costs, req_prefill_comp_costs = self._calculate_prefill_costs(prefill_df=prefill_df)
+            req_decode_comm_costs, req_decode_comp_costs = self._calculate_decode_costs(decode_df=decode_df)
             
-            prefill_comm_costs, prefill_comp_costs = self._calculate_prefill_costs(filtered_df=filtered_df)
-            decode_comm_costs, decode_comp_costs = self._calculate_decode_costs(filtered_df=filtered_df)
+            for src, dst in self._node_path:
+                prefill_comm_costs[(src, dst)].append(req_prefill_comm_costs[(src, dst)])
+                decode_comm_costs[(src, dst)].extend(req_decode_comm_costs[(src, dst)])
             
-            # 2-3. Calculate averages
-            total_comm_sum = sum(sum(times) for times in decode_comm_costs.values())
-            total_comm_len = sum(len(times) for times in decode_comm_costs.values())
-            total_comp_sum = sum(sum(times) for times in decode_comp_costs.values())
-            total_comp_len = sum(len(times) for times in decode_comp_costs.values())
-                
-            average_communication_cost = total_comm_sum / total_comm_len if decode_comm_costs else 0
-            average_computation_cost = total_comp_sum / total_comp_len if decode_comp_costs else 0
-            
-            total_comm_cost[request_id] = average_communication_cost
-            total_comp_cost[request_id] = average_computation_cost
+            for node in self._worker_node:
+                prefill_comp_costs[node].append(req_prefill_comp_costs[node])
+                decode_comp_costs[node].extend(req_decode_comp_costs[node])
+        
+        # 3. Save the results to csv files
+        comm_data = []
+        for (src, dst), prefill_list in prefill_comm_costs.items():
+            decode_list = decode_comm_costs.get((src, dst), [])
+            comm_data.append({
+                '(src, dst)': (src, dst),
+                'Prefill_comm': sum(prefill_list) / len(prefill_list) if prefill_list else 0,
+                'Decode_comm': sum(decode_list) / len(decode_list) if decode_list else 0
+            })
+        comm_df = pd.DataFrame(comm_data)
+        
+        comp_data = []
+        for node, prefill_list in prefill_comp_costs.items():
+            decode_list = decode_comp_costs.get(node, [])
+            comp_data.append({
+                'node': node,
+                'Prefill_comp': sum(prefill_list) / len(prefill_list) if prefill_list else 0,
+                'Decode_comp': sum(decode_list) / len(decode_list) if decode_list else 0
+            })
+        comp_df = pd.DataFrame(comp_data)
+        
+        # Save to separate CSV files
+        comm_output_file = os.path.join(self._file_directory, "comm.csv")
+        comp_output_file = os.path.join(self._file_directory, "comp.csv")
 
-        # 3. Print the results
+        comm_df.to_csv(comm_output_file, index=False)
+        comp_df.to_csv(comp_output_file, index=False)
+
+        print(f"Communication costs saved to {comm_output_file}")
+        print(f"Computation costs saved to {comp_output_file}")
+        
+        # 4. Print the results
         print(f"[Profiler] Profiling final result")
-        print(f"{'Request ID':<15}{'Computation Cost':<20}{'Communication Cost':<20}")
-        print("-" * 55)
+        print(f"{'Type':<15}{'Source/Destination':<25}{'Prefill Cost':<20}{'Decode Cost':<20}")
+        print("-" * 80)
 
-        # Iterate through all request IDs
-        for req_id in sorted(total_comp_cost.keys() | total_comm_cost.keys()):
-            # Get computation and communication costs, defaulting to 0
-            comp_cost = total_comp_cost.get(req_id, 0)
-            comm_cost = total_comm_cost.get(req_id, 0)
+        # Print communication costs
+        for (src, dst), prefill_list in prefill_comm_costs.items():
+            decode_list = decode_comm_costs.get((src, dst), [])
+            prefill_avg = sum(prefill_list) / len(prefill_list) if prefill_list else 0
+            decode_avg = sum(decode_list) / len(decode_list) if decode_list else 0
+            print(f"{'Comm':<15}{(src, dst):<25}{prefill_avg:<20.6f}{decode_avg:<20.6f}")
 
-            # Fixed-width formatting for rows
-            print(f"{req_id:<15}{comp_cost:<20.6f}{comm_cost:<20.6f}")
-        print()
+        # Print computation costs
+        for node, prefill_list in prefill_comp_costs.items():
+            decode_list = decode_comp_costs.get(node, [])
+            prefill_avg = sum(prefill_list) / len(prefill_list) if prefill_list else 0
+            decode_avg = sum(decode_list) / len(decode_list) if decode_list else 0
+            print(f"{'Comp':<15}{node:<25}{prefill_avg:<20.6f}{decode_avg:<20.6f}")
     
     def generate_delay_report(self) -> None:
         # 1. Collect event files from compute nodes
@@ -444,7 +518,7 @@ class SlaveProfiler(Profiler):
         Handle incoming RTT requests from the master.
         """
         
-        for _ in range(self._repetitions):
+        for _ in range(self._rtt_repeat):
             # 2-1. Wait and receive rtt packet
             data = self._receive_packet(conn)
             
