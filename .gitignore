@@ -3,6 +3,7 @@ __pycache__/
 helix.egg-info/
 goguma1_git_token.txt
 examples/real_sys/result/random_online/events.txt
+examples/real_sys/profiling/
 llm_sys/build/
 llm_sys/comm/build/
 llm_sys/comm/llm_sys_comm/
