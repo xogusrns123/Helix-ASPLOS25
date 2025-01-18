@@ -219,8 +219,9 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
             # Added by LJH
             # events.append((time_stamp, request_id, "out", "prompt", 0, "_"))
             assert not parsed_prompt, "Parsed prompt twice!"
-            for i in range(len(request_ids)):
-                slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i])
+            if time_stamp is not None:
+                for i in range(len(request_ids)):
+                    slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i])
         else:
             if time_stamp is not None:
                 for i in range(len(request_ids)):

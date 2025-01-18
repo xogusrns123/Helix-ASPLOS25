@@ -24,8 +24,8 @@ def main():
     parser.add_argument("--batch_size", type=int, required=True, help="Number of requests to process at once")
     parser.add_argument("--num_nodes", type=int, required=True, help="Total number of nodes to use in the cluster")
     parser.add_argument("--duration", type=int, required=True, help="Time to run profiling (seconds)")
-    parser.add_argument("--seq_len", type=int, default=0, help="Sequence length")
-    parser.add_argument("--output_len", type=int, default=0, help="Output length")
+    parser.add_argument("--seq_len", type=int, required=True, help="Sequence length")
+    parser.add_argument("--output_len", type=int, required=True, help="Output length")
     
     args = parser.parse_args()
     
@@ -37,6 +37,7 @@ def main():
         duration=args.duration
     )
 
+# python profiling_host.py --batch_size 32 --num_nodes 3 --duration 90 --seq_len 1000 --output_len 125
 
 if __name__ == '__main__':
     main()

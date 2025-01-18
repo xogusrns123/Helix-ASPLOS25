@@ -448,8 +448,8 @@ def run_heuristic_host_profiling(
     initial_requests = []
     for i in range(initial_launch_num):
         request_time = 0.1 + i * 0.01
-        input_length, output_length = length_sampler.sample_length()
-        initial_requests.append((request_time, input_length, output_length))
+        # input_length, output_length = length_sampler.sample_length()
+        initial_requests.append((request_time, seq_len, output_len))
     # ------------------------------------------------------------------------------------------- #
 
     # ------------------------------------- Init System ------------------------------------ #
