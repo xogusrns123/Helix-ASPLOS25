@@ -370,11 +370,18 @@ class MasterProfiler(Profiler):
 
             # Ensure in_rows and out_rows have the same length for 1:1 mapping
             min_len = min(len(in_rows), len(out_rows))
-            for i in range(min_len):
-                in_time = in_rows.loc[i, 'time_stamp']
-                out_time = out_rows.loc[i, 'time_stamp']
-                decode_comp_costs[node].append(out_time - in_time)
-
+            if len(in_rows) == len(out_rows):
+                for i in range(min_len):
+                    in_time = in_rows.loc[i, 'time_stamp']
+                    out_time = out_rows.loc[i, 'time_stamp']
+                    decode_comp_costs[node].append(out_time - in_time)
+            else:
+                for i in range(1, min_len - 1):
+                    in_time = in_rows.loc[i, 'time_stamp']
+                    out_time = out_rows.loc[i + 1, 'time_stamp']
+                    
+                    if out_time - in_time > 0:
+                        decode_comp_costs[node].append(out_time - in_time)
         return decode_comm_costs, decode_comp_costs
     
     def _calculate_delays(self, file_path) -> None:
@@ -415,7 +422,7 @@ class MasterProfiler(Profiler):
                 decode_df = request_df.iloc[decode_start_index:].reset_index(drop=True)
             else:
                 print(f"No rows satisfy the start condition for request_id {request_id}.")
-                return None, None, None
+                continue
             
             # 2-4. Calculate prefill and decode delay
             req_prefill_comm_costs, req_prefill_comp_costs = self._calculate_prefill_costs(prefill_df=prefill_df)
@@ -454,14 +461,14 @@ class MasterProfiler(Profiler):
         comm_output_file = os.path.join(self._file_directory, "comm.csv")
         comp_output_file = os.path.join(self._file_directory, "comp.csv")
 
-        comm_df.to_csv(comm_output_file, index=False)
-        comp_df.to_csv(comp_output_file, index=False)
+        comm_df.to_csv(comm_output_file, index=False, quoting=1)
+        comp_df.to_csv(comp_output_file, index=False, quoting=1)
 
         print(f"Communication costs saved to {comm_output_file}")
         print(f"Computation costs saved to {comp_output_file}")
         
         # 4. Print the results
-        print(f"[Profiler] Profiling final result")
+        print("\n[Profiler] Profiling final result")
         print(f"{'Type':<15}{'Source/Destination':<25}{'Prefill Cost':<20}{'Decode Cost':<20}")
         print("-" * 80)
 
@@ -470,7 +477,7 @@ class MasterProfiler(Profiler):
             decode_list = decode_comm_costs.get((src, dst), [])
             prefill_avg = sum(prefill_list) / len(prefill_list) if prefill_list else 0
             decode_avg = sum(decode_list) / len(decode_list) if decode_list else 0
-            print(f"{'Comm':<15}{(src, dst):<25}{prefill_avg:<20.6f}{decode_avg:<20.6f}")
+            print(f"{'Comm':<15}{str((src, dst)):<25}{prefill_avg:<20.6f}{decode_avg:<20.6f}")
 
         # Print computation costs
         for node, prefill_list in prefill_comp_costs.items():
