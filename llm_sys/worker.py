@@ -85,21 +85,9 @@ def run_and_submit(engine, start_idx, end_idx, is_last_layer, hidden_size, slave
     
     time_stamp = time.time()
     llm_worker.submit_requests(finished_ids, finished_offsets, finished_lengths, output_tensor)
-    
-    # if len(request_ids) != len(num_tokens_list):
-    #     print(f"DEBUG: Mismatch in lengths: request_ids={len(request_ids)}, num_tokens_list={len(num_tokens_list)}")
-    #     print(f"request_ids={request_ids}, num_tokens_list={num_tokens_list}")
-    
-    # Added by LJH
-    if parsed_prompt:
-        mode = "prompt"
-    else:
-        mode = "decode"
-    for i in range(len(request_ids)):
-        slave_profiler.record_event(time_stamp, request_ids[i], "out", mode, finished_lengths[i], "_")
         
     # ------------------------------------------------------------------------------------------- #
-    return parsed_prompt
+    return parsed_prompt, time_stamp
 
 
 def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str, worker_config_file_path: str, vram_usage=0.8, device_num=3):
@@ -221,17 +209,22 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
 
         # step 2.2 & 2.3: run vllm and submit
         # Modified by LJH
-        parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
+        parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer,
                                        hidden_size=hidden_size, slave_profiler=slave_profiler, num_tokens_list=num_tokens_list, force_decode=False)
         # Added by LJH
         if parsed_prompt:
             # Case for (prompt, out)
-            parsed_prompt = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer, 
+            parsed_prompt, time_stamp = run_and_submit(engine=engine, start_idx=start_idx, end_idx=end_idx, is_last_layer=is_last_layer, 
                                         hidden_size=hidden_size, slave_profiler=slave_profiler, num_tokens_list=num_tokens_list, force_decode=True)
             # Added by LJH
             # events.append((time_stamp, request_id, "out", "prompt", 0, "_"))
             assert not parsed_prompt, "Parsed prompt twice!"
-        
+            for i in range(len(request_ids)):
+                slave_profiler.record_event(time_stamp, request_ids[i], "out", "prompt", 0, num_tokens_list[i])
+        else:
+            for i in range(len(request_ids)):
+                slave_profiler.record_event(time_stamp, request_ids[i], "out", "decode", num_tokens_list[i], 1)
+            
         
     
         # log kv cache status
