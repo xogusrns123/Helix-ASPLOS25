@@ -27,7 +27,7 @@ def main():
     # run worker
     run_worker(
         scheduling_method=scheduling_method, 
-        model_name="./Llama-2-7b-hf", 
+        model_name="./Llama-2-13b-hf", 
         result_logging_dir=result_dir, 
         worker_config_file_path=worker_config_file_path, 
         device_num=args.num_nodes

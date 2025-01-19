@@ -7,3 +7,4 @@ examples/real_sys/profiling/
 llm_sys/build/
 llm_sys/comm/build/
 llm_sys/comm/llm_sys_comm/
+vllm/

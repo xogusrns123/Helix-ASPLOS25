@@ -61,7 +61,7 @@ class Profiler:
         # For basic packet size
         self._packet_size: int = 1024
         # For delta_time measurement
-        self._rtt_repeat: int = 1000
+        self._rtt_repeat: int = 100
         # For event recording
         self._events: List[Tuple] = []
         # For collective file directory
