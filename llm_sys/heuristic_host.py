@@ -457,9 +457,6 @@ def run_heuristic_host_profiling(
     host_ip, open_port = make_self_config(device_num)
     print(f'host_ip:{host_ip}')
     
-    global HOST_CONFIG_BROADCAST_ADDR
-    HOST_CONFIG_BROADCAST_ADDR = "tcp://0.0.0.0:" + str(open_port)
-    
     # assert host_ip.startswith("10"), "Local IP must be of form 10.xxx.xxx.xxx"
     llm_host.start_network_threads(HOST_CONFIG_BROADCAST_ADDR, host_ip, real_sys_config_file_name, 
                                    host_file_path, scheduler_name, device_num)

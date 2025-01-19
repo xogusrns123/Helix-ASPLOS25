@@ -53,6 +53,7 @@ COPY docker_init.sh /home/kth/helix/docker_init.sh
 COPY readme.md /home/kth/helix/readme.md
 COPY setup.py /home/kth/helix/setup.py
 COPY examples /home/kth/helix/examples
+COPY env_export.sh /home/kth/helix/env_export.sh
 
 # Install Helix's communication framework
 WORKDIR /home/kth/helix/llm_sys_comm
