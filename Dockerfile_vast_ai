@@ -85,4 +85,6 @@ RUN apt-get install -y \
     iputils-ping \
     iptables
 
+WORKDIR /home/kth/header/examples/real_sys
+
 CMD ["bash"]
