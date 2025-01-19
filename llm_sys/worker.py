@@ -16,7 +16,8 @@ from llm_sys.engine.scheduler import LayerwiseScheduler
 from llm_sys.engine.exec_engine import PipelineStageEngine
 import llm_sys.engine.llama
 
-import llm_sys.utils as utils, WORKER_CONFIG_BROADCAST_IP
+import llm_sys.utils as utils
+from llm_sys.utils import WORKER_CONFIG_BROADCAST_IP
 
 from llm_sys.profiler.profiler import SlaveProfiler
 import os
