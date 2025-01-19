@@ -143,6 +143,26 @@ void config_merge(const std::string &config_file_path, const int &device_num) {
         machine_configs[0].end_layer = -1;
         machine_configs[0].in_nodes = {device_num - 1};
         machine_configs[0].out_nodes = {1};
+    } else if (LLAMA_VER == "13B") {
+        int start_layer = 0;
+        int end_layer = 40;
+        int layer_per_worker = end_layer / (device_num - 1);
+        
+        for (int machine_id = 1; machine_id < device_num; machine_id++) {
+            machine_configs[machine_id].in_nodes.emplace_back(machine_id - 1);
+            machine_configs[machine_id].out_nodes.emplace_back(machine_id + 1);
+            machine_configs[machine_id].start_layer = start_layer;
+            machine_configs[machine_id].end_layer = start_layer + layer_per_worker;
+            start_layer += layer_per_worker;
+        }
+        machine_configs[device_num - 1].out_nodes = {0};
+        machine_configs[device_num - 1].end_layer = end_layer;
+
+        machine_configs[0].machine_id = 0;
+        machine_configs[0].start_layer = -1;
+        machine_configs[0].end_layer = -1;
+        machine_configs[0].in_nodes = {device_num - 1};
+        machine_configs[0].out_nodes = {1};
     } else {
         log("Config Merge", "Selected LLAMA Version Wrong!");
     }
