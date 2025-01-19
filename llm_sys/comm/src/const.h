@@ -22,9 +22,9 @@
 #define DEBUG true
 
 // For Vast AI
-#define VAST_AI false
+#define VAST_AI True
 
 // For making configs
-#define LLAMA_VER "13B"
+#define LLAMA_VER "70B"
 
 #endif //ZMQ_COMM_CONST_H
