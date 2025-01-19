@@ -12,6 +12,7 @@ import os
 def main():
     parser = argparse.ArgumentParser(description="Run heuristic profiling.")
     parser.add_argument("--num_nodes", type=int, required=True, help="Total number of nodes to use in the cluster")
+    parser.add_argument("--model", type=str, required=True, help="Total number of nodes to use in the cluster")
 
     args = parser.parse_args()
     
@@ -27,12 +28,13 @@ def main():
     # run worker
     run_worker(
         scheduling_method=scheduling_method, 
-        model_name="./Llama-2-13b-hf", 
+        model_name=args.model, 
         result_logging_dir=result_dir, 
         worker_config_file_path=worker_config_file_path, 
         device_num=args.num_nodes
     )
 
+# python profiling_worker.py --num_nodes 11 --model ./Llama-2-13b-hf
 
 if __name__ == '__main__':
     main()
