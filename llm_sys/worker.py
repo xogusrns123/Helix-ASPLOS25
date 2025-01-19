@@ -16,7 +16,7 @@ from llm_sys.engine.scheduler import LayerwiseScheduler
 from llm_sys.engine.exec_engine import PipelineStageEngine
 import llm_sys.engine.llama
 
-import llm_sys.utils as utils
+import llm_sys.utils as utils, WORKER_CONFIG_BROADCAST_IP
 
 from llm_sys.profiler.profiler import SlaveProfiler
 import os
@@ -100,7 +100,10 @@ def run_worker(scheduling_method: str, model_name: str, result_logging_dir: str,
     
     print(f'worker_ip:{worker_ip}')
     # assert worker_ip.startswith("10"), "Local IP must start with 10"
-    llm_worker.start_network_threads(utils.WORKER_CONFIG_BROADCAST_ADDR, worker_ip, scheduling_method, worker_config_file_path)
+    
+    worker_config_broadcast_addr = WORKER_CONFIG_BROADCAST_IP + ":" + str(device_num)
+    
+    llm_worker.start_network_threads(worker_config_broadcast_addr, worker_ip, scheduling_method, worker_config_file_path)
     start_idx, end_idx, is_last_layer = llm_worker.get_model_start_end_idx()
     print(f"[Python] Cluster initialization finished!")
     print(f"[Python] Model layers: [{start_idx}, {end_idx}).")
