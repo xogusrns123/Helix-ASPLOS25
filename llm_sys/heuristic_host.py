@@ -586,9 +586,9 @@ def run_heuristic_host_profiling(
                 llm_host.launch_request(
                     "prompt",  # request_type
                     cur_query_id,  # request_id
-                    input_length,  # num_tokens
-                    input_length + output_length,  # max_num_tokens
-                    [i for i in range(input_length)],  # token_ids
+                    seq_len,  # num_tokens
+                    seq_len + output_len,  # max_num_tokens
+                    [i for i in range(seq_len)],  # token_ids
                     False,  # set_routing
                     [],  # server_ids
                     [],  # start_layer_ids
@@ -597,8 +597,8 @@ def run_heuristic_host_profiling(
 
                 # put into flying queries
                 flying_queries_dict[cur_query_id] = FlyingQuery(query_uid=cur_query_id,
-                                                                input_length=input_length,
-                                                                output_length=output_length,
+                                                                input_length=seq_len,
+                                                                output_length=output_len,
                                                                 compute_node_uids=None,
                                                                 start_layers=None,
                                                                 end_layers=None,
@@ -606,10 +606,10 @@ def run_heuristic_host_profiling(
 
                 # save log
                 # time - query id - in/out - phase - context_len - this_iter_processed
-                events.append((now, cur_query_id, "out", "prompt", 0, input_length + 1))
-                master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, input_length)
-                print(f"Send out new query {cur_query_id}, input len = {input_length}, "
-                      f"max_len = {input_length + output_length} (decode finish request replacement)")
+                events.append((now, cur_query_id, "out", "prompt", 0, seq_len + 1))
+                master_profiler.record_event(time_stamp, cur_query_id, "out", "prompt", 0, seq_len)
+                print(f"Send out new query {cur_query_id}, input len = {seq_len}, "
+                      f"max_len = {seq_len + output_len} (decode finish request replacement)")
 
             else:
                 # then we send the query back into the cluster (next decode iter)

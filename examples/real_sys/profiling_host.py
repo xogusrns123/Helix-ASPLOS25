@@ -18,6 +18,7 @@ def heuristic_profiling(duration:int, batch_size:int, seq_len:int, output_len:in
         device_num=int(num_node)
     )
 
+# Model selction from host should added!!
 def main():
     # Parse arguments using argparse
     parser = argparse.ArgumentParser(description="Run heuristic profiling.")

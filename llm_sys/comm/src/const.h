@@ -22,7 +22,7 @@
 #define DEBUG true
 
 // For Vast AI
-#define VAST_AI true
+#define VAST_AI false
 
 // For making configs
 #define LLAMA_VER "70B"

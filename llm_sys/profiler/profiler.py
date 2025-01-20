@@ -390,7 +390,9 @@ class MasterProfiler(Profiler):
         
         # When the later moment come, node_path should be integrated within total codes
         # At now, node_path is not ours interests  
-        self._node_path = [(0, 1), (1, 2), (2, 0)]
+        for worker_node_idx in range(len(self._worker_node)):
+            self._node_path.append((worker_node_idx, worker_node_idx + 1))
+        self._node_path.append((len(self._worker_node), 0))
         
         # comm: (src, dst) -> List[comm_delay]
         # comp: node -> List[comp_delay]
