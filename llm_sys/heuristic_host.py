@@ -433,7 +433,7 @@ def run_heuristic_host_profiling(
     scheduler_name: str = "random"
     
     # make directory
-    experiment_name: str = f"batch_{initial_launch_num}_device_num_{device_num}"
+    experiment_name: str = f"batch_{initial_launch_num}_device_num_{device_num}_seq_len_{seq_len}_output_len_{output_len}"
     result_logging_dir: str = f"./profiling/{experiment_name}"
     os.makedirs(result_logging_dir, exist_ok=True)
     
