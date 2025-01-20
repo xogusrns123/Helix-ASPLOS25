@@ -16,19 +16,22 @@ def main():
 
     args = parser.parse_args()
     
-    scheduling_method = "random"
-    print(f"Starting worker with scheduling method: {scheduling_method}.")
-
-    # Added by LJH
-    result_dir = f"./profiling/{scheduling_method}_worker/"
+    if args.model == "7b":
+        model = "./Llama-2-7b-hf"
+    elif args.model == "13b":
+        model = "./Llama-2-13b-hf"
+    elif args.model == "70b":
+        model = "./Llama-2-70b-hf"
+        
+    result_dir = f"./profiling/random_worker/"
     os.makedirs(result_dir, exist_ok=True)
     
     worker_config_file_path = f"./config/device_config.txt"
     
     # run worker
     run_worker(
-        scheduling_method=scheduling_method, 
-        model_name=args.model, 
+        scheduling_method="random", 
+        model_name=model, 
         result_logging_dir=result_dir, 
         worker_config_file_path=worker_config_file_path, 
         device_num=args.num_nodes
