@@ -25,6 +25,6 @@
 #define VAST_AI false
 
 // For making configs
-#define LLAMA_VER "70B"
+#define LLAMA_VER "7B"
 
 #endif //ZMQ_COMM_CONST_H

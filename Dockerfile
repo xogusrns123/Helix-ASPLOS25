@@ -67,5 +67,14 @@ WORKDIR /home/kth/helix
 
 RUN pip install pandas
 
-# Default command to run on container start
-CMD pip install -e . && bash
+RUN pip install -e .
+
+RUN apt-get install -y \
+    vim \
+    net-tools \
+    iputils-ping \
+    iptables
+
+WORKDIR /home/kth/header/examples/real_sys
+
+CMD ["bash"]
