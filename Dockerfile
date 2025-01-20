@@ -75,6 +75,6 @@ RUN apt-get install -y \
     iputils-ping \
     iptables
 
-WORKDIR /home/kth/header/examples/real_sys
+WORKDIR /home/kth/helix/examples/real_sys
 
 CMD ["bash"]

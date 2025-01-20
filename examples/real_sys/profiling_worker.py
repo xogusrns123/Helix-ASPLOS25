@@ -37,7 +37,7 @@ def main():
         device_num=args.num_nodes
     )
 
-# python profiling_worker.py --num_nodes 11 --model ./Llama-2-13b-hf
+# python profiling_worker.py --num_nodes 3 --model 7b
 
 if __name__ == '__main__':
     main()

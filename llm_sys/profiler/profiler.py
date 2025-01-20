@@ -159,7 +159,7 @@ class MasterProfiler(Profiler):
         self.slaves: List[Tuple[int, str, int]] = slaves
         # For profiling the cluster's execution flow
         # (SRC, DST)
-        self._node_path: List[Tuple[int, int]] = None
+        self._node_path: List[Tuple[int, int]] = []
         # Worker nodes of the cluster
         self._worker_node: List[int] = []
         # For master event file path
