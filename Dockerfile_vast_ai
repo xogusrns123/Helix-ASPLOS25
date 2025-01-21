@@ -83,7 +83,8 @@ RUN apt-get install -y \
     vim \
     net-tools \
     iputils-ping \
-    iptables
+    iptables \
+    iperf
 
 WORKDIR /home/kth/header/examples/real_sys
 
