@@ -562,7 +562,7 @@ void tensor_gc() {
 
         // remove tensors that are too old
         auto current_time = get_time();
-        while (!hold_time.empty()) {
+        while (!hold_time.empty() && current_time - hold_time.front() > 10 * 1000 * 1000) {
             output_tensors_on_hold.pop_front();
             hold_time.pop_front();
             // log("GC-Tensor", "Cleaned up a tensor!");
