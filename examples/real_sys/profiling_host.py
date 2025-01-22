@@ -38,7 +38,7 @@ def main():
         duration=args.duration
     )
 
-# python profiling_host.py --batch_size 32 --num_nodes 3 --duration 90 --seq_len 1000 --output_len 125
+# python profiling_host.py --batch_size 32 --num_nodes 6 --duration 90 --seq_len 1000 --output_len 125
 
 if __name__ == '__main__':
     main()
