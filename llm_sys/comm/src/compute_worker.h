@@ -546,7 +546,13 @@ void message_gc() {
 }
 
 
-// tensor gc
+// Added by LJH
+// FIXME
+// At now, helix system deallocate activation memory by tensor_gc
+// But, tensor_dc is composed of heuristic memory management policy
+// by counting time.
+// When we design our design components, this method should be fixed 
+// by send and call memory deallocating mechanism.
 void tensor_gc() {
     log("GC-Tensor", "Tensor GC thread has successfully started!");
     std::deque<std::shared_ptr<torch::Tensor>> output_tensors_on_hold;
@@ -562,7 +568,7 @@ void tensor_gc() {
 
         // remove tensors that are too old
         auto current_time = get_time();
-        while (!hold_time.empty() && current_time - hold_time.front() > 20 * 1000 * 1000) {
+        while (!hold_time.empty() && current_time - hold_time.front() > 60 * 1000 * 1000) {
             output_tensors_on_hold.pop_front();
             hold_time.pop_front();
             // log("GC-Tensor", "Cleaned up a tensor!");
